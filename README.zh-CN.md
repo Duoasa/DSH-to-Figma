@@ -17,6 +17,8 @@
 
 </div>
 
+> **推荐安装方式：** 从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载并安装 DSH 包。插件以本地模式启动后，**DSH 会自动生成这台电脑专用、已配对的 Figma 插件**。让 DSH 调用 `figma_setup` 获取路径，在 Figma 首次导入一次生成的 manifest，之后运行即可连接。无需另行下载通用 ZIP，也无需复制配对密钥；使用时保持 Figma 插件窗口打开。
+
 ## 为什么使用 DSH to Figma
 
 - **原生 DSH 插件。** 工具、设计 Skill 和图像附件均使用宿主扩展机制，无需修改 Agent 主循环；支持 **0.2.0-rc.2** 与 **0.2.1-rc.2** 版 DSH 内核。
@@ -76,26 +78,26 @@ DSH 在本地模式启动时，会在 `<DSH_HOME>/figma/` 自动生成已配对�
 
 ### 1. 安装 DSH 插件
 
-准备 Git、兼容的 DSH 宿主，以及用于导入开发插件的 Figma 桌面端。Node 使用宿主要求的版本，仓库开发使用 **Node.js 24+**。已测试 DSH 内核 **0.2.0-rc.2** 和 **0.2.1-rc.2**。本地模式使用 Figma Plugin API，不依赖官方桌面 MCP 的付费席位条件，但仍需正常账号、文件编辑权限及编辑器权限。
+准备兼容的 DSH 宿主，以及用于导入开发插件的 Figma 桌面端；只有源码安装方式需要 Git。Node 使用宿主要求的版本，仓库开发使用 **Node.js 24+**。已测试 DSH 内核 **0.2.0-rc.2** 和 **0.2.1-rc.2**。本地模式使用 Figma Plugin API，不依赖官方桌面 MCP 的付费席位条件，但仍需正常账号、文件编辑权限及编辑器权限。
 
-当前通过 GitHub 源码分发，**尚未发布到 npm**。克隆仓库后安装本地目录：
+从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 **dsh-to-figma-0.2.1.tgz**。**尚未发布到 npm**。使用宿主 CLI 安装下载的文件：
 
 ```sh
-git clone https://github.com/Duoasa/DSH-to-Figma.git
-cd DSH-to-Figma
-dsh plugin --profile web add "file:$PWD"
+dsh plugin --profile web add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
 ```
 
-将 `web` 换成实际使用的 profile。运行时依赖由宿主包管理器安装；仓库已包含生成后的 Figma 插件入口，安装时无需构建。
+将 `web` 换成实际使用的 profile。运行时依赖由宿主包管理器安装，无需自行构建。
 
-**官方 macOS DSH Desktop：** 使用桌面应用自带的 CLI 管理保留的 `desktop` profile。如果应用位于下方路径：
+**官方 macOS DSH Desktop：** 使用桌面应用自带的 CLI 管理保留的 `desktop` profile：
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:$PWD"
+  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
 ```
 
-应用路径不同时请相应调整。全局安装的另一份 `dsh` 可能版本较旧，且拒绝管理 `desktop`。也可以在 DSH 原生插件管理器中添加仓库的绝对路径。
+将包路径替换为实际下载位置；应用路径不同时也请相应调整。全局安装的另一份 `dsh` 可能版本较旧，且拒绝管理 `desktop`。
+
+也可克隆源码，在仓库目录中用同一宿主 CLI 安装 `"file:$PWD"`。只有这种备用方式需要 Git。
 
 打开 **插件 → DSH to Figma**，确认组件显示**运行中**。未自动重载时重启宿主。安装命令成功不等于插件已正常运行。
 
@@ -128,9 +130,11 @@ DSH 以本地模式启动后，对它说：
 
 **从 0.1.5 升级：** 若 profile 显式写了 `backend: desktop`，改为 `local` 后重启或重载。新包的默认值不会覆盖用户已有配置。[接入说明](docs/setup.md)包含可直接使用的 patch。
 
-### 独立 Figma 安装包
+### 独立 Figma 安装包——手动配对备用方案
 
-可在成功的 [GitHub Actions 构建](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)中下载 **DSH-to-Figma-packages**，其中分别包含 DSH 安装包和 Figma 通用 ZIP；也可按下方命令自行打包。
+**推荐流程不需要下载此包。** DSH 会自动生成已配对插件。[Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 中单独提供的 `DSH-to-Figma-companion-0.2.1.zip` 是不含凭证的通用包，需要手动配对。成功的 [GitHub Actions 构建](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)也会通过 **DSH-to-Figma-packages** 提供两端公开安装包。
+
+自动生成的专用插件目录及 `DSH-to-Figma-paired.zip` 含本机凭证，请保留在本机，勿上传或分享；公开 Release 不包含这些私有文件。
 
 运行 `npm run package:companion`，生成 `dist/DSH-to-Figma-companion-0.2.1.zip`，内含 manifest、编译后的插件、界面、中英文安装说明和许可证。该通用包不含凭证，可公开分发。想免复制密钥，请使用**自己这台 DSH** 生成的已配对版本；通用版也保留“高级设置”中的手动配对入口。
 

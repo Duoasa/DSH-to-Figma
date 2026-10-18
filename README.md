@@ -17,6 +17,8 @@ Read and edit Figma with a native DSH plugin and an automatically paired canvas 
 
 </div>
 
+> **Recommended installation:** download the DSH package from [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest). Once installed and running in local mode, **DSH automatically generates a private, pre-paired Figma plugin for this computer**. Ask DSH for `figma_setup`, import its generated manifest once in Figma, then run it to connect. You do not need the standalone generic ZIP or to copy a pairing token. Keep the Figma companion open while working.
+
 ## Why DSH to Figma
 
 - **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required. Supported DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**.
@@ -76,26 +78,26 @@ The private package contains a local credential; keep it on your machine. Public
 
 ### 1. Install the DSH bundle
 
-Prerequisites: Git, a supported DSH host and Figma desktop for development-plugin import. Use the Node version required by the host; repository development uses Node **24+**. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**. Local mode uses Figma’s Plugin API, not the paid desktop MCP seat entitlement; normal account, file-edit and editor permissions still apply.
+Prerequisites: a supported DSH host and Figma desktop for development-plugin import. Git is only needed for source installation. Use the Node version required by the host; repository development uses Node **24+**. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**. Local mode uses Figma’s Plugin API, not the paid desktop MCP seat entitlement; normal account, file-edit and editor permissions still apply.
 
-This repository is the distribution source; **the package is not published to npm**. Clone it and install the local folder:
+Download **dsh-to-figma-0.2.1.tgz** from [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest). **The package is not published to npm.** Install the downloaded package with your host's CLI:
 
 ```sh
-git clone https://github.com/Duoasa/DSH-to-Figma.git
-cd DSH-to-Figma
-dsh plugin --profile web add "file:$PWD"
+dsh plugin --profile web add "file:/absolute/path/dsh-to-figma-0.2.1.tgz"
 ```
 
-Use your actual profile instead of `web`. The host package manager installs runtime dependencies; there is no build step for installation because the generated Figma companion is committed.
+Use your actual profile instead of `web`. The host package manager installs runtime dependencies; no build is required.
 
-**Official macOS DSH Desktop:** use the desktop-bundled CLI for the reserved `desktop` profile. If your app is installed at this location:
+**Official macOS DSH Desktop:** use the desktop-bundled CLI for the reserved `desktop` profile:
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:$PWD"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.2.1.tgz"
 ```
 
-Adjust the app path for your installation. A separate globally installed `dsh` may be older and refuse to manage `desktop`. Alternatively, add the absolute local repository path in DSH's native plugin manager.
+Replace the package path with the file you downloaded. Adjust the app path if needed. A separate globally installed `dsh` may be older and refuse to manage `desktop`.
+
+Alternatively, clone the source and install its folder using the same host CLI, replacing the package argument with `"file:$PWD"` from inside the repository. Git is required only for this alternative.
 
 Open **Plugins → DSH to Figma** and confirm the component is **running**. Restart the host if it does not reload automatically. Installation success alone does not prove runtime health.
 
@@ -128,9 +130,11 @@ With one connected file, the first canvas call binds it automatically. With mult
 
 **Upgrading from 0.1.5:** if your profile explicitly sets `backend: desktop`, change it to `local` and reload/restart. The package default does not overwrite an explicit user preference. The [setup guide](docs/setup.md) includes the patch.
 
-### Standalone Figma package
+### Standalone Figma package — manual-pairing fallback
 
-Download **DSH-to-Figma-packages** from a successful [GitHub Actions build](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml), or build it locally with the command below. The artifact contains the DSH package and a separate generic Figma ZIP.
+**Not needed for the recommended setup.** DSH generates your paired companion automatically. The separate `DSH-to-Figma-companion-0.2.1.zip` on [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) is a credential-free generic package that requires manual pairing. Successful [GitHub Actions builds](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml) also provide both public packages as **DSH-to-Figma-packages**.
+
+The generated private companion directory and `DSH-to-Figma-paired.zip` contain this host’s credential; keep them on your computer and do not upload or share them. They are never included in the public release.
 
 `npm run package:companion` creates `dist/DSH-to-Figma-companion-0.2.1.zip`, containing the manifest, compiled plugin, UI, bilingual install notes and license. It is safe to distribute and contains no credentials. For zero-copy pairing, use the private package generated by **your own** DSH instead; the generic package offers a manual-token fallback under Advanced.
 
