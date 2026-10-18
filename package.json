@@ -1,0 +1,88 @@
+{
+  "name": "dsh-to-figma",
+  "version": "0.1.3",
+  "description": "DSH to Figma \u2014 native canvas editing, design context, assets and screenshots for DeepSeek Harness.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "bin": {
+    "dsh-figma": "cli.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "cli.mjs",
+    "lib",
+    "companion",
+    "skills",
+    "assets",
+    "locale",
+    "cordis.patch.yml",
+    "README.md",
+    "CAPABILITIES.md",
+    "LICENSE",
+    "codex-tool-baseline.json",
+    "README.zh-CN.md",
+    "docs"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:native": "node test/native.mjs",
+    "check": "node scripts/check.mjs",
+    "test:all": "npm run check && npm test && npm run test:native"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.4 || 4.0.5",
+    "@deepseek-ai/schemastery": "3.18.4 || 3.18.5",
+    "@deepseek-ai/dsh-home-paths": "0.2.0-rc.2 || 0.2.1-rc.2",
+    "@deepseek-ai/dsh-mcp-client": "0.2.0-rc.2 || 0.2.1-rc.2",
+    "@deepseek-ai/dsh-skill": "0.2.0-rc.2 || 0.2.1-rc.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "icon": "./assets/icon.svg",
+  "author": "Duoasa",
+  "homepage": "https://github.com/Duoasa/DSH-to-Figma#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Duoasa/DSH-to-Figma.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Duoasa/DSH-to-Figma/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "figma",
+    "mcp",
+    "design-to-code"
+  ],
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.5",
+    "@deepseek-ai/schemastery": "3.18.5",
+    "@deepseek-ai/dsh-home-paths": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-skill": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-llm": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-session": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-session-projection": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-agent": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-attachment-local": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-agent-loop": "0.2.1-rc.2"
+  }
+}

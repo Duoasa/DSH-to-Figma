@@ -1,0 +1,294 @@
+{
+  "observedAt": "2026-10-18",
+  "source": "Codex Figma connector tool inventory exposed in this session; not a DSH remote-account probe.",
+  "tools": [
+    {
+      "name": "add_code_connect_map",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "check_prompt_status",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "create_generative_plugin",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "create_new_file",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "create_shader",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "download_assets",
+      "localTool": "download_assets",
+      "localScope": "Workspace exports and original image bytes; local bounded batches.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "export_video",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "generate_deck",
+      "localTool": "use_figma",
+      "localScope": "Construct native Slides with public APIs; no cloud deck generator.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "generate_diagram",
+      "localTool": "use_figma",
+      "localScope": "Create editable FigJam shapes/connectors from explicit script; no automatic Mermaid parser.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "generate_figma_design",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "generate_image",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_chat_threads",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_code_connect_map",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_code_connect_suggestions",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_context_for_code_connect",
+      "localTool": "get_component_context",
+      "localScope": "Native component structure; local links are not published Code Connect.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_design_context",
+      "localTool": "get_design_context",
+      "localScope": "Native structure and CSS; no cloud reference-code generator.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_figjam",
+      "localTool": "get_figjam",
+      "localScope": "Native JSON structure and screenshot, not official XML/code conversion.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_generative_plugin",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_libraries",
+      "localTool": "get_libraries",
+      "localScope": "Available variable libraries, not the complete cloud library catalog.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_metadata",
+      "localTool": "get_metadata",
+      "localScope": "Bounded native JSON tree, not official XML.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_motion_context",
+      "localTool": "get_motion_context",
+      "localScope": "Public reactions and exposed motion data only.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_screenshot",
+      "localTool": "get_screenshot",
+      "localScope": "Actual PNG via native DSH attachments.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_shader",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "get_variable_defs",
+      "localTool": "get_variable_defs",
+      "localScope": "Local collections and variables only.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "list_file_components_for_code_connect",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "list_file_shaders",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "list_generative_plugins",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "list_shaders",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "open_figma_mcp_app_in_thread",
+      "localTool": null,
+      "localScope": "Host-specific Codex panel; not provided.",
+      "officialMode": "host-specific"
+    },
+    {
+      "name": "publish_to_gallery",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "search_design_system",
+      "localTool": "search_design_system",
+      "localScope": "Current-page components and local-file variables/styles.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "send_code_connect_mappings",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "send_code_to_figma",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "send_prompt",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "update_generative_plugin",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "update_shader",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "upload_assets",
+      "localTool": "upload_assets",
+      "localScope": "Workspace raster/SVG import; local schema differs from signed upload URLs.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "use_figma",
+      "localTool": "use_figma",
+      "localScope": "Public Plugin API; explicit document binding and local helper subset.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_cancel_tool_run",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_find_model",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_get_model_run_output",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_get_tool_inputs",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_get_tool_run_output",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_list_tools",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_run_model",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_run_tool",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "weave_upload_asset",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    },
+    {
+      "name": "whoami",
+      "localTool": null,
+      "localScope": "No local service emulation.",
+      "officialMode": "Available only if the selected official server advertises this exact tool."
+    }
+  ]
+}
