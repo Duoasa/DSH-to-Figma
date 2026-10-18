@@ -136,7 +136,7 @@ https://github.com/Duoasa/DSH-to-Figma
 6. After I run the companion in the target file, call figma_status to verify the connection. Ask me to choose if multiple files are connected. Initially, only read frame information and return a screenshot; leave existing designs unchanged.
 ```
 
-If the original conversation does not discover the new tools after installation, restart or open a new conversation and use the connection prompt in step 2 below. This prompt guides the existing CLI installation workflow; it is not a separate one-click installer. The full prompt has not received a separate end-to-end test. See the [verification record](docs/verification.md) for tested installation and canvas capabilities.
+If the original conversation does not discover the new tools after installation, restart or open a new conversation and use the connection prompt in step 2 below. This prompt guides the existing CLI installation workflow; it is not a separate one-click installer. **On 2026-10-18, the Chinese equivalent was sent unchanged to DSH Desktop 0.2.1-rc.2**: DSH downloaded, verified and reinstalled release 0.2.1, then connected to Figma after a host restart, read four frames and returned an actual screenshot. The run required one installation approval, a host restart and a response to a duplicate-name connection question; the next check showed a single connection again. It reused an already-imported Figma companion, so first-time import on a clean environment remains untested in this run. The English prompt was not run separately. See the [verification record](docs/verification.md#installation-prompt-acceptance--安装提示词实测).
 
 #### Option B: install manually with the CLI
 

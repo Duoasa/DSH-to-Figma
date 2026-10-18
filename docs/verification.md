@@ -33,6 +33,23 @@ On 2026-10-18, installed DSH Desktop 0.2.1-rc.2 and Figma Desktop 126.9.13 compl
 
 [Sanitized evidence / 脱敏记录](evidence/local-mcp-2026-10-18.json). This is one Design-file workflow, not acceptance of every Plugin API, FigJam/Slides, multi-file UI routing or long-running stability. Figma had reported a sync interruption; cloud persistence was not independently verified. / 本次覆盖一个 Design 文件流程，不代表所有 API、其他编辑器、多文件界面路由或长期稳定性通过；Figma 曾提示同步连接中断，未独立验证云端持久化。
 
+## Installation prompt acceptance / 安装提示词实测
+
+**2026-10-18:** The Chinese README prompt at `b1840c8` was sent unchanged to DSH Desktop **0.2.1-rc.2** (DeepSeek-V4.1-Flash, High), with Figma Desktop **126.9.13**. This run replaced an existing development package with public release **0.2.1** and reused an already-imported companion.
+
+**2026-10-18：** 将 `b1840c8` 的中文 README 提示词原样发给 DSH Desktop **0.2.1-rc.2**（DeepSeek-V4.1-Flash，High），配合 Figma Desktop **126.9.13**，完成已有开发包替换为正式版 **0.2.1**，复用已导入的配套插件。
+
+| Check / 检查 | Actual result / 实际结果 |
+| --- | --- |
+| Install / 安装 | Used the desktop host's bundled CLI and `desktop` profile; downloaded and SHA-256-verified the release, then installed with one approval. Existing bundle entries and local configuration retained / 使用桌面内置 CLI 与正确 profile，下载并校验正式包，经一次审批完成安装，保留已有 bundle 与本地模式配置 |
+| Connect / 连接 | After the requested host restart, `figma_setup` returned paired manifest/ZIP paths and the companion reconnected without token entry / 按提示重启后，返回已配对清单及 ZIP 路径，配套插件自动重连，无需输入密钥 |
+| Target / 目标 | Briefly showed two same-name connections and asked for a choice; after confirming the target and rechecking, one remained and auto-binding succeeded / 曾短暂出现两个同名连接并要求选择；确认目标、重新检查后仅剩一个，自动绑定成功 |
+| Read and screenshot / 读取与截图 | Read four top-level frames; opened the returned 1440 × 900 WebP of frame `1:4` in DSH (158,664 bytes) / 读出 4 个顶层画板，在 DSH 打开并检查实际返回的主画板截图 |
+
+**Limits:** No canvas writes in this run. Clean-environment first import, the English prompt and cloud persistence were not verified. The duplicate connection's cause remains unconfirmed. Network-fetch restrictions and a GitHub API rate limit were recovered from using curl and the release page.
+
+**边界：** 本轮未修改画布；未验证全新环境首次导入、英文提示词和云端持久化。短暂同名连接的根因尚未确认。网页抓取受限与 GitHub API 限流均通过 curl 和 Release 页面恢复。
+
 ## Evidence and limits / 证据与边界
 
 | Surface / 范围 | Status / 状态 |
