@@ -7,7 +7,7 @@
 | Mode / 模式 | Connection / 连接 | Requirements / 条件 |
 | --- | --- | --- |
 | `local` | Paired development plugin / 配对的开发插件 | Figma desktop + this companion, same machine / Figma 桌面与本插件在同一台机器 |
-| `desktop` | `http://127.0.0.1:3845/mcp` | Enable the official desktop MCP server / 开启官方桌面 MCP |
+| `desktop` (default / 默认) | `http://127.0.0.1:3845/mcp` | Enable the official desktop MCP server / 开启官方桌面 MCP |
 | `remote` | `https://mcp.figma.com/mcp` | OAuth and eligible official client/account access / OAuth 与官方客户端、账号准入 |
 
 Only the local backend uses port `3055` and `figma_select_document`. Official backends expose the server's actual schemas, resources and prompts; do not assume the local tool arguments apply to them.
@@ -45,6 +45,42 @@ node /absolute/path/to/plugin/cli.mjs install \
   --home /absolute/path/to/dsh-home --profile web --cli /absolute/path/to/dsh
 ```
 
+## Official desktop MCP (default) / 官方桌面 MCP（默认）
+
+Open the target Design file in Figma desktop and enable the built-in desktop MCP. On the verified app, Cmd+K → MCP → Enable desktop MCP server produced the confirmation `http://127.0.0.1:3845/mcp`. Keep Figma open. No companion, pairing token or remote OAuth login is needed. See [Figma’s desktop requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/) for eligible plans/seats.
+
+在 Figma 桌面端打开目标 Design 文件并启用内置桌面 MCP。本次实测通过 Cmd+K → MCP → Enable desktop MCP server，出现 `http://127.0.0.1:3845/mcp` 提示。保持 Figma 打开即可，无需配套插件、配对密钥或远程 OAuth 登录。套餐与席位条件见 [Figma 官方说明](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)。
+
+New installations default to desktop. To migrate an existing explicit local configuration, add/update this entry in your profile’s `cordis.patch.yml`, preserving other entries, then restart/reload DSH:
+
+新安装默认使用桌面模式。已有显式 local 配置时，在 profile 的 `cordis.patch.yml` 中添加或更新以下入口，保留其他条目，再重载或重启 DSH：
+
+```yaml
+- id: dsh-figma
+  config:
+    backend: desktop
+    desktopServerUrl: http://127.0.0.1:3845/mcp
+```
+
+Call `figma_status` in a Work conversation: expect `backend: desktop`, `available: true` and an actual server tool list. `documents: []` and `bridgePort: null` are normal. Call `figma_reconnect` if the server was enabled after DSH started. Use the target node ID from a selection link in the intended open file. Desktop mode supports reading and screenshots, not canvas writing. It never falls back to a companion automatically.
+
+在 Work 会话调用 `figma_status`，应看到 `backend: desktop`、`available: true` 和服务器实际工具列表。`documents: []`、`bridgePort: null` 为正常状态。若启用 MCP 晚于 DSH 启动，调用 `figma_reconnect`。请在目标文件打开时使用选区链接中的节点 ID。桌面模式支持读取和截图，不支持画布写入，也不会自动回退到配套插件。
+
+## Optional local companion / 可选本地配套插件
+
+Choose `backend: local` explicitly and reload/restart the plugin. Only this mode starts the bridge on `127.0.0.1:3055` and supports our local canvas-writing tools.
+
+显式选择 `backend: local` 后重载或重启插件。仅此模式启动 `127.0.0.1:3055` 桥接，并提供本插件的本地画布写入工具。
+
+```sh
+node /absolute/path/to/plugin/cli.mjs pair --home /absolute/path/to/dsh-home
+```
+
+1. Import the printed `companion/manifest.json` through Figma’s Plugins → Development → Import plugin from manifest. / 在 Figma 开发插件菜单导入命令输出的 manifest。
+2. Run DSH to Figma, paste the pairing token only into its UI, and connect. Keep it running. Never paste the token into chat or public evidence. / 运行配套插件，仅在其 UI 中粘贴密钥并连接，保持运行，不要把密钥发到聊天或公开证据中。
+3. In a DSH Work session, call `figma_status` and explicitly select the intended `connectionId` with `figma_select_document`. / 在 Work 会话获取状态并明确绑定目标文档。
+4. Inspect, edit, read back and screenshot. On an uncertain write result, inspect before retrying. / 按检查、编辑、读回、截图的顺序操作；写入结果未知时先检查再重试。
+
 ## OAuth / 远程授权
 
 Run the helper from the installed package with the same home as the host:
@@ -79,15 +115,16 @@ Logout removes local credentials. Reconnect/restart to close existing sessions; 
 | Symptom / 现象 | Action / 操作 |
 | --- | --- |
 | Installed but no tools / 已安装但没有工具 | Check **Plugins → DSH to Figma → running**; verify core version and active profile, restart if necessary / 检查组件运行状态、内核版本和当前 profile，必要时重启 |
+| Desktop unavailable / 桌面不可用 | Open Figma, enable its built-in MCP at :3845 and call `figma_reconnect`; do not start the companion / 打开 Figma 并启用 :3845 内置 MCP，再调用重连；无需启动配套插件 |
 | `bridge_port_in_use` | Another host may own `3055`; disable the duplicate bridge / 另一宿主可能占用端口，请禁用重复桥接 |
-| No documents / 没有文档 | Keep the Figma companion open and connected using the same home's token / 保持配套插件打开，并使用同一 home 的密钥 |
+| No documents in local mode / 本地模式没有文档 | Keep the Figma companion open and connected using the same home's token / 保持配套插件打开，并使用同一 home 的密钥 |
 | Work session required / 要求 Work 会话 | Open a conversation attached to a workspace / 使用已关联工作区的会话 |
 | Choose document / 要求选择文档 | Call `figma_status`, then bind the intended `connectionId` / 获取状态后明确绑定目标文档 |
 | Font error / 字体错误 | Query `list_fonts`; load each exact font before changing text / 先查询并加载准确字体样式，再修改文字 |
 | Image unavailable / 图像不可用 | The selected model needs image-input support; exports may still be saved / 选择支持图像输入的模型，导出文件仍可能可用 |
 | Timeout after write / 写入后超时 | Do not replay blindly; inspect metadata and the canvas first / 不要盲目重试，先检查元数据和画布 |
 | Stuck script / 脚本卡住 | Close/reopen the companion, pair, bind and inspect; no automatic rollback / 关闭并重新打开配套插件，配对、绑定并检查；没有自动回滚 |
-| Remote login rejected / 远程登录被拒绝 | Check client approval/account access; local mode is independent / 检查客户端审批与账号权限，本地模式独立运行 |
+| `oauth_client_registration_forbidden` / 远程注册 403 | Registration was rejected before user authorization; an approved MCP client is needed. Desktop mode does not use remote OAuth / 用户授权前的客户端注册被拒绝，需要获批的 MCP 客户端；桌面模式不使用远程 OAuth |
 
 `dsh-figma status` reads a saved bridge record. It does **not** prove the process is alive. Use the live `figma_status` tool and the host plugin status. A `401` from an unauthenticated loopback request is expected.
 

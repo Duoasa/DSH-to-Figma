@@ -11,11 +11,12 @@ import { bridgeToken, privateDirectory, privateJson } from './lib/storage.mjs'
 import { LOCAL_TOOLS, objectSchema, SUPPORTED_BACKENDS } from './lib/catalog.mjs'
 import { readAssets, saveAssets, localResult } from './lib/assets.mjs'
 import { connectOfficial, desktopUrl } from './lib/official.mjs'
+import { figmaDiagnostic } from './lib/diagnostics.mjs'
 
 export const name='dsh-figma'
 export const inject=['tools','skills','systemPrompt']
 export const Config=z.object({
-  backend:z.string().default('local'),
+  backend:z.string().default('desktop'),
   bridgePort:z.number().step(1).min(1024).max(65535).default(3055),
   desktopServerUrl:z.string().default('http://127.0.0.1:3845/mcp'),
   toolCallTimeoutMs:z.number().step(1).min(1000).max(300000).default(120000),
@@ -34,14 +35,14 @@ async function registerSkill(ctx){
   ctx.skills.registerProvider(()=>({name:'dsh-figma',list:async()=>[summary],get:async({rank:_rank,locator:_locator,...metadata})=>({...metadata,content:raw.slice(front[0].length).trim()})}))
 }
 export async function applyWithDependencies(ctx,config={},deps={}){
-  const backend=config.backend??'local',home=deps.home??resolveDshHome(),timeoutMs=config.toolCallTimeoutMs??120000
+  const backend=config.backend??'desktop',home=deps.home??resolveDshHome(),timeoutMs=config.toolCallTimeoutMs??120000
   if(!SUPPORTED_BACKENDS.includes(backend))throw new Error('Figma backend must be local, desktop, or remote')
   if(backend==='desktop')desktopUrl(config.desktopServerUrl)
   const disposers=[],dynamic=[],sessions=new Map(),bindings=new Map(),agents=new WeakMap(),dead=new WeakSet(),shutdown=new AbortController()
   const connect=deps.connect??connectOfficial
   let gate=Promise.resolve()
   const exclusive=run=>{const next=gate.then(run);gate=next.catch(()=>{});return next}
-  let stopped=false,bridge,available=false,toolNames=[],remoteInstructions='',refreshing,errorCode=null
+  let stopped=false,bridge,available=false,toolNames=[],remoteInstructions='',refreshing,errorCode=null,diagnostic=null
   const assertOpen=()=>{if(stopped)throw new Error('Figma plugin has stopped')}
   const register=(rawName,description,inputSchema,call,{qualified=true,outputSchema,taskRequired}={})=>{
     const tool=createMcpToolDefinition(ctx,{name:qualified?publicToolName('figma',rawName):rawName,rawName,description,inputSchema,outputSchema,taskRequired,call})
@@ -69,7 +70,7 @@ export async function applyWithDependencies(ctx,config={},deps={}){
   }
   ctx.systemPrompt.section({name:'mcp:figma',order:ctx.systemPrompt.getSectionOrder('MCP_SERVERS'),interpolate:false,text:()=>stopped?'':
     `DSH to Figma backend: ${backend}. Read figma-workbench before design work. Use figma_status, then explicitly bind a connected document with figma_select_document in local mode. Never infer cloud capability from a tool name. Inspect existing content, preserve components, use auto layout, return IDs, and verify composition with a real screenshot. On an unknown write outcome, inspect before retrying; never replay automatically. ${remoteInstructions}`})
-  register('figma_status','Show connected Figma documents, backend, actual tool coverage and setup state without credentials.',objectSchema(),async()=>result({backend,available,tools:toolNames,errorCode,documents:bridge?.list()??[],bridgePort:bridge?.port??null,skill:'figma-workbench',cloudAccess:backend==='remote'?'Depends on official client approval, account and seat.':'Cloud-only generation is not provided by the local bridge.',setup:backend==='local'?'Run dsh-figma pair, import companion/manifest.json as a Figma development plugin, connect, then select_document.':'Run figma_reconnect after enabling desktop MCP or dsh-figma login.'}),{qualified:false})
+  register('figma_status','Show connected Figma documents, backend, actual tool coverage and setup state without credentials.',objectSchema(),async()=>result({backend,available,tools:toolNames,errorCode,diagnostic,documents:bridge?.list()??[],bridgePort:bridge?.port??null,skill:'figma-workbench',cloudAccess:backend==='remote'?'Depends on official client approval, account and seat.':backend==='desktop'?'Official desktop MCP provides design reading and screenshots, not canvas writing or cloud generation.':'Cloud-only generation is not provided by the local bridge.',setup:backend==='local'?'Run dsh-figma pair, import companion/manifest.json as a Figma development plugin, connect, then select_document.':backend==='desktop'?'Keep Figma desktop open with its built-in MCP enabled, then run figma_reconnect. No companion plugin or remote OAuth login is required.':'Run dsh-figma login with the same DSH home, then figma_reconnect.'}),{qualified:false})
   register('figma_read_guide','Read a focused local Figma workflow guide.',objectSchema({topic:{type:'string',enum:guides}},['topic']),async args=>{if(!guides.includes(args.topic))throw new Error('Unknown Figma guide');return {content:[{type:'text',text:await readFile(join(skillDir,'references',args.topic+'.md'),'utf8')}] }},{qualified:false})
   register('figma_select_document','Bind this Work session to one explicitly chosen local Figma document. IDs come from figma_status. Never silently switches targets.',objectSchema({connectionId:{type:'string'}},['connectionId']),async(args,exec)=>{
     const {session,workspace}=await execution(exec)
@@ -132,10 +133,10 @@ export async function applyWithDependencies(ctx,config={},deps={}){
             catch(error){await closeSession(context.session.id);throw new Error('Official Figma call failed or was interrupted. The operation was not replayed. Inspect the canvas before retrying; check login, access and service status.')}
           }),{outputSchema:tool.outputSchema,taskRequired:tool.execution?.taskSupport==='required'})
         }
-        toolNames=listed.tools.map(t=>t.name);remoteInstructions=instructions;available=true;errorCode=null
-      }catch{errorCode='official_unavailable_or_login_required';if(!available){for(const dispose of dynamic.splice(0))dispose();toolNames=[]}ctx.logger.warn('Official Figma MCP unavailable. Local mode remains an independent alternative; see figma_status.')}
+        toolNames=listed.tools.map(t=>t.name);remoteInstructions=instructions;available=true;errorCode=null;diagnostic=null
+      }catch(error){diagnostic=figmaDiagnostic(error);errorCode=diagnostic.code;if(!available){for(const dispose of dynamic.splice(0))dispose();toolNames=[]}ctx.logger.warn(diagnostic.message)}
       finally{await discovery?.close()}
-      return {available,tools:toolNames,errorCode}
+      return {available,tools:toolNames,errorCode,diagnostic}
     }).finally(()=>{refreshing=null});return refreshing
   }
   register('figma_reconnect','Refresh the official MCP tool catalog after login or enabling Figma desktop MCP. No canvas tools are called.',objectSchema(),async()=>result(await refresh()),{qualified:false})

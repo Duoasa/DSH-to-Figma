@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-18",
+  "host": "DSH Desktop 0.2.1-rc.2",
+  "backend": "desktop",
+  "endpoint": "http://127.0.0.1:3845/mcp",
+  "companionRunning": false,
+  "bridge3055Listening": false,
+  "tools": [
+    "get_design_context",
+    "get_variable_defs",
+    "get_screenshot",
+    "get_motion_context",
+    "get_code_connect_map",
+    "add_code_connect_map",
+    "get_code_connect_suggestions",
+    "send_code_connect_mappings",
+    "get_metadata",
+    "get_figjam"
+  ],
+  "verifiedTools": [
+    "figma_status",
+    "get_metadata",
+    "get_screenshot"
+  ],
+  "frame": {
+    "id": "1:4",
+    "name": "DeepSeek Harness — Desktop UI",
+    "width": 1440,
+    "height": 900
+  },
+  "screenshot": {
+    "path": "../../assets/examples/desktop-mcp-screenshot.webp",
+    "attachmentId": "sha256:d7f0325681b743a451d17df3974e977a52ba98c71471460bd26f8f87b2f14ea2",
+    "mediaType": "image/webp",
+    "width": 1024,
+    "height": 640,
+    "bytes": 37226
+  },
+  "desktopConversationVerified": true,
+  "nativeServiceAttachmentMatches": true,
+  "canvasModified": false,
+  "unverified": "Other tools, other files/editor modes, reconnect durability and remote OAuth/canvas access."
+}

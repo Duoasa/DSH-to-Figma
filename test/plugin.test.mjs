@@ -38,3 +38,40 @@ test('refresh waits for an active official call rather than closing its transpor
   await entered;const refresh=handle.refresh();await new Promise(resolve=>setImmediate(resolve));assert.equal(discovery,1);assert.equal(closed,1)
   release();await call;await refresh;assert.equal(discovery,2)
 })
+
+test('native remote status exposes registration rejection and clears it after successful discovery',async t=>{
+  const {RegistrationRejectedError}=await import('@modelcontextprotocol/client')
+  const home=await mkdtemp(join(tmpdir(),'figma-registration-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions}=context();let denied=true
+  const connect=async()=>{
+    if(denied)throw new RegistrationRejectedError({status:403,body:'private-response',submittedMetadata:{redirect_uris:[]}})
+    return {client:{listTools:async()=>({tools:[]}),getInstructions:()=>''},close:async()=>{}}
+  }
+  const handle=await applyWithDependencies(ctx,{backend:'remote'},{home,connect});t.after(()=>handle.close())
+  let status=await definitions.get('figma_status').execute({})
+  assert.equal(status.structuredContent.available,false)
+  assert.equal(status.structuredContent.errorCode,'oauth_client_registration_forbidden')
+  assert.equal(status.structuredContent.diagnostic.httpStatus,403)
+  assert.doesNotMatch(JSON.stringify(status),/private-response/)
+  denied=false;await handle.refresh()
+  status=await definitions.get('figma_status').execute({})
+  assert.equal(status.structuredContent.available,true)
+  assert.equal(status.structuredContent.diagnostic,null)
+})
+
+test('default backend uses official desktop and stays there when the server is unavailable',async t=>{
+  const {ctx,definitions}=context();let options,bridgeStarted=false
+  const handle=await applyWithDependencies(ctx,{}, {
+    connect:async value=>{options=value;throw new Error('desktop offline')},
+    bridge:{start:async()=>{bridgeStarted=true}}
+  });t.after(()=>handle.close())
+  const status=(await definitions.get('figma_status').execute({})).structuredContent
+  assert.equal(options.backend,'desktop')
+  assert.equal(status.backend,'desktop')
+  assert.equal(status.available,false)
+  assert.equal(status.bridgePort,null)
+  assert.equal(bridgeStarted,false)
+  assert.deepEqual(status.tools,[])
+  assert.match(status.setup,/No companion plugin or remote OAuth login/)
+  assert.ok(!definitions.has('mcp__figma__use_figma'))
+})

@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process'
 import { Client, StreamableHTTPClientTransport, UnauthorizedError } from '@modelcontextprotocol/client'
 import { bridgeToken, privateDirectory, readJson } from './lib/storage.mjs'
 import { oauthProvider, callbackServer, oauthFetch, REMOTE_URL } from './lib/oauth.mjs'
+import { figmaDiagnostic } from './lib/diagnostics.mjs'
 const root=dirname(fileURLToPath(import.meta.url))
 function options(args){const values={command:args.shift()??'help'};while(args.length){const key=args.shift();if(!['--home','--port','--client-id','--profile','--cli'].includes(key)||!args.length)throw new Error('Unknown or incomplete option');values[key.slice(2)]=args.shift()}return values}
 async function main(){
@@ -24,7 +25,7 @@ async function main(){
   if(opts.command==='login'){
     const port=Number(opts.port??3056);if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Invalid OAuth callback port')
     const provider=await oauthProvider(home,{redirectUrl:`http://127.0.0.1:${port}/callback`,clientId:opts['client-id'],onRedirect:url=>console.log(`Open this Figma authorization URL in your browser:\n${url.href}`)})
-    const callback=await callbackServer({port,state:provider.state}),client=new Client({name:'dsh-to-figma',version:'0.1.3'}),transport=new StreamableHTTPClientTransport(new URL(REMOTE_URL),{authProvider:provider,fetch:oauthFetch,reconnectionOptions:{maxRetries:0}})
+    const callback=await callbackServer({port,state:provider.state}),client=new Client({name:'dsh-to-figma',version:'0.1.5'}),transport=new StreamableHTTPClientTransport(new URL(REMOTE_URL),{authProvider:provider,fetch:oauthFetch,reconnectionOptions:{maxRetries:0}})
     try{
       try{await client.connect(transport,{timeout:15000})}catch(error){if(!(error instanceof UnauthorizedError))throw error;const params=await callback.result;await transport.finishAuth(params)}
       if(!await provider.tokens())throw new Error('Login did not return credentials')
@@ -34,4 +35,4 @@ async function main(){
   }
   throw new Error('Unknown command; run dsh-figma help')
 }
-main().catch(()=>{console.error('dsh-figma: operation failed. Check the command, local port, DSH installation or Figma client approval. Credentials and server response bodies are not logged.');process.exitCode=1})
+main().catch(error=>{console.error(JSON.stringify({ok:false,...figmaDiagnostic(error)},null,2));process.exitCode=1})

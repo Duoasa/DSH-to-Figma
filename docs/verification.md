@@ -1,23 +1,52 @@
 # Verification / 验证
 
-The public standalone package is `dsh-to-figma` **0.1.4**. It continues the local development implementation under the **DSH to Figma** name.
+The public standalone package is `dsh-to-figma` **0.1.5**. It continues the local development implementation under the **DSH to Figma** name.
 
-公开的独立包为 `dsh-to-figma` **0.1.4**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
+公开的独立包为 `dsh-to-figma` **0.1.5**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
 
 ## Evidence and limits / 证据与边界
 
 | Surface / 范围 | Status / 状态 |
 | --- | --- |
-| Unit and protocol suite / 单元与协议测试 | 23 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth, official MCP transport and companion message/endpoint compatibility / 23 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth、官方 MCP 传输及配套插件消息/地址兼容性 |
+| Unit and protocol suite / 单元与协议测试 | 27 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth, official MCP transport and companion message/endpoint compatibility / 27 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth、官方 MCP 传输及配套插件消息/地址兼容性 |
 | Native DSH integration / 原生 DSH 集成 | Tested with 0.2.0-rc.2 and 0.2.1-rc.2 services, including the production entry, skills, tools, workspace scope and durable image attachments / 已用两版内核服务验证正式入口、Skill、工具、工作区边界与持久图像附件 |
 | Desktop host installation / 桌面宿主安装 | Predecessor 0.1.2 installed through official DSH Desktop 0.2.1-rc.2 CLI; native UI reported running; loopback listener and unauthenticated 401 verified on 2026-10-18 / 前身 0.1.2 于 2026-10-18 经官方 CLI 安装，原生界面显示运行中，本机监听与未授权 401 检查通过 |
 | Real Figma editor / 真实 Figma 编辑器 | Companion import, document-name handshake and authenticated local pairing verified on 2026-10-18 with the patched installed development companion. Maintainer screenshots demonstrate UI reconstruction with native layers; full readback/edit/export acceptance remains pending / 2026-10-18 已用修复后的已安装开发插件验证导入、文件名握手与带鉴权的本机配对。维护者截图展示了带原生图层的 UI 重建；完整读回、修改与导出仍待验收 |
 | Fonts, FigJam and Slides / 字体、FigJam 与 Slides | Real editor and visual acceptance pending / 待实机与视觉验收 |
-| Official Figma service / 官方 Figma 服务 | SDK transport tested against a local protocol fixture; real client approval/OAuth/account/seat access pending / SDK 传输已通过本地协议 fixture 验证，真实客户端审批、OAuth、账号与席位权限待验 |
+| Official desktop MCP / 官方桌面 MCP | Real metadata and screenshot calls passed in installed DSH Desktop 0.2.1-rc.2 without the companion; details below / 已在安装的 DSH Desktop 0.2.1-rc.2 中通过真实读取与截图验收，未运行配套插件，详见下方 |
+| Official remote MCP / 官方远程 MCP | Discovery reached Figma; client registration returned HTTP 403 before user authorization. No remote canvas calls verified / 已到达 Figma 服务，客户端注册在用户授权前返回 HTTP 403，未验证任何远程画布调用 |
 
-Automated Figma tests use a simulated Plugin API. A successful fixture screenshot is not proof of real Figma rendering. The real-editor example below is separate, maintainer-supplied evidence.
+Automated Figma tests use a simulated Plugin API. A successful fixture screenshot is not proof of real Figma rendering. The desktop MCP acceptance and the maintainer-supplied editing example below are separate real-editor evidence.
 
-自动化 Figma 测试使用模拟 Plugin API。fixture 截图成功不等于真实 Figma 渲染通过；下方实机案例是维护者单独提供的证据。
+自动化 Figma 测试使用模拟 Plugin API。fixture 截图成功不等于真实 Figma 渲染通过；下方桌面 MCP 验收和维护者提供的编辑案例是独立的实机证据。
+
+## Official desktop MCP: real acceptance / 官方桌面 MCP 实机验收
+
+**Date / 日期:** 2026-10-18. **Host / 宿主:** installed DSH Desktop 0.2.1-rc.2 on macOS. The installed development plugin was configured with `backend: desktop` and the app restarted. Its transport was already present in the installed 0.1.2 package; this 0.1.5 update makes desktop the default for new installations. A separate native-service run used the repository plugin with pinned 0.2.1-rc.2 services. These are real Figma calls, distinct from the automated fixtures.
+
+实测使用 macOS 上已安装的 DSH Desktop 0.2.1-rc.2，将开发插件设为 `backend: desktop` 后重启。该传输能力已包含在安装的 0.1.2 包中；本次 0.1.5 更新把桌面模式设为新安装的默认值。另一路验证使用仓库插件和锁定的 0.2.1-rc.2 原生服务。两路均调用真实 Figma，区别于自动化 fixture。
+
+| Check / 检查 | Actual result / 实际结果 |
+| --- | --- |
+| Figma service / 服务 | Built-in desktop MCP enabled at `http://127.0.0.1:3845/mcp`; listener owned by Figma / Figma 内置服务监听 |
+| Companion / 配套插件 | Not running; no listener on bridge port 3055 after DSH restart / 未运行，DSH 重启后桥接端口 3055 无监听 |
+| Native status / 原生状态 | `backend: desktop`, `available: true`, 10 official tools, `bridgePort: null` |
+| Metadata / 元数据 | `get_metadata` returned frame `1:4`, **DeepSeek Harness — Desktop UI**, **1440 × 900**, with Sidebar **324 × 900** and Main **1116 × 900** |
+| Screenshot / 截图 | `get_screenshot` returned a **1024 × 640 WebP**, **37,226 bytes**, admitted as a native DSH image attachment / 成功进入原生图像附件存储 |
+| Actual conversation / 实际对话 | Tool details inspected; screenshot displayed in installed DSH. Its attachment hash matched the separate native-service run / 已核对工具详情并显示图片，附件哈希与独立原生服务验证一致 |
+| Canvas writes / 画布写入 | None performed. Official desktop MCP does not provide general canvas writing / 本次未写入，官方桌面 MCP 不提供通用画布写入 |
+
+[Actual returned image / 实际返回截图](../assets/examples/desktop-mcp-screenshot.webp) · [Sanitized evidence / 脱敏验证记录](evidence/desktop-mcp-2026-10-18.json)
+
+Reproduce with the intended file open: enable desktop MCP, configure/reload the DSH desktop backend, then in a Work conversation call `figma_status`, `mcp__figma__get_metadata` and `mcp__figma__get_screenshot` using that file’s frame node ID. Inspect the actual tool results and image attachment. IDs are file-scoped; do not reuse this example’s ID in a different file. Tool discovery alone does not verify the other eight tools, other plans, FigJam/Slides, reconnect stability or long-running use.
+
+复现时打开目标文件，启用桌面 MCP，配置并重载 DSH 桌面后端，在 Work 会话依次调用上述三个工具并传入该文件的画板节点 ID，核对真实返回值及图片附件。节点 ID 属于文件内部标识，不应跨文件复用本例 ID。工具发现不能证明其余八个工具、其他套餐、FigJam / Slides、重连稳定性或长期运行均已通过。
+
+## Official remote access attempt / 官方远程接入尝试
+
+On 2026-10-18, OAuth discovery succeeded, but POST to `https://api.figma.com/v1/oauth/mcp/register` returned **403 Forbidden** for the DSH client. Retrying with an advertised client authentication method (`client_secret_post`) also returned 403. No authorization URL, user grant or tokens were obtained; remote reading, writing and screenshots were **not run**. The response did not provide a detailed rejection reason. Figma’s [official guide](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/) restricts new clients to approved access and links a [client waitlist](https://form.asana.com/?d=10497086658021&k=kBG-ejRQTdY8x_H6a4vM3Q).
+
+2026-10-18，OAuth 发现成功，但 DSH 客户端注册请求返回 **403 Forbidden**；采用服务器声明支持的 `client_secret_post` 认证方式重试仍为 403。未获得授权 URL、用户授权或令牌，远程读取、写入及截图**均未执行**。响应未提供更具体的拒绝原因。官方文档要求新客户端获批，并提供申请入口。错误诊断现在区分注册拒绝与需要登录，不输出敏感响应内容。
 
 ## Real example: screenshot to editable UI / 实机案例：从截图到可编辑 UI
 
@@ -31,9 +60,9 @@ The request screenshot shows a stopped conversation, not a completed tool trace.
 
 ## 0.1.4 connection regression / 连接回归
 
-The release includes the localhost manifest/UI endpoint and exact bridge Host allowlist, plus the Figma outer-window message fix. HTTP tests reject lookalike hosts and wrong ports. UI tests cover document metadata and operation results, reject unrelated message sources/origins, and check that the manifest permits the endpoint used by the UI.
+Version 0.1.4 included the localhost manifest/UI endpoint and exact bridge Host allowlist, plus the Figma outer-window message fix. HTTP tests reject lookalike hosts and wrong ports. UI tests cover document metadata and operation results, reject unrelated message sources/origins, and check that the manifest permits the endpoint used by the UI.
 
-本版包含 localhost 清单/UI 地址、桥接 Host 精确白名单，以及 Figma 外层窗口消息修复。HTTP 测试拒绝仿冒主机名与错误端口；UI 测试覆盖文件信息与操作结果、拒绝无关消息来源，并检查清单允许 UI 使用的连接地址。
+0.1.4 版包含 localhost 清单/UI 地址、桥接 Host 精确白名单，以及 Figma 外层窗口消息修复。HTTP 测试拒绝仿冒主机名与错误端口；UI 测试覆盖文件信息与操作结果、拒绝无关消息来源，并检查清单允许 UI 使用的连接地址。
 
 Manual pairing reproduction: import the installed companion manifest in Figma desktop, run it in a test Design file, paste the same host's existing pairing token, and click Connect. Confirm the document name, Disconnect button and connected status. Keep the companion open. This verifies pairing only, not canvas operations.
 
