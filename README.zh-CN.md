@@ -1,5 +1,7 @@
 <div align="center">
 
+![DSH to Figma — 设计、编辑与开发](assets/readme-hero.png)
+
 # DSH to Figma
 
 **把 Figma 画布能力接入 DeepSeek Harness。**

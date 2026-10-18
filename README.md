@@ -1,5 +1,7 @@
 <div align="center">
 
+![DSH to Figma — Design. Edit. Build.](assets/readme-hero.png)
+
 # DSH to Figma
 
 **Bring Figma canvas tools into DeepSeek Harness.**
