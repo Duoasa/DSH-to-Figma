@@ -1,6 +1,6 @@
 # Capability coverage
 
-Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 17 canvas tools plus setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
+Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 17 canvas tools plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
 
 | Capability | Local implementation | Official MCP mode |
 | --- | --- | --- |
@@ -22,16 +22,16 @@ Baseline: 48 Codex Figma connector tools exposed in this development session on 
 | Resources/prompts | Seven focused local guides | MCP resource list/templates/read and prompt list/get |
 | OAuth | Local editor pairing requires no Figma OAuth | Independent Figma PKCE login, private storage, refresh, logout |
 
-## Default desktop backend
+## Default local backend and optional desktop mode
 
-Official desktop MCP is the default from 0.1.5. On 2026-10-18, DSH Desktop 0.2.1-rc.2 discovered 10 tools and successfully called `get_metadata` and `get_screenshot` against a real frame with no companion running. Canvas writing (`use_figma`), new-file creation and UI-to-canvas generation require another supported backend; the desktop mode does not provide them. Remote client registration returned 403 before user authorization, so remote canvas capabilities remain unverified. See [real evidence](docs/verification.md).
+Version 0.2.0 defaults to local canvas editing with a private, automatically paired companion. One connected document is selected on first use; multiple files and disconnected bindings require explicit selection. Official desktop MCP was the 0.1.5 default and remains an optional read/screenshot route. On 2026-10-18, DSH Desktop 0.2.1-rc.2 discovered 10 tools and successfully called `get_metadata` and `get_screenshot` against a real frame with no companion running. Canvas writing (`use_figma`), new-file creation and UI-to-canvas generation require another supported backend; the desktop mode does not provide them. Remote client registration returned 403 before user authorization, so remote canvas capabilities remain unverified. See [real evidence](docs/verification.md).
 
 The “Official MCP mode” column above describes combined potential across desktop and remote catalogs, not a guarantee that every capability is available in desktop mode.
 
 ## Local behavior limits that affect equivalence
 
 - Public Plugin API functionality and fonts depend on the actual Figma editor/version. The companion cannot unlock private APIs.
-- Local `use_figma` accepts `{code}` after explicit document binding. It does not claim the same input schema as Codex's remote execution tool.
+- Local `use_figma` accepts `{code}` after document binding (automatic only when exactly one file is connected). It does not claim the same input schema as Codex's remote execution tool.
 - Convenience helpers cover auto layout, property setters, exact type/name queries, inline screenshots and hex colors. Unsupported Codex-only conveniences are documented rather than silently ignored.
 - Public editor scripting is powerful and nontransactional. Unknown write outcomes require inspection. No process on the host evaluates Figma scripts.
 - Server tools requiring MCP task-based execution are surfaced with the native DSH bridge's explicit unsupported-task behavior, not silently run through a different protocol. Sampling, host panels and interactive server elicitation are not advertised as supported capabilities.

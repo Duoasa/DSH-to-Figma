@@ -1,10 +1,10 @@
 /* Generated entry is built by scripts/check.mjs from runtime.js and this file. */
-figma.showUI(__html__, { width: 360, height: 430, themeColors: true })
+figma.showUI(__html__, { width: 380, height: 450, themeColors: true })
 const runtime = new globalThis.DshFigmaRuntime(figma)
 let busy = false
 figma.ui.onmessage = async message => {
   if (message.type === 'describe') {
-    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType })
+    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
     return
   }
   if (message.type !== 'execute') return

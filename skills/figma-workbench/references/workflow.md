@@ -8,4 +8,4 @@ Build a coherent subtree in one operation when safe. Reuse stable IDs for subseq
 
 Use one composition screenshot after building, then a targeted post-fix screenshot if needed. Inspect overflow, cramped spacing, inconsistent radii, weak contrast, unbalanced density, missing imagery, wrong font styles and responsive behavior. Validate component linkage and variable bindings structurally. A screenshot does not prove those relationships.
 
-Local reads and writes are serialized per connected document. Do not run independent scripts concurrently on the same canvas. Different DSH sessions must each bind a document. The currently selected Figma node may change through human interaction; use explicit node IDs once discovered.
+Local reads and writes are serialized per connected document. Do not run independent scripts concurrently on the same canvas. A fresh DSH Work session binds the only connected document automatically. Multiple documents require explicit selection. Existing bindings never silently switch after disconnect. The currently selected Figma node may change through human interaction; use explicit node IDs once discovered.

@@ -11,12 +11,13 @@ import { bridgeToken, privateDirectory, privateJson } from './lib/storage.mjs'
 import { LOCAL_TOOLS, objectSchema, SUPPORTED_BACKENDS } from './lib/catalog.mjs'
 import { readAssets, saveAssets, localResult } from './lib/assets.mjs'
 import { connectOfficial, desktopUrl } from './lib/official.mjs'
+import { prepareCompanion } from './lib/companion.mjs'
 import { figmaDiagnostic } from './lib/diagnostics.mjs'
 
 export const name='dsh-figma'
 export const inject=['tools','skills','systemPrompt']
 export const Config=z.object({
-  backend:z.string().default('desktop'),
+  backend:z.string().default('local'),
   bridgePort:z.number().step(1).min(1024).max(65535).default(3055),
   desktopServerUrl:z.string().default('http://127.0.0.1:3845/mcp'),
   toolCallTimeoutMs:z.number().step(1).min(1000).max(300000).default(120000),
@@ -35,14 +36,14 @@ async function registerSkill(ctx){
   ctx.skills.registerProvider(()=>({name:'dsh-figma',list:async()=>[summary],get:async({rank:_rank,locator:_locator,...metadata})=>({...metadata,content:raw.slice(front[0].length).trim()})}))
 }
 export async function applyWithDependencies(ctx,config={},deps={}){
-  const backend=config.backend??'desktop',home=deps.home??resolveDshHome(),timeoutMs=config.toolCallTimeoutMs??120000
+  const backend=config.backend??'local',home=deps.home??resolveDshHome(),timeoutMs=config.toolCallTimeoutMs??120000
   if(!SUPPORTED_BACKENDS.includes(backend))throw new Error('Figma backend must be local, desktop, or remote')
   if(backend==='desktop')desktopUrl(config.desktopServerUrl)
   const disposers=[],dynamic=[],sessions=new Map(),bindings=new Map(),agents=new WeakMap(),dead=new WeakSet(),shutdown=new AbortController()
   const connect=deps.connect??connectOfficial
   let gate=Promise.resolve()
   const exclusive=run=>{const next=gate.then(run);gate=next.catch(()=>{});return next}
-  let stopped=false,bridge,available=false,toolNames=[],remoteInstructions='',refreshing,errorCode=null,diagnostic=null
+  let stopped=false,bridge,companion,available=false,toolNames=[],remoteInstructions='',refreshing,errorCode=null,diagnostic=null
   const assertOpen=()=>{if(stopped)throw new Error('Figma plugin has stopped')}
   const register=(rawName,description,inputSchema,call,{qualified=true,outputSchema,taskRequired}={})=>{
     const tool=createMcpToolDefinition(ctx,{name:qualified?publicToolName('figma',rawName):rawName,rawName,description,inputSchema,outputSchema,taskRequired,call})
@@ -69,8 +70,9 @@ export async function applyWithDependencies(ctx,config={},deps={}){
     return {session,workspace,signal}
   }
   ctx.systemPrompt.section({name:'mcp:figma',order:ctx.systemPrompt.getSectionOrder('MCP_SERVERS'),interpolate:false,text:()=>stopped?'':
-    `DSH to Figma backend: ${backend}. Read figma-workbench before design work. Use figma_status, then explicitly bind a connected document with figma_select_document in local mode. Never infer cloud capability from a tool name. Inspect existing content, preserve components, use auto layout, return IDs, and verify composition with a real screenshot. On an unknown write outcome, inspect before retrying; never replay automatically. ${remoteInstructions}`})
-  register('figma_status','Show connected Figma documents, backend, actual tool coverage and setup state without credentials.',objectSchema(),async()=>result({backend,available,tools:toolNames,errorCode,diagnostic,documents:bridge?.list()??[],bridgePort:bridge?.port??null,skill:'figma-workbench',cloudAccess:backend==='remote'?'Depends on official client approval, account and seat.':backend==='desktop'?'Official desktop MCP provides design reading and screenshots, not canvas writing or cloud generation.':'Cloud-only generation is not provided by the local bridge.',setup:backend==='local'?'Run dsh-figma pair, import companion/manifest.json as a Figma development plugin, connect, then select_document.':backend==='desktop'?'Keep Figma desktop open with its built-in MCP enabled, then run figma_reconnect. No companion plugin or remote OAuth login is required.':'Run dsh-figma login with the same DSH home, then figma_reconnect.'}),{qualified:false})
+    `DSH to Figma backend: ${backend}. Read figma-workbench before design work. Use figma_status, in local mode one connected document is bound on first use; when multiple documents exist or a previous binding disconnected, use figma_select_document explicitly. Never infer cloud capability from a tool name. Inspect existing content, preserve components, use auto layout, return IDs, and verify composition with a real screenshot. On an unknown write outcome, inspect before retrying; never replay automatically. ${remoteInstructions}`})
+  register('figma_status','Show connected Figma documents, backend, actual tool coverage and setup state without credentials.',objectSchema(),async()=>result({backend,available,tools:toolNames,errorCode,diagnostic,documents:bridge?.list()??[],companion:companion??null,documentSelection:backend==='local'?'A single connected document is selected on first use. Multiple documents and disconnected bindings require explicit selection.':'Use the actual official tool schema and intended file or selection.',bridgePort:bridge?.port??null,skill:'figma-workbench',cloudAccess:backend==='remote'?'Depends on official client approval, account and seat.':backend==='desktop'?'Official desktop MCP provides design reading and screenshots, not canvas writing or cloud generation.':'Cloud-only generation is not provided by the local bridge.',setup:backend==='local'?'Import the paired companion.manifest once in Figma, then run DSH to Figma · Local. It connects automatically; keep it open. Call figma_setup for installation paths.':backend==='desktop'?'Keep Figma desktop open with its built-in MCP enabled, then run figma_reconnect. No companion plugin or remote OAuth login is required.':'Run dsh-figma login with the same DSH home, then figma_reconnect.'}),{qualified:false})
+  register('figma_setup','Prepare the private, pre-paired Figma companion. Return installation paths only; never read or share its credential-bearing code or archive.',objectSchema(),async()=>{companion=await prepareCompanion(home,{port:bridge?.port??config.bridgePort??3055,token:bridge?.token});return result({backend,bridgeRunning:!!bridge&&available,...companion,instructions:'Import this manifest once through Figma Plugins > Development > Import plugin from manifest. Run DSH to Figma · Local in your target file. Keep the window open. Requires backend: local; restart DSH after changing backend. Do not upload or share this private package.'})},{qualified:false})
   register('figma_read_guide','Read a focused local Figma workflow guide.',objectSchema({topic:{type:'string',enum:guides}},['topic']),async args=>{if(!guides.includes(args.topic))throw new Error('Unknown Figma guide');return {content:[{type:'text',text:await readFile(join(skillDir,'references',args.topic+'.md'),'utf8')}] }},{qualified:false})
   register('figma_select_document','Bind this Work session to one explicitly chosen local Figma document. IDs come from figma_status. Never silently switches targets.',objectSchema({connectionId:{type:'string'}},['connectionId']),async(args,exec)=>{
     const {session,workspace}=await execution(exec)
@@ -83,10 +85,17 @@ export async function applyWithDependencies(ctx,config={},deps={}){
     try{
       bridge=deps.bridge??new LocalBridge({token:await bridgeToken(home),port:config.bridgePort??3055,timeoutMs})
       await bridge.start()
-      await privateJson(join(await privateDirectory(home),'bridge.json'),{port:bridge.port,pid:process.pid,companion:fileURLToPath(new URL('./companion/manifest.json',import.meta.url)),startedAt:new Date().toISOString()})
+      companion=await prepareCompanion(home,{port:bridge.port,token:bridge.token})
+      await privateJson(join(await privateDirectory(home),'bridge.json'),{port:bridge.port,pid:process.pid,companion:companion.manifest,startedAt:new Date().toISOString()})
       for(const tool of LOCAL_TOOLS)register(tool.name,tool.description,tool.inputSchema,async(args,exec)=>{
-        const {session,workspace,signal}=await execution(exec),binding=bindings.get(session.id)
-        if(!binding)throw new Error('Choose the target document with figma_select_document using figma_status first')
+        const {session,workspace,signal}=await execution(exec)
+        let binding=bindings.get(session.id)
+        if(!binding){
+          const documents=bridge.list()
+          if(documents.length!==1)throw new Error(documents.length?'Multiple Figma documents are connected. Choose the target with figma_select_document using figma_status.':'No Figma document is connected. Run the paired Figma companion; use figma_setup for its manifest path.')
+          binding={id:documents[0].connectionId,workspace};bindings.set(session.id,binding)
+        }
+        if(!bridge.list().some(doc=>doc.connectionId===binding.id))throw new Error('The previously selected Figma document disconnected. Explicitly choose the intended document with figma_select_document; it will not switch automatically.')
         if(binding.workspace!==workspace)throw new Error('Work workspace changed; explicitly select the document again')
         const id=binding.id
         let payload=args

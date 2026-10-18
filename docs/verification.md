@@ -1,14 +1,22 @@
 # Verification / 验证
 
-The public standalone package is `dsh-to-figma` **0.1.5**. It continues the local development implementation under the **DSH to Figma** name.
+The public standalone package is `dsh-to-figma` **0.2.0**. It continues the local development implementation under the **DSH to Figma** name.
 
-公开的独立包为 `dsh-to-figma` **0.1.5**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
+公开的独立包为 `dsh-to-figma` **0.2.0**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
+
+## 0.2.0 local onboarding / 本地接入改造
+
+- Local is the package/schema/runtime default. Startup generates a stable, private paired companion directory and ZIP; public standalone packaging includes no credentials. / 包、配置与运行时默认使用 local，启动时生成稳定的本机私有配对目录及 ZIP；公开通用包不含凭证。
+- Companion launch automatically connects; idle failures back off and retry. Handshake retries preserve the connection and active job. Lost operation acknowledgements block reconnect/replay. / 启动自动连接，空闲失败退避重试，重复握手保留连接与当前操作；执行结果确认丢失时停止重连及重放。
+- One connected file auto-binds on first canvas use; multiple files and stale bindings require explicit selection. / 单文件首次自动绑定，多文件和失效绑定需要明确选择。
+- Automated verification: **33 tests**, including private package permissions, generic ZIP contents, auto-connect/retry, no replay after lost result, document isolation and actual DSH attachment integration. / 33 项测试覆盖权限、打包、自动连接、重试、禁止重放、文档隔离与原生附件。
+- New paired-companion real-editor acceptance: pending. DSH 0.2.1-rc.2 installed the new package, started the local bridge and generated its private companion successfully. / 新已配对插件实机验收待完成；DSH 0.2.1-rc.2 已安装新包，成功启动本地桥接并生成专用插件。
 
 ## Evidence and limits / 证据与边界
 
 | Surface / 范围 | Status / 状态 |
 | --- | --- |
-| Unit and protocol suite / 单元与协议测试 | 27 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth, official MCP transport and companion message/endpoint compatibility / 27 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth、官方 MCP 传输及配套插件消息/地址兼容性 |
+| Unit and protocol suite / 单元与协议测试 | 33 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth, official MCP transport and companion message/endpoint compatibility / 33 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth、官方 MCP 传输及配套插件消息/地址兼容性 |
 | Native DSH integration / 原生 DSH 集成 | Tested with 0.2.0-rc.2 and 0.2.1-rc.2 services, including the production entry, skills, tools, workspace scope and durable image attachments / 已用两版内核服务验证正式入口、Skill、工具、工作区边界与持久图像附件 |
 | Desktop host installation / 桌面宿主安装 | Predecessor 0.1.2 installed through official DSH Desktop 0.2.1-rc.2 CLI; native UI reported running; loopback listener and unauthenticated 401 verified on 2026-10-18 / 前身 0.1.2 于 2026-10-18 经官方 CLI 安装，原生界面显示运行中，本机监听与未授权 401 检查通过 |
 | Real Figma editor / 真实 Figma 编辑器 | Companion import, document-name handshake and authenticated local pairing verified on 2026-10-18 with the patched installed development companion. Maintainer screenshots demonstrate UI reconstruction with native layers; full readback/edit/export acceptance remains pending / 2026-10-18 已用修复后的已安装开发插件验证导入、文件名握手与带鉴权的本机配对。维护者截图展示了带原生图层的 UI 重建；完整读回、修改与导出仍待验收 |
@@ -22,9 +30,9 @@ Automated Figma tests use a simulated Plugin API. A successful fixture screensho
 
 ## Official desktop MCP: real acceptance / 官方桌面 MCP 实机验收
 
-**Date / 日期:** 2026-10-18. **Host / 宿主:** installed DSH Desktop 0.2.1-rc.2 on macOS. The installed development plugin was configured with `backend: desktop` and the app restarted. Its transport was already present in the installed 0.1.2 package; this 0.1.5 update makes desktop the default for new installations. A separate native-service run used the repository plugin with pinned 0.2.1-rc.2 services. These are real Figma calls, distinct from the automated fixtures.
+**Date / 日期:** 2026-10-18. **Host / 宿主:** installed DSH Desktop 0.2.1-rc.2 on macOS. The installed development plugin was configured with `backend: desktop` and the app restarted. Its transport was already present in the installed 0.1.2 package; version 0.1.5 made desktop the default, while 0.2.0 returns to local mode with automatic pairing. A separate native-service run used the repository plugin with pinned 0.2.1-rc.2 services. These are real Figma calls, distinct from the automated fixtures.
 
-实测使用 macOS 上已安装的 DSH Desktop 0.2.1-rc.2，将开发插件设为 `backend: desktop` 后重启。该传输能力已包含在安装的 0.1.2 包中；本次 0.1.5 更新把桌面模式设为新安装的默认值。另一路验证使用仓库插件和锁定的 0.2.1-rc.2 原生服务。两路均调用真实 Figma，区别于自动化 fixture。
+实测使用 macOS 上已安装的 DSH Desktop 0.2.1-rc.2，将开发插件设为 `backend: desktop` 后重启。该传输能力已包含在安装的 0.1.2 包中；0.1.5 曾将桌面模式设为默认；0.2.0 改为带自动配对的本地模式。另一路验证使用仓库插件和锁定的 0.2.1-rc.2 原生服务。两路均调用真实 Figma，区别于自动化 fixture。
 
 | Check / 检查 | Actual result / 实际结果 |
 | --- | --- |

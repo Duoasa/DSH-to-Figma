@@ -4,7 +4,7 @@
 
 **Bring Figma canvas tools into DeepSeek Harness.**
 
-Read Figma designs and get screenshots through the official desktop MCP by default. No companion plugin needed. Optional local mode adds canvas editing.
+Read and edit Figma with a native DSH plugin and an automatically paired canvas companion. Import once, then launch and work.
 
 [![Checks](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml/badge.svg)](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -20,16 +20,16 @@ Read Figma designs and get screenshots through the official desktop MCP by defau
 ## Why DSH to Figma
 
 - **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required. Supported DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**.
-- **Optional editable design work (`local`).** The companion executes public Figma Plugin API scripts inside the selected document. Create and update frames, text, auto layout, components, variants, styles and variables.
+- **Editable design work by default (`local`).** The companion executes public Figma Plugin API scripts inside the selected document. Create and update frames, text, auto layout, components, variants, styles and variables.
 - **A design-to-code workflow.** Inspect the layer tree, layout, CSS and assets, then let the host agent implement them in the current workspace.
 - **Visual feedback.** Receive canvas screenshots through DSH's native image attachment path. A text-only model receives an explicit diagnostic instead of a pretend visual review.
-- **Official desktop MCP by default.** Connect to Figma’s built-in server without running a companion. Local companion editing and approved remote OAuth remain optional.
+- **No token copying in the recommended setup.** DSH generates your private, paired Figma plugin automatically. Start it in a file to connect; one connected file is selected automatically. Official desktop MCP remains an optional reading/screenshot mode.
 
-> **Verified on 2026-10-18:** the installed DSH Desktop **0.2.1-rc.2** read a real Figma frame and displayed its screenshot through the official desktop MCP, with no companion running. Desktop mode does **not** support canvas writing. Remote client registration returned **HTTP 403 before user authorization**, so remote read/write/screenshot access remains unverified. This independent integration does not claim full Codex feature parity. See the [verification record](docs/verification.md).
+> **0.2.0:** local editing is now the default. First-time Figma development-plugin import is still required; keep the companion open while working. Automated pairing, reconnect and document-selection tests pass; see the [verification record](docs/verification.md) for real-editor results. The optional official desktop MCP has passed real reading/screenshot tests but cannot write to the canvas. Remote client registration returned HTTP 403 before authorization.
 
 ## Examples
 
-### Read and screenshot with official desktop MCP (default)
+### Read and screenshot with official desktop MCP (optional)
 
 In a DSH Work conversation, provide a link to a frame in the open Figma file:
 
@@ -39,9 +39,9 @@ The real run returned **10 official tools**, `backend: desktop`, `available: tru
 
 ![Actual screenshot returned by official desktop MCP through DSH](assets/examples/desktop-mcp-screenshot.webp)
 
-### Rebuild a screenshot as editable Figma UI (optional local mode)
+### Rebuild a screenshot as editable Figma UI (local mode)
 
-This earlier writing example uses `backend: local` and the running companion; it is not a desktop MCP feature. Provide a reference screenshot in DSH, select the target frame in the connected Figma file, and describe what to draw:
+This writing example uses `backend: local` and the running companion. Version 0.2.0 simplifies its setup with automatic pairing. Provide a reference screenshot in DSH, select the target frame in the connected Figma file, and describe what to draw:
 
 > Recreate this UI on the frame I selected. Draw only the UI.
 
@@ -59,20 +59,24 @@ These screenshots were supplied by the maintainer from an actual run on 2026-10-
 
 ```mermaid
 flowchart LR
-    A[DSH tools + skills] -->|default: desktop| B[Figma built-in MCP :3845]
-    B --> C[Design reading + screenshots]
-    A -. optional: local .-> D[Paired companion :3055]
-    D --> E[Canvas editing]
-    A -. optional: remote .-> F[Official remote MCP + approved OAuth]
+    A[DSH tools + skills] -->|default: local| B[Authenticated bridge :3055]
+    A --> C[Private paired companion package]
+    C -->|import once| D[Figma companion]
+    D <--> B
+    D --> E[Editable canvas + screenshots]
+    A -. optional: desktop .-> F[Official reading + screenshots :3845]
+    A -. optional: remote .-> G[Official remote MCP + approved OAuth]
 ```
 
-The default connects to `http://127.0.0.1:3845/mcp`. Keep the Figma desktop app open with its built-in MCP enabled. No companion, pairing token or remote OAuth login is needed. Target the intended open file and supply a node ID or selection link; desktop tools operate in the desktop editor context. There is no automatic fallback to local or remote mode.
+DSH prepares a private companion directory and ZIP in `<DSH_HOME>/figma/` on local-mode startup. Import its manifest into Figma once. Each time you run **DSH to Figma · Local**, it connects automatically to this DSH host. Keep its window open. No remote OAuth or personal access token is needed.
+
+The private package contains a local credential; keep it on your machine. Public distribution packages contain no credentials. The bridge remains authenticated and loopback-only; automatic pairing does not expose an unauthenticated token endpoint. Idle connections retry automatically, but interrupted canvas operations are never replayed.
 
 ## Quick start
 
 ### 1. Install the DSH bundle
 
-Prerequisites: Git, Node.js **24+** for development, a supported DSH host, and the Figma desktop app with access to the built-in desktop MCP. Figma’s [desktop requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/) specify a Dev or Full seat on Professional, Education, Organization, Government or Enterprise. The plugin declares Node 22+; use the Node runtime required by your DSH host. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**.
+Prerequisites: Git, a supported DSH host and Figma desktop for development-plugin import. Use the Node version required by the host; repository development uses Node **24+**. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**. Local mode uses Figma’s Plugin API, not the paid desktop MCP seat entitlement; normal account, file-edit and editor permissions still apply.
 
 This repository is the distribution source; **the package is not published to npm**. Clone it and install the local folder:
 
@@ -97,26 +101,44 @@ Open **Plugins → DSH to Figma** and confirm the component is **running**. Rest
 
 Use the CLI, profile and `DSH_HOME` belonging to the host with a compatible DSH core. Disable/remove any earlier development version of this plugin before enabling this package; duplicate versions share the same entry ID and local bridge port.
 
-### 2. Enable Figma’s official desktop MCP
+### 2. Import the automatically paired Figma plugin once
 
-1. Open the intended Design file in Figma desktop.
-2. Enable **desktop MCP server** in Dev Mode. In the verified app UI, **Cmd+K → “MCP” → Enable desktop MCP server** also worked.
-3. Confirm Figma reports `http://127.0.0.1:3845/mcp`.
-4. In a DSH **Work session with a workspace**, call `figma_status`. Expect `backend: desktop` and `available: true`; if needed, call `figma_reconnect` after enabling the server.
+After DSH starts in local mode, ask it:
 
-Do not import or run the companion for this workflow. `documents: []` and `bridgePort: null` are normal in desktop mode; `figma_select_document` is only for local mode.
+> Help me connect Figma. Call figma_setup and give me the paired manifest path. Do not show the credential or read the generated code.
 
-### 3. Read a frame and get a screenshot
+With the default DSH home, the manifest is:
 
-> Read the figma-workbench skill. Check figma_status, then read the metadata and get a screenshot of the frame at <Figma selection link>. Report its name, dimensions and main layers. Do not modify the canvas. If the model cannot receive images, say so explicitly.
+```text
+~/.dsh/figma/companion/manifest.json
+```
 
-For **canvas editing**, explicitly choose `backend: local` and follow the [companion setup](docs/setup.md#optional-local-companion--可选本地配套插件). For remote canvas writing, Figma client approval and successful OAuth are required; our remote registration attempt was rejected before user authorization.
+1. In Figma desktop, choose **Plugins → Development → Import plugin from manifest…**.
+2. Select the generated manifest. On macOS, use **⌘⇧G** in the file picker to enter its full path.
+3. Open the target Design file and run **DSH to Figma · Local**.
+4. It connects automatically; there is no token field to fill in the normal flow. Keep the plugin window open.
+
+The path is stable across DSH plugin updates; run the Figma plugin again after an update. Do not move/delete that directory. If you prefer an archive, `figma_setup` also returns **DSH-to-Figma-paired.zip**, a private copy for this host. Extract it to a permanent directory before import; that extracted copy must be refreshed manually after updates.
+
+### 3. Start working
+
+> Inspect the connected Figma file, then create a separate auto-layout card titled “Hello from DSH”. Return its node ID, read it back, and show a screenshot. Leave existing artwork unchanged.
+
+With one connected file, the first canvas call binds it automatically. With multiple files, DSH explicitly chooses a target. Existing bindings never silently switch after disconnect. Writes can leave partial changes on failure; inspect before retrying.
+
+**Upgrading from 0.1.5:** if your profile explicitly sets `backend: desktop`, change it to `local` and reload/restart. The package default does not overwrite an explicit user preference. The [setup guide](docs/setup.md) includes the patch.
+
+### Standalone Figma package
+
+Download **DSH-to-Figma-packages** from a successful [GitHub Actions build](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml), or build it locally with the command below. The artifact contains the DSH package and a separate generic Figma ZIP.
+
+`npm run package:companion` creates `dist/DSH-to-Figma-companion-0.2.0.zip`, containing the manifest, compiled plugin, UI, bilingual install notes and license. It is safe to distribute and contains no credentials. For zero-copy pairing, use the private package generated by **your own** DSH instead; the generic package offers a manual-token fallback under Advanced.
+
+The local CLI alternative is `node /absolute/path/to/plugin/cli.mjs setup --home /absolute/path/to/dsh-home`; it prints installation paths, never the pairing token.
 
 ## Tools
 
-Default desktop mode dynamically exposes the official catalog. The verified run advertised **10 tools**; only `get_metadata` and `get_screenshot` were exercised against the real canvas. Discovery of the other tools does not prove their execution or account eligibility. Desktop has no `use_figma` canvas-writing tool.
-
-Optional local mode registers **17 canvas tools** under `mcp__figma__…`, plus four setup/guidance tools.
+Default local mode registers **17 canvas tools** under `mcp__figma__…`, plus five setup/guidance tools. Optional official modes dynamically expose their actual server catalog. Desktop MCP has no `use_figma` canvas-writing tool.
 
 | Workflow | Local tools |
 | --- | --- |
@@ -127,7 +149,7 @@ Optional local mode registers **17 canvas tools** under `mcp__figma__…`, plus 
 | Component/code references | `get_local_component_links`, `set_local_component_links` |
 | Motion inspection | `get_motion_context` |
 | Asset transfer | `upload_assets`, `download_assets` |
-| Setup and guidance | `figma_status`, `figma_select_document`, `figma_read_guide`, `figma_reconnect` |
+| Setup and guidance | `figma_setup`, `figma_status`, `figma_select_document`, `figma_read_guide`, `figma_reconnect` |
 
 The bundled `figma-workbench` skill includes focused guides for canvas scripting, design-to-code, components/variables, assets/scenes, FigJam/Slides and official services. Local component links are plugin data, **not published Code Connect mappings**. Search covers the implemented local scope, not all cloud libraries. Public API scripting can target Design, FigJam and Slides; editor-specific acceptance is pending.
 
@@ -139,15 +161,16 @@ Configure the `dsh-figma` entry through your host's native plugin configuration.
 
 | Field | Default | Purpose |
 | --- | --- | --- |
-| `backend` | `desktop` | `local`, `desktop` or `remote` |
+| `backend` | `local` | `local`, `desktop` or `remote` |
 | `bridgePort` | `3055` | Local companion bridge |
 | `desktopServerUrl` | `http://127.0.0.1:3845/mcp` | Official desktop endpoint |
 | `toolCallTimeoutMs` | `120000` | Tool timeout, 1–300 seconds |
 | `oauthClientId` | empty | Approved remote OAuth client ID, when required |
 
-Changing `bridgePort` also requires updating the companion UI endpoint and manifest `devAllowedDomains`. Keep `3055` unless you intentionally maintain that customization.
+Changing `bridgePort` regenerates the paired companion with the matching endpoint and manifest allowlist. Restart DSH and rerun/reimport the generated companion as needed. Multiple hosts should use different ports and their own generated companions.
 
-- **Desktop mode (default):** enable Figma’s desktop MCP server, then refresh with `figma_reconnect`. Existing installations with an explicit `backend: local` override must change it to `desktop` and reload/restart; upgrading does not override a user’s choice.
+- **Local mode (default):** automatic private companion preparation, launch-to-connect and single-document selection.
+- **Desktop mode (optional):** enable Figma’s built-in desktop MCP, set `backend: desktop`, and restart/reload DSH. Reading and screenshots only; no companion. See [Figma’s seat requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/).
 - **Remote mode:** use `dsh-figma login` and `backend: remote`. Official availability depends on Figma client approval, account, seat and server catalog. No Codex credentials are reused.
 - **Disable:** use the native plugin manager, or launch the host with `DSH_FIGMA_DISABLED=1`.
 
@@ -155,9 +178,9 @@ Changing `bridgePort` also requires updating the companion UI endpoint and manif
 
 ## Data and execution boundaries
 
-- The local bridge binds only loopback, checks Host/Origin and requires a pairing token on every request. Tokens are stored under `DSH_HOME/figma` with private filesystem permissions; the companion keeps the token only in memory.
+- The local bridge binds only loopback, checks Host/Origin and requires a pairing token on every request. Tokens are stored under `DSH_HOME/figma` with private filesystem permissions; the paired companion contains a private copy on disk and holds it in memory while running. It does not store it in Figma document data or clientStorage.
 - Figma scripts execute inside the editor through the public Plugin API. The DSH bundle itself runs with host process privileges, as other native plugins do.
-- In optional local mode, document binding is explicit. Operations are ordered per document; unknown writes are never automatically replayed. Mutations are not transactional.
+- In local mode, one connected document is bound on first use. Multiple documents and disconnected bindings require explicit selection. Operations are ordered per document; unknown writes are never automatically replayed. Mutations are not transactional.
 - Asset uploads must stay inside the Work workspace. Exports use fresh `.figma/assets/<batch>/` directories. Screenshots may be sent to your configured model provider as part of the conversation.
 - OAuth credentials are stored in a private local file, **not encrypted with the OS keychain**. `dsh-figma logout` removes local credentials; revoke Figma app access separately to invalidate the grant server-side.
 

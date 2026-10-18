@@ -17,4 +17,12 @@ jobs:
       - run: npm run test:all
       - name: Generated companion must be committed
         run: git diff --exit-code -- companion/code.js
-      - run: npm pack --ignore-scripts --dry-run
+      - run: npm run package:companion
+      - run: npm pack --ignore-scripts --pack-destination dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DSH-to-Figma-packages
+          path: |
+            dist/DSH-to-Figma-companion-*.zip
+            dist/dsh-to-figma-*.tgz
+          if-no-files-found: error

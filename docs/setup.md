@@ -6,8 +6,8 @@
 
 | Mode / 模式 | Connection / 连接 | Requirements / 条件 |
 | --- | --- | --- |
-| `local` | Paired development plugin / 配对的开发插件 | Figma desktop + this companion, same machine / Figma 桌面与本插件在同一台机器 |
-| `desktop` (default / 默认) | `http://127.0.0.1:3845/mcp` | Enable the official desktop MCP server / 开启官方桌面 MCP |
+| `local` (default / 默认) | Paired development plugin / 配对的开发插件 | Figma desktop + this companion, same machine / Figma 桌面与本插件在同一台机器 |
+| `desktop` | `http://127.0.0.1:3845/mcp` | Enable the official desktop MCP server / 开启官方桌面 MCP |
 | `remote` | `https://mcp.figma.com/mcp` | OAuth and eligible official client/account access / OAuth 与官方客户端、账号准入 |
 
 Only the local backend uses port `3055` and `figma_select_document`. Official backends expose the server's actual schemas, resources and prompts; do not assume the local tool arguments apply to them.
@@ -45,15 +45,15 @@ node /absolute/path/to/plugin/cli.mjs install \
   --home /absolute/path/to/dsh-home --profile web --cli /absolute/path/to/dsh
 ```
 
-## Official desktop MCP (default) / 官方桌面 MCP（默认）
+## Official desktop MCP (optional) / 官方桌面 MCP（可选）
 
 Open the target Design file in Figma desktop and enable the built-in desktop MCP. On the verified app, Cmd+K → MCP → Enable desktop MCP server produced the confirmation `http://127.0.0.1:3845/mcp`. Keep Figma open. No companion, pairing token or remote OAuth login is needed. See [Figma’s desktop requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/) for eligible plans/seats.
 
 在 Figma 桌面端打开目标 Design 文件并启用内置桌面 MCP。本次实测通过 Cmd+K → MCP → Enable desktop MCP server，出现 `http://127.0.0.1:3845/mcp` 提示。保持 Figma 打开即可，无需配套插件、配对密钥或远程 OAuth 登录。套餐与席位条件见 [Figma 官方说明](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)。
 
-New installations default to desktop. To migrate an existing explicit local configuration, add/update this entry in your profile’s `cordis.patch.yml`, preserving other entries, then restart/reload DSH:
+New installations default to local editing. To use official desktop reading instead, add/update this entry in your profile’s `cordis.patch.yml`, preserving other entries, then restart/reload DSH:
 
-新安装默认使用桌面模式。已有显式 local 配置时，在 profile 的 `cordis.patch.yml` 中添加或更新以下入口，保留其他条目，再重载或重启 DSH：
+新安装默认使用本地编辑模式。如需官方桌面读取模式，在 profile 的 `cordis.patch.yml` 中添加或更新以下入口，保留其他条目，再重载或重启 DSH：
 
 ```yaml
 - id: dsh-figma
@@ -66,20 +66,38 @@ Call `figma_status` in a Work conversation: expect `backend: desktop`, `availabl
 
 在 Work 会话调用 `figma_status`，应看到 `backend: desktop`、`available: true` 和服务器实际工具列表。`documents: []`、`bridgePort: null` 为正常状态。若启用 MCP 晚于 DSH 启动，调用 `figma_reconnect`。请在目标文件打开时使用选区链接中的节点 ID。桌面模式支持读取和截图，不支持画布写入，也不会自动回退到配套插件。
 
-## Optional local companion / 可选本地配套插件
+## Local companion (default) / 本地配套插件（默认）
 
-Choose `backend: local` explicitly and reload/restart the plugin. Only this mode starts the bridge on `127.0.0.1:3055` and supports our local canvas-writing tools.
+DSH automatically prepares `<DSH_HOME>/figma/companion/manifest.json` and `<DSH_HOME>/figma/DSH-to-Figma-paired.zip` when the local backend starts. Use `figma_setup` in DSH to retrieve these paths without exposing credentials. For an existing profile with a desktop override, set:
 
-显式选择 `backend: local` 后重载或重启插件。仅此模式启动 `127.0.0.1:3055` 桥接，并提供本插件的本地画布写入工具。
+DSH 本地模式启动后，自动生成上述 manifest 和本机专用 ZIP。在 DSH 中调用 `figma_setup` 即可获得路径，无需显示凭证。旧 profile 若保留桌面模式覆盖，修改为：
 
-```sh
-node /absolute/path/to/plugin/cli.mjs pair --home /absolute/path/to/dsh-home
+```yaml
+- id: dsh-figma
+  config:
+    backend: local
+    bridgePort: 3055
 ```
 
-1. Import the printed `companion/manifest.json` through Figma’s Plugins → Development → Import plugin from manifest. / 在 Figma 开发插件菜单导入命令输出的 manifest。
-2. Run DSH to Figma, paste the pairing token only into its UI, and connect. Keep it running. Never paste the token into chat or public evidence. / 运行配套插件，仅在其 UI 中粘贴密钥并连接，保持运行，不要把密钥发到聊天或公开证据中。
-3. In a DSH Work session, call `figma_status` and explicitly select the intended `connectionId` with `figma_select_document`. / 在 Work 会话获取状态并明确绑定目标文档。
-4. Inspect, edit, read back and screenshot. On an uncertain write result, inspect before retrying. / 按检查、编辑、读回、截图的顺序操作；写入结果未知时先检查再重试。
+Restart/reload DSH. Import the generated manifest once through Figma Plugins → Development → Import plugin from manifest. Open the intended file and run **DSH to Figma · Local**. It connects automatically; keep the window open. The generated folder stays in place and is updated on DSH startup. ZIP copies extracted elsewhere do not update automatically.
+
+重启或重载 DSH，通过 Figma 开发插件菜单首次导入生成的 manifest。在目标文件运行 **DSH to Figma · Local**，插件自动连接，保持窗口打开即可。生成目录位置稳定，每次 DSH 启动时更新；解压到其他位置的 ZIP 副本不会自动更新。
+
+One connected document is bound automatically on first canvas use. Multiple connected documents require `figma_select_document`; a disconnected binding never silently changes targets. Empty documents means the companion is not connected yet. Idle disconnects retry automatically. If the connection breaks during an operation, reopen the companion and inspect the canvas before another write; no operation is replayed.
+
+单个连接文档在首次画布调用时自动绑定。多个文档需要明确选择，断开的旧绑定不会自动转向其他文件。文档列表为空表示插件尚未连接。空闲断线会自动重试；执行中断线需重新打开插件并先检查画布，操作不会自动重放。
+
+The generated directory and paired ZIP contain a local credential. They are private installation artifacts, not shareable release packages. The public standalone ZIP from `npm run package:companion` contains no credentials; it needs either a generated paired replacement or a token entered under Advanced.
+
+已配对目录与 ZIP 含本机凭证，仅供本机安装，不可作为公开发行包分享。`npm run package:companion` 生成的通用独立 ZIP 不含凭证，需要替换为本机配对版，或在高级设置中手动输入密钥。
+
+CLI fallback / CLI 备用方式：
+
+```sh
+node /absolute/path/to/plugin/cli.mjs setup --home /absolute/path/to/dsh-home
+# Manual-token fallback only / 仅手动密钥备用方式：
+node /absolute/path/to/plugin/cli.mjs pair --home /absolute/path/to/dsh-home
+```
 
 ## OAuth / 远程授权
 
@@ -117,7 +135,7 @@ Logout removes local credentials. Reconnect/restart to close existing sessions; 
 | Installed but no tools / 已安装但没有工具 | Check **Plugins → DSH to Figma → running**; verify core version and active profile, restart if necessary / 检查组件运行状态、内核版本和当前 profile，必要时重启 |
 | Desktop unavailable / 桌面不可用 | Open Figma, enable its built-in MCP at :3845 and call `figma_reconnect`; do not start the companion / 打开 Figma 并启用 :3845 内置 MCP，再调用重连；无需启动配套插件 |
 | `bridge_port_in_use` | Another host may own `3055`; disable the duplicate bridge / 另一宿主可能占用端口，请禁用重复桥接 |
-| No documents in local mode / 本地模式没有文档 | Keep the Figma companion open and connected using the same home's token / 保持配套插件打开，并使用同一 home 的密钥 |
+| No documents in local mode / 本地模式没有文档 | Run the paired companion generated by this DSH home; use figma_setup for its path / 运行这台 DSH 生成的已配对插件，调用 figma_setup 获取路径 |
 | Work session required / 要求 Work 会话 | Open a conversation attached to a workspace / 使用已关联工作区的会话 |
 | Choose document / 要求选择文档 | Call `figma_status`, then bind the intended `connectionId` / 获取状态后明确绑定目标文档 |
 | Font error / 字体错误 | Query `list_fonts`; load each exact font before changing text / 先查询并加载准确字体样式，再修改文字 |

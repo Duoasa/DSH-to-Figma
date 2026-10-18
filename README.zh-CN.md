@@ -4,7 +4,7 @@
 
 **把 Figma 画布能力接入 DeepSeek Harness。**
 
-默认通过 Figma 官方桌面 MCP 读取设计和获取截图，无需运行配套插件；可选本地模式支持编辑画布。
+原生 DSH 插件搭配自动配对的 Figma 插件，直接读取、编辑画布并获取截图。首次导入一次，以后启动即连接。
 
 [![Checks](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml/badge.svg)](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -20,16 +20,16 @@
 ## 为什么使用 DSH to Figma
 
 - **原生 DSH 插件。** 工具、设计 Skill 和图像附件均使用宿主扩展机制，无需修改 Agent 主循环；支持 **0.2.0-rc.2** 与 **0.2.1-rc.2** 版 DSH 内核。
-- **可选的画布编辑（`local`）。** 配套 Figma 插件在选定文档中执行公开 Plugin API，创建和修改 Frame、文字、自动布局、组件、变体、样式与变量。
+- **默认支持画布编辑（`local`）。** 配套 Figma 插件在选定文档中执行公开 Plugin API，创建和修改 Frame、文字、自动布局、组件、变体、样式与变量。
 - **从设计到代码。** 读取图层结构、布局、CSS 与素材，让宿主 Agent 在当前工作区中实现界面。
 - **视觉反馈。** 画布截图通过 DSH 原生图像附件机制传递。模型不支持图像时明确报告限制，不会假装完成视觉检查。
-- **默认使用官方桌面 MCP。** 直接连接 Figma 内置服务，无需运行配套插件；本地配套插件编辑和获批后的远程 OAuth 接入作为可选模式。
+- **推荐流程无需复制密钥。** DSH 自动生成本机专用的已配对 Figma 插件，运行后自动连接；只有一个连接文件时自动选用。官方桌面 MCP 保留为可选的读取与截图模式。
 
-> **2026-10-18 实测通过：** 已安装的 DSH Desktop **0.2.1-rc.2** 通过官方桌面 MCP 读取真实 Figma 画板，并在对话中显示截图，全程未运行配套插件。桌面模式**不支持画布写入**。远程客户端注册在用户授权前返回 **HTTP 403**，因此远程读写与截图仍未验证。本项目为独立集成，不宣称完整复刻 Codex 能力。详见[验证记录](docs/verification.md)。
+> **0.2.0：** 默认改为本地编辑模式。首次仍需在 Figma 导入开发插件，使用时保持插件窗口打开。自动配对、重连与文档选择测试已通过，实机结果见[验证记录](docs/verification.md)。可选的官方桌面 MCP 已实测读取与截图，但不能写入画布；官方远程接入在用户授权前返回客户端注册 HTTP 403。
 
 ## 使用示例
 
-### 官方桌面 MCP 读取与截图（默认）
+### 官方桌面 MCP 读取与截图（可选模式）
 
 在 DSH Work 会话中，提供当前 Figma 文件内目标画板的链接：
 
@@ -39,9 +39,9 @@
 
 ![DSH 通过官方桌面 MCP 实际获取的画板截图](assets/examples/desktop-mcp-screenshot.webp)
 
-### 从参考截图重建可编辑的 Figma 界面（可选本地模式）
+### 从参考截图重建可编辑的 Figma 界面（本地模式）
 
-此早期写入案例使用 `backend: local` 并运行配套插件，不属于官方桌面 MCP 的能力。在 DSH 中提供参考截图，在已连接的 Figma 文件中选中目标画板，再用自然语言描述绘制要求：
+此写入案例使用 `backend: local` 和配套插件；0.2.0 通过自动配对简化了它的接入过程。在 DSH 中提供参考截图，在已连接的 Figma 文件中选中目标画板，再用自然语言描述绘制要求：
 
 > 把这个 UI 绘制在我选中的画板上，注意只绘制 UI。
 
@@ -59,20 +59,24 @@
 
 ```mermaid
 flowchart LR
-    A[DSH 工具与 Skill] -->|默认 desktop| B[Figma 内置 MCP :3845]
-    B --> C[读取设计与截图]
-    A -. 可选 local .-> D[配对插件 :3055]
-    D --> E[画布编辑]
-    A -. 可选 remote .-> F[官方远程 MCP 与获批 OAuth]
+    A[DSH 工具与 Skill] -->|默认 local| B[鉴权桥接 :3055]
+    A --> C[本机专用已配对插件包]
+    C -->|首次导入一次| D[Figma 插件]
+    D <--> B
+    D --> E[编辑画布与截图]
+    A -. 可选 desktop .-> F[官方读取与截图 :3845]
+    A -. 可选 remote .-> G[官方远程 MCP 与获批 OAuth]
 ```
 
-默认连接 `http://127.0.0.1:3845/mcp`。保持 Figma 桌面应用打开并启用内置 MCP 即可，无需配套插件、配对密钥或远程 OAuth 登录。请打开目标文件并提供节点 ID 或选区链接；桌面工具使用桌面编辑器中的文件上下文。连接失败时不会自动切换到本地或远程模式。
+DSH 在本地模式启动时，会在 `<DSH_HOME>/figma/` 自动生成已配对的插件目录和 ZIP。首次导入 manifest 后，每次在 Figma 运行 **DSH to Figma · Local** 就会自动连接这台 DSH。使用时保持插件窗口打开，无需远程 OAuth 或个人访问令牌。
+
+已配对版本包含本机凭证，请保留在本机；公开分发包不含凭证。桥接仍只监听本机并验证密钥，没有新增匿名获取密钥的网络接口。空闲断线会自动重连，执行中断的画布操作不会自动重放。
 
 ## 快速开始
 
 ### 1. 安装 DSH 插件
 
-准备 Git、用于开发的 **Node.js 24+**、兼容的 DSH 宿主，以及可使用内置桌面 MCP 的 Figma 桌面应用。[官方条件](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)为 Professional、Education、Organization、Government 或 Enterprise 套餐中的 Dev 或 Full 席位。插件声明 Node 22+，实际请使用宿主要求的 Node 版本。已测试的 DSH 内核为 **0.2.0-rc.2** 和 **0.2.1-rc.2**。
+准备 Git、兼容的 DSH 宿主，以及用于导入开发插件的 Figma 桌面端。Node 使用宿主要求的版本，仓库开发使用 **Node.js 24+**。已测试 DSH 内核 **0.2.0-rc.2** 和 **0.2.1-rc.2**。本地模式使用 Figma Plugin API，不依赖官方桌面 MCP 的付费席位条件，但仍需正常账号、文件编辑权限及编辑器权限。
 
 当前通过 GitHub 源码分发，**尚未发布到 npm**。克隆仓库后安装本地目录：
 
@@ -97,26 +101,44 @@ dsh plugin --profile web add "file:$PWD"
 
 请使用兼容 DSH 内核宿主对应的 CLI、profile 和 `DSH_HOME`。如果已安装此插件的早期开发版本，请先禁用或移除，再启用当前包；重复版本使用相同的入口 ID 和桥接端口。
 
-### 2. 启用 Figma 官方桌面 MCP
+### 2. 首次导入自动配对的 Figma 插件
 
-1. 在 Figma 桌面端打开目标 Design 文件。
-2. 在 Dev Mode 中启用 **desktop MCP server**。本次实测也可通过 **Cmd+K → 搜索“MCP” → Enable desktop MCP server** 开启。
-3. 确认 Figma 提示服务地址为 `http://127.0.0.1:3845/mcp`。
-4. 在具有工作区的 DSH **Work 会话**中调用 `figma_status`，应返回 `backend: desktop`、`available: true`；如果先启动了 DSH，再启用 Figma MCP，调用 `figma_reconnect` 即可重新发现工具。
+DSH 以本地模式启动后，对它说：
 
-这条流程不需要导入或运行配套插件。桌面模式下 `documents: []`、`bridgePort: null` 属于正常状态；`figma_select_document` 仅用于本地模式。
+> 帮我连接 Figma，调用 figma_setup，把已配对插件的 manifest 路径给我。不要显示密钥，也不要读取生成的代码。
 
-### 3. 读取画板并获取截图
+默认 DSH home 对应的路径是：
 
-> 读取 figma-workbench Skill。检查 figma_status，然后读取这个画板链接对应节点的元数据并获取截图：<Figma 选区链接>。报告画板名称、尺寸和主要图层，不要修改画布。如果模型无法接收图片，请明确说明。
+```text
+~/.dsh/figma/companion/manifest.json
+```
 
-需要**编辑画布**时，显式设置 `backend: local`，按[配套插件接入说明](docs/setup.md#optional-local-companion--可选本地配套插件)操作。远程画布写入需要 Figma 客户端准入及成功的 OAuth 授权；本次远程尝试在用户授权前即被拒绝。
+1. 在 Figma 桌面端选择 **Plugins → Development → Import plugin from manifest…**。
+2. 选择生成的 manifest。macOS 文件选择器可按 **⌘⇧G** 输入完整路径。
+3. 打开目标 Design 文件，运行 **DSH to Figma · Local**。
+4. 插件自动连接，正常流程无需粘贴密钥。保持插件窗口打开即可。
+
+此目录位置稳定，DSH 插件升级后重新运行 Figma 插件即可。不要移动或删除该目录。`figma_setup` 也会返回本机专用的 **DSH-to-Figma-paired.zip**；如选择压缩包，先解压到固定目录再导入。解压后的独立副本需要在升级时手动更新。
+
+### 3. 开始使用
+
+> 读取已连接的 Figma 文件，新建一张独立的自动布局卡片，标题为“Hello from DSH”。返回节点 ID，读回内容并截图。不要改动已有设计。
+
+只有一个连接文件时，首次画布调用自动绑定；同时连接多个文件时明确选择目标。已有绑定断开后不会悄悄切换到其他文件。写入失败可能已产生部分修改，应先检查再重试。
+
+**从 0.1.5 升级：** 若 profile 显式写了 `backend: desktop`，改为 `local` 后重启或重载。新包的默认值不会覆盖用户已有配置。[接入说明](docs/setup.md)包含可直接使用的 patch。
+
+### 独立 Figma 安装包
+
+可在成功的 [GitHub Actions 构建](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)中下载 **DSH-to-Figma-packages**，其中分别包含 DSH 安装包和 Figma 通用 ZIP；也可按下方命令自行打包。
+
+运行 `npm run package:companion`，生成 `dist/DSH-to-Figma-companion-0.2.0.zip`，内含 manifest、编译后的插件、界面、中英文安装说明和许可证。该通用包不含凭证，可公开分发。想免复制密钥，请使用**自己这台 DSH** 生成的已配对版本；通用版也保留“高级设置”中的手动配对入口。
+
+也可通过 `node /插件绝对路径/cli.mjs setup --home /DSH-home绝对路径` 生成本机安装包，命令只输出安装路径，不输出密钥。
 
 ## 工具列表
 
-默认桌面模式动态提供官方工具目录。本次实测发现 **10 个工具**，其中 `get_metadata` 与 `get_screenshot` 已在真实画布上执行；发现其他工具不代表它们均已实测或当前账号具有所有权限。桌面模式没有 `use_figma` 画布写入工具。
-
-可选本地模式提供 **17 个画布工具**，名称前缀为 `mcp__figma__…`，另有 4 个配对与指南工具。
+默认本地模式提供 **17 个画布工具**，名称前缀为 `mcp__figma__…`，另有 5 个接入与指南工具。可选官方模式动态提供服务器实际工具目录；官方桌面模式没有 `use_figma` 画布写入工具。
 
 | 工作流 | 本地工具 |
 | --- | --- |
@@ -127,7 +149,7 @@ dsh plugin --profile web add "file:$PWD"
 | 组件与代码引用 | `get_local_component_links`、`set_local_component_links` |
 | 动效信息 | `get_motion_context` |
 | 素材传输 | `upload_assets`、`download_assets` |
-| 配对与指南 | `figma_status`、`figma_select_document`、`figma_read_guide`、`figma_reconnect` |
+| 配对与指南 | `figma_setup`、`figma_status`、`figma_select_document`、`figma_read_guide`、`figma_reconnect` |
 
 内置 `figma-workbench` Skill，并附带画布脚本、设计转代码、组件与变量、素材与场景、FigJam / Slides、官方服务等专项指南。本地组件引用保存在插件数据中，**不等同于发布 Code Connect 映射**。设计系统搜索按实际实现覆盖本地范围，不是全云端搜索。公开 API 脚本可面向 Design、FigJam 和 Slides；各编辑器的实机验收仍待完成。
 
@@ -139,15 +161,16 @@ dsh plugin --profile web add "file:$PWD"
 
 | 字段 | 默认值 | 用途 |
 | --- | --- | --- |
-| `backend` | `desktop` | `local`、`desktop` 或 `remote` |
+| `backend` | `local` | `local`、`desktop` 或 `remote` |
 | `bridgePort` | `3055` | 本机配套插件桥接端口 |
 | `desktopServerUrl` | `http://127.0.0.1:3845/mcp` | 官方桌面 MCP 地址 |
 | `toolCallTimeoutMs` | `120000` | 工具超时，范围 1–300 秒 |
 | `oauthClientId` | 空 | 需要时填写已获批的远程 OAuth client ID |
 
-修改 `bridgePort` 时，还必须同步修改配套插件 UI 地址及 manifest 的 `devAllowedDomains`。没有明确需求时，保持 `3055`。
+修改 `bridgePort` 后，DSH 自动为已配对插件生成匹配的地址和 manifest 白名单；重启 DSH 后，按需重新运行或导入生成的插件。多个宿主应使用不同端口和各自生成的配套插件。
 
-- **桌面模式（默认）：** 开启 Figma 桌面 MCP 服务，再调用 `figma_reconnect` 刷新。旧安装若显式配置了 `backend: local`，需要改成 `desktop` 后重载或重启；升级不会覆盖用户已有选择。
+- **本地模式（默认）：** 自动生成已配对插件，启动即连接，单文件自动选用。
+- **桌面模式（可选）：** 启用 Figma 内置桌面 MCP，设置 `backend: desktop` 并重启或重载 DSH。只支持读取与截图，无需配套插件；套餐条件见[官方说明](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)。
 - **远程模式：** 通过 `dsh-figma login` 登录，设置 `backend: remote`。能力取决于 Figma 客户端审批、账号、席位和服务器实际工具列表，不复用 Codex 凭证。
 - **禁用：** 使用宿主插件管理器，或设置环境变量 `DSH_FIGMA_DISABLED=1` 后启动宿主。
 
@@ -155,9 +178,9 @@ dsh plugin --profile web add "file:$PWD"
 
 ## 数据与执行边界
 
-- 本地服务仅监听 loopback，检查 Host / Origin，每个请求都需要配对密钥。密钥保存在 `DSH_HOME/figma` 下，使用私有文件权限；Figma 插件仅在内存中保存它。
+- 本地服务仅监听 loopback，检查 Host / Origin，每个请求都需要配对密钥。密钥保存在 `DSH_HOME/figma` 下，使用私有文件权限；已配对插件文件包含本机私有副本，运行时在内存中使用，不写入 Figma 文档数据或 clientStorage。
 - Figma 脚本通过公开 Plugin API 在编辑器中执行。DSH 插件本身与其他原生插件一样，以宿主进程权限运行。
-- 可选本地模式下，目标文档必须明确绑定，同一文档操作串行执行；结果未知的写入不会自动重放。画布修改不是事务。
+- 本地模式下，单文件首次自动绑定，多文件或旧绑定断开后需要明确选择；同一文档操作串行执行；结果未知的写入不会自动重放。画布修改不是事务。
 - 素材上传不能超出当前 Work 工作区，导出写入全新的 `.figma/assets/<batch>/` 目录。截图作为对话内容，可能发送给你配置的模型提供方。
 - OAuth 凭证保存在私有本地文件中，**没有使用系统钥匙串加密**。`dsh-figma logout` 删除本地凭证；如需让服务器授权失效，还要在 Figma 中撤销应用访问。
 

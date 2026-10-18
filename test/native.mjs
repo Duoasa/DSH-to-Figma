@@ -34,7 +34,7 @@ try{
   const status=await call(a,'figma_status');assert.equal(status.isError,false,JSON.stringify(status));assert.equal(status.value.structuredContent.backend,'local')
   const id=await connect(bridge),fixture=await fixtureRuntime()
   assert.equal((await call(chat,'figma_select_document',{connectionId:id})).isError,true)
-  assert.equal((await call(b,'mcp__figma__get_metadata')).isError,true)
+  const autoRead=call(b,'mcp__figma__get_metadata');await runJob(bridge,id,fixture.runtime);assert.equal((await autoRead).isError,false)
   for(const owner of [a,text])assert.equal((await call(owner,'figma_select_document',{connectionId:id})).isError,false)
   const write=call(a,'mcp__figma__use_figma',{code:"const card=figma.createAutoLayout('VERTICAL',{name:'Native smoke'});figma.currentPage.appendChild(card);return {id:card.id}"})
   await runJob(bridge,id,fixture.runtime);const written=await write;assert.equal(written.isError,false,JSON.stringify(written));const nodeId=written.value.structuredContent.result.id

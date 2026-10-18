@@ -59,3 +59,12 @@ test('timeout retains in-flight operation and refuses blind replay',async t=>{
   const b=await rig(t,60),id=await connect(b),p=b.call(id,'use_figma',{code:'return 1'},{mutation:true}),rejected=assert.rejects(p,/unknown/)
   await request(b,'/poll',{connectionId:id});await rejected;assert.equal(b.list()[0].busy,true);assert.equal(b.list()[0].needsInspection,true)
 })
+test('repeated companion handshake is idempotent and preserves active job state',async t=>{
+  const b=await rig(t),clientId=crypto.randomUUID(),metadata={name:'Canvas',editorType:'figma',clientId}
+  const id=(await (await request(b,'/connect',metadata)).json()).connectionId
+  const pending=b.call(id,'use_figma',{code:'return 1'},{mutation:true})
+  const job=await (await request(b,'/poll',{connectionId:id})).json()
+  const retry=await (await request(b,'/connect',metadata)).json()
+  assert.equal(retry.connectionId,id);assert.equal(b.list().length,1);assert.equal(b.documents.get(id).active.id,job.id)
+  await request(b,'/result',{connectionId:id,id:job.id,ok:true,result:{value:1}});await pending
+})

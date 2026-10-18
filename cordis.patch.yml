@@ -2,5 +2,5 @@
     - id: dsh-figma
       name: 'dsh-to-figma'
       config:
-        backend: desktop
+        backend: local
         bridgePort: 3055

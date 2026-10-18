@@ -59,9 +59,9 @@ test('native remote status exposes registration rejection and clears it after su
   assert.equal(status.structuredContent.diagnostic,null)
 })
 
-test('default backend uses official desktop and stays there when the server is unavailable',async t=>{
+test('explicit desktop backend stays there when the server is unavailable',async t=>{
   const {ctx,definitions}=context();let options,bridgeStarted=false
-  const handle=await applyWithDependencies(ctx,{}, {
+  const handle=await applyWithDependencies(ctx,{backend:'desktop'}, {
     connect:async value=>{options=value;throw new Error('desktop offline')},
     bridge:{start:async()=>{bridgeStarted=true}}
   });t.after(()=>handle.close())
@@ -74,4 +74,25 @@ test('default backend uses official desktop and stays there when the server is u
   assert.deepEqual(status.tools,[])
   assert.match(status.setup,/No companion plugin or remote OAuth login/)
   assert.ok(!definitions.has('mcp__figma__use_figma'))
+})
+
+test('default local prepares a private companion and binds one file without silently switching',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs')
+  const {connect}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-auto-bind-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions}=context(),bridge=new LocalBridge({token:'a'.repeat(64),port:0})
+  bridge.call=async id=>({value:{id},images:[]})
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  const status=(await definitions.get('figma_status').execute({})).structuredContent
+  assert.equal(status.backend,'local');assert.equal(status.available,true);assert.ok(status.companion.paired)
+  assert.doesNotMatch(JSON.stringify(status),new RegExp(bridge.token))
+  const exec={agent:{session:{id:'a',header:{cwd:home}}},signal:new AbortController().signal}
+  const invoke=()=>definitions.get('mcp__figma__get_metadata').execute({},exec)
+  await assert.rejects(invoke(),/No Figma document/)
+  const first=await connect(bridge,'First');assert.equal((await invoke()).structuredContent.result.id,first)
+  const second=await connect(bridge,'Second');assert.equal((await invoke()).structuredContent.result.id,first)
+  await assert.rejects(definitions.get('mcp__figma__get_metadata').execute({},{...exec,agent:{session:{id:'new',header:{cwd:home}}}}),/Multiple Figma documents/)
+  bridge.remove(first);await assert.rejects(invoke(),/will not switch automatically/)
+  await definitions.get('figma_select_document').execute({connectionId:second},exec)
+  assert.equal((await invoke()).structuredContent.result.id,second)
 })
