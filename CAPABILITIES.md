@@ -36,6 +36,6 @@ The “Official MCP mode” column above describes combined potential across des
 - Public editor scripting is powerful and nontransactional. Unknown write outcomes require inspection. No process on the host evaluates Figma scripts.
 - Server tools requiring MCP task-based execution are surfaced with the native DSH bridge's explicit unsupported-task behavior, not silently run through a different protocol. Sampling, host panels and interactive server elicitation are not advertised as supported capabilities.
 - Remote screenshot base64 is requested if the advertised schema supports it. Ordinary resource URLs stay URLs; they are not fetched through an unrestricted network bridge.
-- Automated fixtures prove implementation/protocol behavior. Real desktop metadata and screenshot acceptance passed for one Design file; broader editor, font, layout and long-running acceptance remain pending.
+- Automated fixtures prove implementation/protocol behavior. Real local create/read/update/screenshot/export and official desktop metadata/screenshot acceptance passed for one Design file; broader editor, font, layout and long-running acceptance remain pending.
 
 Official sources: [Plugin API](https://developers.figma.com/docs/plugins/api/figma/), [manifest](https://developers.figma.com/docs/plugins/manifest/), [MCP tools](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/), [remote installation and approved-client restriction](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/).

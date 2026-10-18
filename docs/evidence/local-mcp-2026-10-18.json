@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-18",
+  "pluginVersion": "0.2.1",
+  "host": "DSH Desktop 0.2.1-rc.2",
+  "editor": "Figma Desktop 126.9.13",
+  "editorMode": "Design",
+  "backend": "local",
+  "companion": {
+    "importedPrivateManifest": true,
+    "manualTokenEntry": false,
+    "automaticConnection": true,
+    "reconnectedAfterDshRestart": true
+  },
+  "singleDocumentAutoBinding": true,
+  "explicitSelectionBeforeMetadata": false,
+  "actualNativeTools": [
+    "figma_status",
+    "mcp__figma__get_metadata",
+    "mcp__figma__use_figma",
+    "mcp__figma__get_screenshot",
+    "mcp__figma__download_assets"
+  ],
+  "frame": {
+    "id": "3:5",
+    "name": "DSH Local 0.2.1 — Acceptance",
+    "width": 480,
+    "height": 280,
+    "x": 2319,
+    "y": 0
+  },
+  "text": {
+    "id": "3:6",
+    "before": "Created from DSH",
+    "after": "Read · Write · Screenshot ✓",
+    "font": "Inter Regular",
+    "fontSize": 32
+  },
+  "background": {
+    "before": {
+      "r": 1,
+      "g": 1,
+      "b": 1
+    },
+    "after": {
+      "r": 0.85,
+      "g": 0.95,
+      "b": 0.87
+    }
+  },
+  "screenshot": {
+    "mimeType": "image/png",
+    "width": 960,
+    "height": 560,
+    "exportBytes": 14375,
+    "exportSha256": "7e32125cf161945ac2e17e730f50d1a67ba2e339911b015676fc493d0a443b18",
+    "nativeDshAttachmentVisuallyInspected": true,
+    "asset": "../../assets/examples/local-mcp-acceptance.png"
+  },
+  "limits": [
+    "One dedicated Design test file and one frame/text workflow.",
+    "Cloud save persistence not independently verified; editor had reported a sync connection interruption.",
+    "Multi-file routing, write interruption and other editors remain automated-test or pending manual coverage."
+  ],
+  "regressionFixed": "Figma opaque-origin UI lacks crypto.randomUUID; use crypto.getRandomValues UUID v4 generation."
+}

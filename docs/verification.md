@@ -1,8 +1,8 @@
 # Verification / 验证
 
-The public standalone package is `dsh-to-figma` **0.2.0**. It continues the local development implementation under the **DSH to Figma** name.
+The public standalone package is `dsh-to-figma` **0.2.1**. It continues the local development implementation under the **DSH to Figma** name.
 
-公开的独立包为 `dsh-to-figma` **0.2.0**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
+公开的独立包为 `dsh-to-figma` **0.2.1**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
 
 ## 0.2.0 local onboarding / 本地接入改造
 
@@ -10,7 +10,28 @@ The public standalone package is `dsh-to-figma` **0.2.0**. It continues the loca
 - Companion launch automatically connects; idle failures back off and retry. Handshake retries preserve the connection and active job. Lost operation acknowledgements block reconnect/replay. / 启动自动连接，空闲失败退避重试，重复握手保留连接与当前操作；执行结果确认丢失时停止重连及重放。
 - One connected file auto-binds on first canvas use; multiple files and stale bindings require explicit selection. / 单文件首次自动绑定，多文件和失效绑定需要明确选择。
 - Automated verification: **33 tests**, including private package permissions, generic ZIP contents, auto-connect/retry, no replay after lost result, document isolation and actual DSH attachment integration. / 33 项测试覆盖权限、打包、自动连接、重试、禁止重放、文档隔离与原生附件。
-- New paired-companion real-editor acceptance: pending. DSH 0.2.1-rc.2 installed the new package, started the local bridge and generated its private companion successfully. / 新已配对插件实机验收待完成；DSH 0.2.1-rc.2 已安装新包，成功启动本地桥接并生成专用插件。
+- Real-editor acceptance passed with 0.2.1 after fixing the opaque-origin UUID startup error found in 0.2.0; details below. / 0.2.0 实机发现不支持 randomUUID 的启动问题；0.2.1 修复后通过完整读写及截图验收，详见下方。
+
+## 0.2.1 local mode: real acceptance / 本地模式实机验收
+
+On 2026-10-18, installed DSH Desktop 0.2.1-rc.2 and Figma Desktop 126.9.13 completed this workflow in **Design mode**, using the private companion and the actual DSH conversation tools. Initial 0.2.0 launch failed because Figma's opaque-origin UI does not expose `crypto.randomUUID`. Version 0.2.1 uses `crypto.getRandomValues` to generate the session UUID; the UI tests now omit randomUUID to reproduce that environment.
+
+2026-10-18，在已安装的 DSH Desktop 0.2.1-rc.2 与 Figma Desktop 126.9.13 中，以 **Design 设计模式**完成真实会话验收。首次测试发现 0.2.0 使用的 `crypto.randomUUID` 在插件 UI 中不存在；0.2.1 改用 `crypto.getRandomValues` 生成会话 UUID，并以不提供 randomUUID 的测试环境覆盖回归。
+
+| Check / 检查 | Actual result / 实际结果 |
+| --- | --- |
+| Import and pairing / 导入配对 | Imported generated manifest once; launched companion and connected without entering a token / 导入专用清单后直接启动，未输入密钥即连接 |
+| Restart recovery / 重启恢复 | Kept Figma companion open, restarted DSH, observed Connected again / 保持 Figma 插件打开，DSH 重启后恢复已连接 |
+| Auto-binding / 自动绑定 | Sole file; get_metadata returned Page 1 before any figma_select_document call / 唯一连接文件，首次读取前未显式选择文件 |
+| Create / 创建 | Frame 3:5, 480×280 at (2319,0); text 3:6, Inter Regular 32px, Created from DSH / 新建独立原生画板及文字 |
+| Read and update / 读回修改 | Second independent use_figma read both IDs, changed text to Read · Write · Screenshot ✓ and fill to RGB (0.85,0.95,0.87) / 第二次独立调用读回节点并修改文字、填充 |
+| Screenshot / 截图 | Actual get_screenshot image attachment opened and visually inspected in DSH / 已在 DSH 打开并检查工具返回的真实图像附件 |
+| Export / 导出 | download_assets wrote a 960×560 PNG, 14,375 bytes; inspected local image / 实际导出 PNG 并查看图片 |
+| Existing content / 已有内容 | New frame placed right of the two existing top-level frames; no edits to those nodes / 新画板位于已有内容右侧，未修改原节点 |
+
+![Actual local Figma export / 本地模式实际导出](../assets/examples/local-mcp-acceptance.png)
+
+[Sanitized evidence / 脱敏记录](evidence/local-mcp-2026-10-18.json). This is one Design-file workflow, not acceptance of every Plugin API, FigJam/Slides, multi-file UI routing or long-running stability. Figma had reported a sync interruption; cloud persistence was not independently verified. / 本次覆盖一个 Design 文件流程，不代表所有 API、其他编辑器、多文件界面路由或长期稳定性通过；Figma 曾提示同步连接中断，未独立验证云端持久化。
 
 ## Evidence and limits / 证据与边界
 
@@ -19,7 +40,7 @@ The public standalone package is `dsh-to-figma` **0.2.0**. It continues the loca
 | Unit and protocol suite / 单元与协议测试 | 33 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth, official MCP transport and companion message/endpoint compatibility / 33 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth、官方 MCP 传输及配套插件消息/地址兼容性 |
 | Native DSH integration / 原生 DSH 集成 | Tested with 0.2.0-rc.2 and 0.2.1-rc.2 services, including the production entry, skills, tools, workspace scope and durable image attachments / 已用两版内核服务验证正式入口、Skill、工具、工作区边界与持久图像附件 |
 | Desktop host installation / 桌面宿主安装 | Predecessor 0.1.2 installed through official DSH Desktop 0.2.1-rc.2 CLI; native UI reported running; loopback listener and unauthenticated 401 verified on 2026-10-18 / 前身 0.1.2 于 2026-10-18 经官方 CLI 安装，原生界面显示运行中，本机监听与未授权 401 检查通过 |
-| Real Figma editor / 真实 Figma 编辑器 | Companion import, document-name handshake and authenticated local pairing verified on 2026-10-18 with the patched installed development companion. Maintainer screenshots demonstrate UI reconstruction with native layers; full readback/edit/export acceptance remains pending / 2026-10-18 已用修复后的已安装开发插件验证导入、文件名握手与带鉴权的本机配对。维护者截图展示了带原生图层的 UI 重建；完整读回、修改与导出仍待验收 |
+| Real Figma editor / 真实 Figma 编辑器 | 0.2.1 automatic pairing, single-file binding, create/read/update, screenshot and PNG export passed on 2026-10-18; details above / 0.2.1 自动配对、单文件绑定、创建读回修改、截图与 PNG 导出实测通过，详见上方 |
 | Fonts, FigJam and Slides / 字体、FigJam 与 Slides | Real editor and visual acceptance pending / 待实机与视觉验收 |
 | Official desktop MCP / 官方桌面 MCP | Real metadata and screenshot calls passed in installed DSH Desktop 0.2.1-rc.2 without the companion; details below / 已在安装的 DSH Desktop 0.2.1-rc.2 中通过真实读取与截图验收，未运行配套插件，详见下方 |
 | Official remote MCP / 官方远程 MCP | Discovery reached Figma; client registration returned HTTP 403 before user authorization. No remote canvas calls verified / 已到达 Figma 服务，客户端注册在用户授权前返回 HTTP 403，未验证任何远程画布调用 |

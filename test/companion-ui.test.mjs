@@ -53,7 +53,7 @@ test('companion endpoint uses localhost and matches the manifest development all
 async function uiHarness(fetcher){
  const html=await readFile(new URL('../companion/ui.html',import.meta.url),'utf8'),elements=new Map(),timers=[],messages=[]
  const parent={postMessage(message){messages.push(message)}},window={},document={body:{dataset:{}},querySelector(selector){if(!elements.has(selector))elements.set(selector,{value:'',textContent:''});return elements.get(selector)}}
- const ctx=vm.createContext({window,parent,top:{},document,crypto,URL,AbortSignal,fetch:fetcher,setInterval(){},setTimeout(fn){timers.push(fn);return timers.length},clearTimeout(){}})
+ const ctx=vm.createContext({window,parent,top:{},document,crypto:{getRandomValues:values=>crypto.getRandomValues(values)},URL,AbortSignal,fetch:fetcher,setInterval(){},setTimeout(fn){timers.push(fn);return timers.length},clearTimeout(){}})
  vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],ctx)
  const send=message=>window.onmessage({source:parent,origin:'null',data:{pluginMessage:message}})
  const flush=async()=>{for(let i=0;i<6;i++)await new Promise(resolve=>setImmediate(resolve))}
@@ -64,7 +64,7 @@ test('paired companion auto-connects and retries idle startup failure without ma
  let attempts=0
  const h=await uiHarness(async(url,options)=>{
   assert.equal(options.headers.authorization,'Bearer '+'a'.repeat(64))
-  if(url.endsWith('/connect')){attempts++;if(attempts===1)throw new Error('offline');return ok({connectionId:'connected'})}
+  if(url.endsWith('/connect')){assert.match(JSON.parse(options.body).clientId,/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);attempts++;if(attempts===1)throw new Error('offline');return ok({connectionId:'connected'})}
   if(url.endsWith('/poll'))return new Promise(()=>{})
   throw new Error('unexpected request')
  })
