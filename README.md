@@ -13,7 +13,7 @@ Read and edit Figma with a native DSH plugin and an automatically paired canvas 
 
 **English** · [简体中文](README.zh-CN.md)
 
-[Quick start](#quick-start) · [Tools](#tools) · [Configuration](#configuration) · [Verification](docs/verification.md)
+[Use cases](#use-cases) · [Quick start](#quick-start) · [Tools](#tools) · [Configuration](#configuration) · [Verification](docs/verification.md)
 
 </div>
 
@@ -28,6 +28,44 @@ Read and edit Figma with a native DSH plugin and an automatically paired canvas 
 - **No token copying in the recommended setup.** DSH generates your private, paired Figma plugin automatically. Start it in a file to connect; one connected file is selected automatically. Official desktop MCP remains an optional reading/screenshot mode.
 
 > **0.2.1 verified in Figma Design mode:** automatic pairing, single-file binding, native frame/text creation, independent readback and update, screenshot and PNG export all passed through an installed DSH conversation. This version fixes the Figma sandbox startup failure found in 0.2.0. See [actual results and image](docs/verification.md).
+
+## Use cases
+
+These workflows use the default local mode. Connect the target Figma file and keep the companion running. Code and asset file operations require the corresponding workspace to be open in DSH with write access.
+
+### 1. Existing UI frames → frontend pages
+
+Once a design is ready, ask DSH to inspect the target frame's layer tree, layout, styles/CSS, component information and screenshot, then export the icons and images it needs. DSH can use the current codebase's framework, existing components and conventions to create or update frontend pages, for example in React or Vue projects.
+
+> Read my selected login frame. Inspect this project's stack and components first, then implement the page in the project. Reuse existing components, use the real design assets, and explain how the layout should adapt to small screens.
+
+**The plugin supplies design context and assets; DSH's model and workspace tools implement the frontend code.** Local mode does not call Figma's cloud code generation. Interaction logic, responsive rules, backend APIs and business behavior still need project requirements; a static frame cannot determine them on its own.
+
+### 2. Reference screenshots or written requirements → editable Figma UI
+
+Give DSH a reference image, or describe a page's structure, dimensions and content. It can create native frames, text, vectors and auto layout inside the current Figma file, then refine them. See the real screenshot reconstruction in [Examples](#examples) below.
+
+> Create a 1440 × 900 task management screen on the current page, with a sidebar, task list and details panel. Use editable text and auto layout.
+
+### 3. Batch changes and design iteration
+
+Specify the target frame and scope, then ask DSH to adjust copy, colors, spacing or layout, read the result back and return a screenshot for review. Canvas writes are not transactional, so review larger changes in small steps.
+
+> Set the primary buttons in this frame to 40px high with an 8px corner radius. Check for text overflow and return a screenshot after the changes.
+
+### 4. Reuse components and design variables
+
+Inspect components, styles and variables to carry existing design conventions into new pages. Create or update components, variants and variables within an explicit scope. Component search covers the current page; style and variable search covers the local file. Load another page before inspecting its components; this is not an all-cloud library search. Local component/code references are not published official Code Connect mappings.
+
+> Inspect the button and input components on this page and the file's color variables, then use them to build a settings page.
+
+### 5. Asset handoff and frontend visual review
+
+Export specified layers as SVG, PNG, JPG or PDF into `.figma/assets/<batch>/` in the workspace, then let DSH organize them into the project's asset directory. If the host provides browser or page preview tools and the model supports images, DSH can also compare the implementation against a Figma screenshot and refine the code. Web preview capabilities come from the host.
+
+> Export the icons and images used by this frame and organize them into the project's asset directory. After implementing the page, compare its typography, spacing and alignment against the design.
+
+These are composable workflows, not automatic two-way design/code synchronization or a guarantee of pixel-perfect output. **Real-editor verification** covers local automatic pairing, canvas reading, creation and updates, screenshots, PNG export and the screenshot reconstruction below. Frontend generation, component organization and the other workflows have not each received end-to-end acceptance testing. See the [verification record](docs/verification.md) and [capability boundaries](CAPABILITIES.md).
 
 ## Examples
 
