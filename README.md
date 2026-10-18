@@ -120,6 +120,26 @@ The private package contains a local credential; keep it on your machine. Public
 
 Prerequisites: a supported DSH host and Figma desktop for development-plugin import. Git is only needed for source installation. Use the Node version required by the host; repository development uses Node **24+**. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**. Local mode uses Figma’s Plugin API, not the paid desktop MCP seat entitlement; normal account, file-edit and editor permissions still apply.
 
+#### Option A: ask DSH to install it
+
+Paste the prompt below into a DSH conversation with network access, terminal tools and permission to install locally. DSH performs the installation; follow its instructions when a host restart or the first Figma plugin import is needed.
+
+```text
+Install DSH to Figma in the DSH host I am currently using:
+https://github.com/Duoasa/DSH-to-Figma
+
+1. Read the repository README installation instructions. Identify this host's DSH core version, CLI, profile and DSH_HOME. Use this host's CLI without changing another DSH installation or client; ask me if the target is ambiguous.
+2. Download dsh-to-figma-<version>.tgz and SHA256SUMS from the latest stable GitHub Release. Verify SHA-256 and version compatibility. Do not guess an npm package or substitute the generic Figma companion ZIP for the DSH bundle.
+3. Use the host CLI to run plugin --profile <current profile> add "file:<absolute downloaded package path>". Install into the current profile and use local mode. Preserve other plugin settings and avoid enabling an old dsh-figma entry alongside the new one.
+4. Check that the plugin is running. If I need to restart DSH, tell me first and continue after the restart. A successful install command is not proof of a working connection.
+5. Once the tools are available, call figma_setup and give me the full path to the generated manifest.json. Guide me through importing it once in Figma desktop and running DSH to Figma · Local with its window kept open. Do not print the pairing credential, read the generated code or upload the paired package.
+6. After I run the companion in the target file, call figma_status to verify the connection. Ask me to choose if multiple files are connected. Initially, only read frame information and return a screenshot; leave existing designs unchanged.
+```
+
+If the original conversation does not discover the new tools after installation, restart or open a new conversation and use the connection prompt in step 2 below. This prompt guides the existing CLI installation workflow; it is not a separate one-click installer. The full prompt has not received a separate end-to-end test. See the [verification record](docs/verification.md) for tested installation and canvas capabilities.
+
+#### Option B: install manually with the CLI
+
 Download **dsh-to-figma-0.2.1.tgz** from [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest). **The package is not published to npm.** Install the downloaded package with your host's CLI:
 
 ```sh

@@ -120,6 +120,26 @@ DSH 在本地模式启动时，会在 `<DSH_HOME>/figma/` 自动生成已配对�
 
 准备兼容的 DSH 宿主，以及用于导入开发插件的 Figma 桌面端；只有源码安装方式需要 Git。Node 使用宿主要求的版本，仓库开发使用 **Node.js 24+**。已测试 DSH 内核 **0.2.0-rc.2** 和 **0.2.1-rc.2**。本地模式使用 Figma Plugin API，不依赖官方桌面 MCP 的付费席位条件，但仍需正常账号、文件编辑权限及编辑器权限。
 
+#### 方式 A：把安装提示词发给 DSH
+
+在具备联网、终端执行和本机安装权限的 DSH 会话中，复制发送下面这段话。安装动作由 DSH 执行；需要重启宿主或首次导入 Figma 插件时，按它的提示操作。
+
+```text
+帮我在当前使用的 DSH 宿主中安装 DSH to Figma：
+https://github.com/Duoasa/DSH-to-Figma
+
+1. 阅读仓库 README 的安装说明，确认当前宿主的 DSH 内核版本、CLI、profile 和 DSH_HOME。使用对应宿主的 CLI，不要改到另一份 DSH 或其他客户端；无法确定时先问我。
+2. 从 GitHub 最新正式 Release 下载 dsh-to-figma-<版本>.tgz 和 SHA256SUMS，核对 SHA-256 与版本兼容性。不从 npm 猜测安装包，也不使用通用 Figma companion ZIP 代替 DSH 包。
+3. 使用该宿主的 CLI 执行 plugin --profile <当前 profile> add "file:<下载包的绝对路径>"。安装到当前 profile，使用 local 模式；保留其他插件配置，避免重复启用旧版 dsh-figma。
+4. 检查插件是否运行。若需我重启 DSH，请先告诉我，待重启后继续；不要把安装命令成功当作连接成功。
+5. 工具可用后调用 figma_setup，给我本机生成的 manifest.json 完整路径，指导我在 Figma 桌面端首次导入并运行 DSH to Figma · Local，保持窗口打开。不要输出配对密钥、读取生成的代码或上传已配对安装包。
+6. 等我在目标文件运行配套插件后，调用 figma_status 确认连接。多个文件时让我选择目标；先只读取画板信息并返回截图，不修改已有设计。
+```
+
+若安装后原会话未发现新工具，重启或新建会话，再发送下方第 2 步的连接提示词。这是对现有 CLI 安装流程的自然语言引导，不是新增的一键安装器；完整提示词流程尚未单独实测，已验证的安装与画布能力见[验证记录](docs/verification.md)。
+
+#### 方式 B：手动使用 CLI 安装
+
 从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 **dsh-to-figma-0.2.1.tgz**。**尚未发布到 npm**。使用宿主 CLI 安装下载的文件：
 
 ```sh
