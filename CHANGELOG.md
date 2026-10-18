@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4 — 2026-10-18
+
+- Fix local pairing in Figma desktop: accept outer-window messages only from exact Figma origins while preserving the direct-parent route.
+- Include the `localhost:3055` manifest/UI endpoint and exact loopback Host validation, avoiding Figma manifest rejection of the IP-literal endpoint.
+- Add regression coverage for message sources, document metadata, operation results and local endpoint consistency.
+- Verify real Figma companion import and pairing; add the maintainer's real screenshot-to-editable-UI example with bilingual explanations. Full readback/edit/export, FigJam/Slides and remote-account acceptance remain pending.
+- Document DSH core compatibility in both READMEs without host-brand references.
+
 ## 0.1.3
 
 - Publish the standalone **DSH to Figma** source repository with English and Chinese READMEs.

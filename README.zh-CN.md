@@ -19,32 +19,44 @@
 
 ## 为什么使用 DSH to Figma
 
-- **原生 DSH 插件。** 工具、设计 Skill 和图像附件均使用宿主扩展机制，无需修改 Agent 主循环；Scoder 等采用兼容 DSH 内核的宿主也可加载。
+- **原生 DSH 插件。** 工具、设计 Skill 和图像附件均使用宿主扩展机制，无需修改 Agent 主循环；支持 **0.2.0-rc.2** 与 **0.2.1-rc.2** 版 DSH 内核。
 - **可继续编辑的设计。** 配套 Figma 插件在选定文档中执行公开 Plugin API，创建和修改 Frame、文字、自动布局、组件、变体、样式与变量。
 - **从设计到代码。** 读取图层结构、布局、CSS 与素材，让宿主 Agent 在当前工作区中实现界面。
 - **视觉反馈。** PNG 截图通过 DSH 原生图像附件机制传递。模型不支持图像时明确报告限制，不会假装完成视觉检查。
 - **本地与官方 MCP 两种接入路径。** 默认使用本机配对插件，也可连接 Figma 官方桌面或远程 MCP，动态发现服务器实际提供的工具。
 
-> **预览状态：** 已通过原生 DSH 加载与自动化协议、运行时测试。真实 Figma 插件导入、画布读写和截图验收**仍待完成**。这是独立开发的集成，不是 DeepSeek / Figma 官方产品，也不宣称完整复刻 Codex 的所有云端能力。详见[验证记录](docs/verification.md)和[能力矩阵](CAPABILITIES.md)。
+> **预览状态：** 已通过原生 DSH 加载与自动化协议、运行时测试。已验证真实 Figma 插件导入和本机配对；下方维护者提供的案例展示了将 UI 重建为可编辑图层的实机结果。完整读回、修改、导出及更多编辑器场景仍待验收。这是独立开发的集成，不是 DeepSeek / Figma 官方产品，也不宣称完整复刻 Codex 的所有云端能力。详见[验证记录](docs/verification.md)和[能力矩阵](CAPABILITIES.md)。
 
 ## 使用示例
 
-使用截图待补充。
+### 从参考截图重建可编辑的 Figma 界面
 
-<!-- Real usage screenshots will be supplied by the maintainer. -->
+在 DSH 中提供参考截图，在已连接的 Figma 文件中选中目标画板，再用自然语言描述绘制要求：
+
+> 把这个 UI 绘制在我选中的画板上，注意只绘制 UI。
+
+**1. 在 DSH 中提供参考图与指令。** 本例使用 DeepSeek Harness 桌面应用截图。Agent 识别选中的画板，计划按 1440 × 900 重建应用界面，并去除外围桌面背景。
+
+![在 DSH 中提供参考截图和自然语言绘制指令](assets/examples/screenshot-to-ui-prompt.png)
+
+**2. 在 Figma 中得到可编辑结果。** 画布呈现了侧边栏、对话区和消息输入区。左侧图层面板展示了独立的文字、Frame 和矢量图层，选中画板的尺寸为 1440 × 900，可以继续选择和调整其中的元素。
+
+![Figma 中重建的桌面界面、原生图层及 1440 × 900 画板](assets/examples/screenshot-to-ui-figma.png)
+
+以上截图由维护者提供，来自 2026-10-18 的实际运行，展示了这次从截图到 UI 的案例；不代表逐像素一致性或所有工具、编辑器模式均已验收。
 
 ## 工作原理
 
 ```mermaid
 flowchart LR
-    A[DSH / 兼容的 Scoder 宿主] --> B[DSH to Figma 工具与 Skill]
+    A[兼容的 DSH 内核] --> B[DSH to Figma 工具与 Skill]
     B --> C[带鉴权的本机桥接]
     C <--> D[Figma 开发插件]
     D <--> E[可编辑的 Figma 文档]
     B -. 可选 .-> F[官方桌面 / 远程 MCP]
 ```
 
-本地模式连接 `127.0.0.1:3055`。Figma 配套插件需要保持打开；每个 DSH Work 会话都必须明确选择目标文档。本地配对不需要 Figma Personal Access Token，也不依赖远程 OAuth 客户端审批；Figma 本身仍需正常的账号与文档访问权限。
+配套插件连接 `http://localhost:3055`，桥接服务仅监听 `127.0.0.1:3055`。Figma 配套插件需要保持打开；每个 DSH Work 会话都必须明确选择目标文档。本地配对不需要 Figma Personal Access Token，也不依赖远程 OAuth 客户端审批；Figma 本身仍需正常的账号与文档访问权限。
 
 ## 快速开始
 
@@ -73,7 +85,7 @@ dsh plugin --profile web add "file:$PWD"
 
 打开 **插件 → DSH to Figma**，确认组件显示**运行中**。未自动重载时重启宿主。安装命令成功不等于插件已正常运行。
 
-在 Scoder 中，请使用 **Scoder 自己的 DSH CLI、profile 和 `DSH_HOME`**。如果已安装早期开发包 `@scoder/dsh-plugin-figma`，请先禁用或移除它，再启用新名称的插件；两者使用相同的入口 ID 和桥接端口。
+请使用兼容 DSH 内核宿主对应的 CLI、profile 和 `DSH_HOME`。如果已安装此插件的早期开发版本，请先禁用或移除，再启用当前包；重复版本使用相同的入口 ID 和桥接端口。
 
 ### 2. 配对 Figma
 

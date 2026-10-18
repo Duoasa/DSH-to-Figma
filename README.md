@@ -19,32 +19,44 @@ Read designs, edit native layers, work with components and variables, and return
 
 ## Why DSH to Figma
 
-- **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required; compatible DSH-based hosts such as Scoder can load the bundle.
+- **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required. Supported DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**.
 - **Editable design work.** The companion executes public Figma Plugin API scripts inside the selected document. Create and update frames, text, auto layout, components, variants, styles and variables.
 - **A design-to-code workflow.** Inspect the layer tree, layout, CSS and assets, then let the host agent implement them in the current workspace.
 - **Visual feedback.** Export PNG screenshots through DSH's native image attachment path. A text-only model receives an explicit diagnostic instead of a pretend visual review.
 - **Local or official MCP.** Use the paired local companion by default, or connect to Figma's official desktop/remote MCP server and discover its available tools.
 
-> **Preview status:** native DSH loading and automated protocol/runtime tests pass. Real Figma companion import, canvas read/write and screenshot acceptance are **still pending**. This is an independent integration, not an official DeepSeek/Figma product or a claim of full Codex feature parity. See the [verification record](docs/verification.md) and [capability matrix](CAPABILITIES.md).
+> **Preview status:** native DSH loading and automated protocol/runtime tests pass. Real Figma companion import and local pairing have been verified; the maintainer's example below demonstrates UI reconstruction as editable layers. Full readback/edit/export and broader editor acceptance remain pending. This is an independent integration, not an official DeepSeek/Figma product or a claim of full Codex feature parity. See the [verification record](docs/verification.md) and [capability matrix](CAPABILITIES.md).
 
 ## Examples
 
-Usage screenshots coming soon.
+### Rebuild a screenshot as editable Figma UI
 
-<!-- Real usage screenshots will be supplied by the maintainer. -->
+Provide a reference screenshot in DSH, select the target frame in the connected Figma file, and describe what to draw:
+
+> Recreate this UI on the frame I selected. Draw only the UI.
+
+**1. Reference and instruction in DSH.** The request uses a screenshot of the DeepSeek Harness desktop app. The agent identifies the selected frame and plans a 1440 × 900 UI reconstruction without the surrounding desktop background.
+
+![Reference screenshot and natural-language instruction in DSH](assets/examples/screenshot-to-ui-prompt.png)
+
+**2. Editable result in Figma.** The result contains the sidebar, conversation area and message composer. Figma's layer panel shows separate text, frame and vector layers; the selected frame measures 1440 × 900. These elements can be selected and refined in Figma.
+
+![Reconstructed desktop UI with native layers and a 1440 by 900 frame in Figma](assets/examples/screenshot-to-ui-figma.png)
+
+These screenshots were supplied by the maintainer from an actual run on 2026-10-18. They demonstrate this screenshot-to-UI case; they are not a pixel-perfect comparison or verification of every tool and editor mode.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    A[DSH / compatible Scoder host] --> B[DSH to Figma tools + skills]
+    A[Compatible DSH core] --> B[DSH to Figma tools + skills]
     B --> C[Authenticated loopback bridge]
     C <--> D[Figma development plugin]
     D <--> E[Editable Figma document]
     B -. optional .-> F[Official desktop / remote MCP]
 ```
 
-Local mode connects to `127.0.0.1:3055`. The companion stays open in Figma; each DSH Work session explicitly selects a connected document. Local pairing does not require a Figma personal access token or remote OAuth approval. Figma itself still needs its normal account and document access.
+The companion connects to `http://localhost:3055`; the bridge listens only on `127.0.0.1:3055`. The companion stays open in Figma; each DSH Work session explicitly selects a connected document. Local pairing does not require a Figma personal access token or remote OAuth approval. Figma itself still needs its normal account and document access.
 
 ## Quick start
 
@@ -73,7 +85,7 @@ Adjust the app path for your installation. A separate globally installed `dsh` m
 
 Open **Plugins → DSH to Figma** and confirm the component is **running**. Restart the host if it does not reload automatically. Installation success alone does not prove runtime health.
 
-For Scoder, use **its own DSH CLI, profile and `DSH_HOME`**. If the earlier development package `@scoder/dsh-plugin-figma` is installed, disable/remove it before enabling this renamed package: both use the same entry ID and local bridge port.
+Use the CLI, profile and `DSH_HOME` belonging to the host with a compatible DSH core. Disable/remove any earlier development version of this plugin before enabling this package; duplicate versions share the same entry ID and local bridge port.
 
 ### 2. Pair Figma
 

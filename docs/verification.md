@@ -1,23 +1,43 @@
 # Verification / 验证
 
-The public standalone package is `dsh-to-figma` **0.1.3**. It continues the local `@scoder/dsh-plugin-figma` 0.1.2 implementation under the **DSH to Figma** name.
+The public standalone package is `dsh-to-figma` **0.1.4**. It continues the local development implementation under the **DSH to Figma** name.
 
-公开的独立包为 `dsh-to-figma` **0.1.3**，承接原本地开发包 `@scoder/dsh-plugin-figma` 0.1.2，统一品牌为 **DSH to Figma**。
+公开的独立包为 `dsh-to-figma` **0.1.4**，承接原本地开发实现，统一品牌为 **DSH to Figma**。
 
 ## Evidence and limits / 证据与边界
 
 | Surface / 范围 | Status / 状态 |
 | --- | --- |
-| Unit and protocol suite / 单元与协议测试 | 21 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth and official MCP transport / 21 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth 与官方 MCP 传输 |
+| Unit and protocol suite / 单元与协议测试 | 23 tests: HTTP auth, routing, serialization, cancellation, recovery, assets, OAuth, official MCP transport and companion message/endpoint compatibility / 23 项，覆盖 HTTP 鉴权、路由、串行执行、取消、恢复、素材、OAuth、官方 MCP 传输及配套插件消息/地址兼容性 |
 | Native DSH integration / 原生 DSH 集成 | Tested with 0.2.0-rc.2 and 0.2.1-rc.2 services, including the production entry, skills, tools, workspace scope and durable image attachments / 已用两版内核服务验证正式入口、Skill、工具、工作区边界与持久图像附件 |
 | Desktop host installation / 桌面宿主安装 | Predecessor 0.1.2 installed through official DSH Desktop 0.2.1-rc.2 CLI; native UI reported running; loopback listener and unauthenticated 401 verified on 2026-10-18 / 前身 0.1.2 于 2026-10-18 经官方 CLI 安装，原生界面显示运行中，本机监听与未授权 401 检查通过 |
-| Real Figma editor / 真实 Figma 编辑器 | **Pending:** companion import, actual canvas reads/writes and screenshots / **待验证：** 配套插件导入、真实画布读写与截图 |
+| Real Figma editor / 真实 Figma 编辑器 | Companion import, document-name handshake and authenticated local pairing verified on 2026-10-18 with the patched installed development companion. Maintainer screenshots demonstrate UI reconstruction with native layers; full readback/edit/export acceptance remains pending / 2026-10-18 已用修复后的已安装开发插件验证导入、文件名握手与带鉴权的本机配对。维护者截图展示了带原生图层的 UI 重建；完整读回、修改与导出仍待验收 |
 | Fonts, FigJam and Slides / 字体、FigJam 与 Slides | Real editor and visual acceptance pending / 待实机与视觉验收 |
 | Official Figma service / 官方 Figma 服务 | SDK transport tested against a local protocol fixture; real client approval/OAuth/account/seat access pending / SDK 传输已通过本地协议 fixture 验证，真实客户端审批、OAuth、账号与席位权限待验 |
 
-Automated Figma tests use a simulated Plugin API. A successful fixture screenshot is not proof of real Figma rendering. The current preview has no real-canvas demo screenshot for that reason.
+Automated Figma tests use a simulated Plugin API. A successful fixture screenshot is not proof of real Figma rendering. The real-editor example below is separate, maintainer-supplied evidence.
 
-自动化 Figma 测试使用模拟 Plugin API。fixture 截图成功不等于真实 Figma 渲染通过，因此当前预览版没有提供真实画布演示截图。
+自动化 Figma 测试使用模拟 Plugin API。fixture 截图成功不等于真实 Figma 渲染通过；下方实机案例是维护者单独提供的证据。
+
+## Real example: screenshot to editable UI / 实机案例：从截图到可编辑 UI
+
+On 2026-10-18 the maintainer supplied a [DSH request screenshot](../assets/examples/screenshot-to-ui-prompt.png) and a [Figma result screenshot](../assets/examples/screenshot-to-ui-figma.png). The request asks to recreate only the reference app UI on the selected frame. The Figma result shows a 1440 × 900 desktop UI with separate text, frame and vector layers, including the sidebar, conversation and message composer.
+
+2026-10-18，维护者提供了 [DSH 请求截图](../assets/examples/screenshot-to-ui-prompt.png)和 [Figma 结果截图](../assets/examples/screenshot-to-ui-figma.png)。请求要求在选中画板上仅绘制参考应用 UI；结果展示了 1440 × 900 桌面界面，包含独立文字、Frame、矢量图层，以及侧边栏、对话和输入区。
+
+The request screenshot shows a stopped conversation, not a completed tool trace. The result is visual evidence of this case, not proof of every intermediate tool call, pixel-perfect fidelity, screenshot export, or reconnect behavior.
+
+请求截图中的对话状态为已停止，并非完整的已完成工具轨迹。结果图可作为本案例的视觉证据，不能据此推断每个中间工具调用、逐像素还原、截图导出或重连行为均已通过。
+
+## 0.1.4 connection regression / 连接回归
+
+The release includes the localhost manifest/UI endpoint and exact bridge Host allowlist, plus the Figma outer-window message fix. HTTP tests reject lookalike hosts and wrong ports. UI tests cover document metadata and operation results, reject unrelated message sources/origins, and check that the manifest permits the endpoint used by the UI.
+
+本版包含 localhost 清单/UI 地址、桥接 Host 精确白名单，以及 Figma 外层窗口消息修复。HTTP 测试拒绝仿冒主机名与错误端口；UI 测试覆盖文件信息与操作结果、拒绝无关消息来源，并检查清单允许 UI 使用的连接地址。
+
+Manual pairing reproduction: import the installed companion manifest in Figma desktop, run it in a test Design file, paste the same host's existing pairing token, and click Connect. Confirm the document name, Disconnect button and connected status. Keep the companion open. This verifies pairing only, not canvas operations.
+
+手动配对复现：在 Figma 桌面端导入已安装插件的清单，在测试 Design 文件中运行，粘贴同一宿主已有的配对密钥并连接。核对文件名、断开按钮和已连接状态，保持插件打开。此检查仅证明配对成功，不代表画布操作已验收。
 
 ## Reproduce / 复现
 
