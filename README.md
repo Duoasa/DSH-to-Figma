@@ -12,6 +12,7 @@ Read and edit Figma with a native DSH plugin and an automatically paired canvas 
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-native%20plugin-536DFE)](https://github.com/deepseek-ai/deepseek-harness)
 [![Stage](https://img.shields.io/badge/status-preview-orange)](docs/verification.md)
+[![Listed in awesome-dsh-plugin](https://img.shields.io/badge/awesome--dsh--plugin-listed-brightgreen)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/data/plugins/Duoasa__DSH-to-Figma.yml)
 
 **English** · [简体中文](README.zh-CN.md)
 
