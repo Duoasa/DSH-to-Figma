@@ -1,6 +1,6 @@
 # Setup and troubleshooting / 接入与排查
 
-[English README](../README.md) · [中文 README](../README.zh-CN.md)
+[中文 README](../README.md) · [English README](../README.en.md) · [日本語 README](../README.ja.md)
 
 ## Choose one backend / 选择一种后端
 

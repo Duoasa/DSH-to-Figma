@@ -14,7 +14,7 @@
 [![Stage](https://img.shields.io/badge/status-preview-orange)](docs/verification.md)
 [![已被 awesome-dsh-plugin 收录](https://img.shields.io/badge/awesome--dsh--plugin-%E5%B7%B2%E6%94%B6%E5%BD%95-brightgreen)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/data/plugins/Duoasa__DSH-to-Figma.yml)
 
-[English](README.md) · **简体中文**
+**简体中文** · [English](README.en.md) · [日本語](README.ja.md)
 
 [使用场景](#使用场景) · [快速开始](#快速开始) · [工具列表](#工具列表) · [配置](#配置) · [验证记录](docs/verification.md)
 

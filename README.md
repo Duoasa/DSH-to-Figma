@@ -1,256 +1,256 @@
 <div align="center">
 
-![DSH to Figma — Design. Edit. Build.](assets/readme-hero.png)
+![DSH to Figma — 设计、编辑与开发](assets/readme-hero.png)
 
 # DSH to Figma
 
-**Bring Figma canvas tools into DeepSeek Harness.**
+**把 Figma 画布能力接入 DeepSeek Harness。**
 
-Read and edit Figma with a native DSH plugin and an automatically paired canvas companion. Import once, then launch and work.
+原生 DSH 插件搭配自动配对的 Figma 插件，直接读取、编辑画布并获取截图。首次导入一次，以后启动即连接。
 
 [![Checks](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml/badge.svg)](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-native%20plugin-536DFE)](https://github.com/deepseek-ai/deepseek-harness)
 [![Stage](https://img.shields.io/badge/status-preview-orange)](docs/verification.md)
-[![Listed in awesome-dsh-plugin](https://img.shields.io/badge/awesome--dsh--plugin-listed-brightgreen)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/data/plugins/Duoasa__DSH-to-Figma.yml)
+[![已被 awesome-dsh-plugin 收录](https://img.shields.io/badge/awesome--dsh--plugin-%E5%B7%B2%E6%94%B6%E5%BD%95-brightgreen)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/blob/main/data/plugins/Duoasa__DSH-to-Figma.yml)
 
-**English** · [简体中文](README.zh-CN.md)
+**简体中文** · [English](README.en.md) · [日本語](README.ja.md)
 
-[Use cases](#use-cases) · [Quick start](#quick-start) · [Tools](#tools) · [Configuration](#configuration) · [Verification](docs/verification.md)
+[使用场景](#使用场景) · [快速开始](#快速开始) · [工具列表](#工具列表) · [配置](#配置) · [验证记录](docs/verification.md)
 
 </div>
 
-> **Recommended installation:** download the DSH package from [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest). Once installed and running in local mode, **DSH automatically generates a private, pre-paired Figma plugin for this computer**. Ask DSH for `figma_setup`, import its generated manifest once in Figma, then run it to connect. You do not need the standalone generic ZIP or to copy a pairing token. Keep the Figma companion open while working.
+> **推荐安装方式：** 从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载并安装 DSH 包。插件以本地模式启动后，**DSH 会自动生成这台电脑专用、已配对的 Figma 插件**。让 DSH 调用 `figma_setup` 获取路径，在 Figma 首次导入一次生成的 manifest，之后运行即可连接。无需另行下载通用 ZIP，也无需复制配对密钥；使用时保持 Figma 插件窗口打开。
 
-## Why DSH to Figma
+## 为什么使用 DSH to Figma
 
-- **No official Figma MCP quota consumed in local mode.** Read, edit, screenshot and export through the local companion without using official Figma MCP call quotas.
-- **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required. Supported DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**.
-- **Editable design work by default (`local`).** The companion executes public Figma Plugin API scripts inside the selected document. Create and update frames, text, auto layout, components, variants, styles and variables.
-- **A design-to-code workflow.** Inspect the layer tree, layout, CSS and assets, then let the host agent implement them in the current workspace.
-- **Visual feedback.** Receive canvas screenshots through DSH's native image attachment path. A text-only model receives an explicit diagnostic instead of a pretend visual review.
-- **No token copying in the recommended setup.** DSH generates your private, paired Figma plugin automatically. Start it in a file to connect; one connected file is selected automatically. Official desktop MCP remains an optional reading/screenshot mode.
+- **本地模式不消耗官方 Figma MCP 调用额度。** 通过本地配套插件读取、编辑、截图和导出，可持续迭代，无需消耗官方 MCP 调用次数。
+- **原生 DSH 插件。** 工具、设计 Skill 和图像附件均使用宿主扩展机制，无需修改 Agent 主循环；支持 **0.2.0-rc.2** 与 **0.2.1-rc.2** 版 DSH 内核。
+- **默认支持画布编辑（`local`）。** 配套 Figma 插件在选定文档中执行公开 Plugin API，创建和修改 Frame、文字、自动布局、组件、变体、样式与变量。
+- **从设计到代码。** 读取图层结构、布局、CSS 与素材，让宿主 Agent 在当前工作区中实现界面。
+- **视觉反馈。** 画布截图通过 DSH 原生图像附件机制传递。模型不支持图像时明确报告限制，不会假装完成视觉检查。
+- **推荐流程无需复制密钥。** DSH 自动生成本机专用的已配对 Figma 插件，运行后自动连接；只有一个连接文件时自动选用。官方桌面 MCP 保留为可选的读取与截图模式。
 
-> **0.2.1 verified in Figma Design mode:** automatic pairing, single-file binding, native frame/text creation, independent readback and update, screenshot and PNG export all passed through an installed DSH conversation. This version fixes the Figma sandbox startup failure found in 0.2.0. See [actual results and image](docs/verification.md).
+> **0.2.1 已在 Figma 设计模式实测：** 自动配对、单文件绑定、原生画板与文字创建、独立读回修改、截图及 PNG 导出均通过已安装 DSH 的真实会话完成。此版本修复了 0.2.0 实机发现的沙箱启动兼容问题，详见[验证记录与实际图片](docs/verification.md)。
 
-## Use cases
+## 使用场景
 
-These workflows use the default local mode. Connect the target Figma file and keep the companion running. Code and asset file operations require the corresponding workspace to be open in DSH with write access.
+以下场景面向默认本地模式，需要连接目标 Figma 文件并保持配套插件运行。涉及代码与素材文件的操作，需要在 DSH 中打开相应工作区并具备写入权限。
 
-### 1. Existing UI frames → frontend pages
+### 1. 已有 UI 画板 → 前端页面
 
-Once a design is ready, ask DSH to inspect the target frame's layer tree, layout, styles/CSS, component information and screenshot, then export the icons and images it needs. DSH can use the current codebase's framework, existing components and conventions to create or update frontend pages, for example in React or Vue projects.
+设计稿做好后，让 DSH 读取目标画板的图层结构、布局、样式/CSS、组件信息和截图，再导出所需图标与图片。DSH 可以结合当前代码工作区的框架、已有组件和约定生成或修改前端页面，例如 React、Vue 项目。
 
-> Read my selected login frame. Inspect this project's stack and components first, then implement the page in the project. Reuse existing components, use the real design assets, and explain how the layout should adapt to small screens.
+> 读取我选中的登录页画板，先检查当前项目的技术栈和组件，在项目中实现这个页面。复用已有组件，使用画板中的真实素材，并说明小屏幕下的布局处理。
 
-**The plugin supplies design context and assets; DSH's model and workspace tools implement the frontend code.** Local mode does not call Figma's cloud code generation. Interaction logic, responsive rules, backend APIs and business behavior still need project requirements; a static frame cannot determine them on its own.
+**插件提供设计上下文与素材，前端代码由 DSH 的模型和工作区工具实现。** 本地模式不调用 Figma 云端代码生成；交互逻辑、响应式规则、后端接口和业务行为仍需结合项目需求补充，不能仅凭静态画板确定。
 
-### 2. Reference screenshots or written requirements → editable Figma UI
+### 2. 参考截图或文字需求 → 可编辑 Figma UI
 
-Give DSH a reference image, or describe a page's structure, dimensions and content. It can create native frames, text, vectors and auto layout inside the current Figma file, then refine them. See the real screenshot reconstruction in [Examples](#examples) below.
+给 DSH 一张参考图，或描述页面结构、尺寸与内容，让它在当前 Figma 文件中创建原生画板、文字、矢量和自动布局，再继续调整。已有截图重建案例见下方[使用示例](#使用示例)。
 
-> Create a 1440 × 900 task management screen on the current page, with a sidebar, task list and details panel. Use editable text and auto layout.
+> 在当前页面新建一个 1440 × 900 的任务管理界面，包含侧边栏、任务列表和详情面板，使用可编辑文字与自动布局。
 
-### 3. Batch changes and design iteration
+### 3. 已有设计的批量修改与迭代
 
-Specify the target frame and scope, then ask DSH to adjust copy, colors, spacing or layout, read the result back and return a screenshot for review. Canvas writes are not transactional, so review larger changes in small steps.
+指定画板和修改范围，让 DSH 调整文案、颜色、间距或布局，再读取结果并返回截图检查。画布修改不是事务，建议把较大的修改拆成小步核对。
 
-> Set the primary buttons in this frame to 40px high with an 8px corner radius. Check for text overflow and return a screenshot after the changes.
+> 将这个画板中的主按钮统一为 40px 高、8px 圆角，检查文字是否溢出，修改后给我截图。
 
-### 4. Reuse components and design variables
+### 4. 复用组件与设计变量
 
-Inspect components, styles and variables to carry existing design conventions into new pages. Create or update components, variants and variables within an explicit scope. Component search covers the current page; style and variable search covers the local file. Load another page before inspecting its components; this is not an all-cloud library search. Local component/code references are not published official Code Connect mappings.
+读取组件、样式和变量，辅助新页面沿用已有设计规范；也可以在明确范围内创建或调整组件、变体和变量。组件搜索以当前页面为范围，样式与变量搜索以本地文件为范围；检查其他页面需先加载目标页面，不是全云端设计库检索。本地组件与代码引用也不等同于发布官方 Code Connect 映射。
 
-> Inspect the button and input components on this page and the file's color variables, then use them to build a settings page.
+> 先检查当前页面已有的按钮和输入框组件，以及文件中的颜色变量，再用它们搭建设置页。
 
-### 5. Asset handoff and frontend visual review
+### 5. 素材交付与前端效果核对
 
-Export specified layers as SVG, PNG, JPG or PDF into `.figma/assets/<batch>/` in the workspace, then let DSH organize them into the project's asset directory. If the host provides browser or page preview tools and the model supports images, DSH can also compare the implementation against a Figma screenshot and refine the code. Web preview capabilities come from the host.
+将指定图层导出为 SVG、PNG、JPG 或 PDF，保存到工作区的 `.figma/assets/<batch>/`，再由 DSH 按项目约定整理到资源目录。若宿主具备浏览器或页面预览工具，且模型支持图像，还可以对照 Figma 截图检查前端效果并继续修改代码；这些网页预览能力由宿主提供。
 
-> Export the icons and images used by this frame and organize them into the project's asset directory. After implementing the page, compare its typography, spacing and alignment against the design.
+> 导出这个画板用到的图标和图片，整理到项目资源目录；页面实现后，对照设计稿检查字体、间距和对齐。
 
-These are composable workflows, not automatic two-way design/code synchronization or a guarantee of pixel-perfect output. **Real-editor verification** covers local automatic pairing, canvas reading, creation and updates, screenshots, PNG export and the screenshot reconstruction below. Frontend generation, component organization and the other workflows have not each received end-to-end acceptance testing. See the [verification record](docs/verification.md) and [capability boundaries](CAPABILITIES.md).
+这些是可组合的工作流，不会自动双向同步设计与代码，也不保证逐像素还原。**已实测**的范围包括本地自动配对、画布读取、创建与修改、截图、PNG 导出，以及下方的截图重建案例；前端生成、组件整理等工作流尚未逐项完成端到端实测。详见[验证记录](docs/verification.md)与[能力边界](CAPABILITIES.md)。
 
-## Examples
+## 使用示例
 
-### Read and screenshot with official desktop MCP (optional)
+### 官方桌面 MCP 读取与截图（可选模式）
 
-In a DSH Work conversation, provide a link to a frame in the open Figma file:
+在 DSH Work 会话中，提供当前 Figma 文件内目标画板的链接：
 
-> Use the official desktop MCP. Check figma_status, read this frame’s metadata, and return a screenshot. Do not modify the canvas.
+> 使用官方桌面 MCP，先检查 figma_status，再读取这个画板的元数据并返回截图，不要修改画布。
 
-The real run returned **10 official tools**, `backend: desktop`, `available: true`, and `bridgePort: null`. `get_metadata` read **DeepSeek Harness — Desktop UI**, node `1:4`, **1440 × 900**, including its Sidebar and Main layers. `get_screenshot` returned a **1024 × 640 WebP**, stored as a native DSH image attachment and displayed in the conversation. The image below is that actual MCP result; no canvas changes were made.
+实测发现 **10 个官方工具**，状态为 `backend: desktop`、`available: true`、`bridgePort: null`。`get_metadata` 成功读取 **DeepSeek Harness — Desktop UI**，节点 `1:4`，尺寸 **1440 × 900**，以及 Sidebar、Main 等内部图层。`get_screenshot` 返回 **1024 × 640 WebP**，进入 DSH 原生图片附件存储，并在实际对话中显示。下图就是该次 MCP 返回的图片；验收没有修改画布。
 
-![Actual screenshot returned by official desktop MCP through DSH](assets/examples/desktop-mcp-screenshot.webp)
+![DSH 通过官方桌面 MCP 实际获取的画板截图](assets/examples/desktop-mcp-screenshot.webp)
 
-### Rebuild a screenshot as editable Figma UI (local mode)
+### 从参考截图重建可编辑的 Figma 界面（本地模式）
 
-This writing example uses `backend: local` and the running companion. Version 0.2.0 simplifies its setup with automatic pairing. Provide a reference screenshot in DSH, select the target frame in the connected Figma file, and describe what to draw:
+此写入案例使用 `backend: local` 和配套插件；0.2.0 通过自动配对简化了它的接入过程。在 DSH 中提供参考截图，在已连接的 Figma 文件中选中目标画板，再用自然语言描述绘制要求：
 
-> Recreate this UI on the frame I selected. Draw only the UI.
+> 把这个 UI 绘制在我选中的画板上，注意只绘制 UI。
 
-**1. Reference and instruction in DSH.** The request uses a screenshot of the DeepSeek Harness desktop app. The agent identifies the selected frame and plans a 1440 × 900 UI reconstruction without the surrounding desktop background.
+**1. 在 DSH 中提供参考图与指令。** 本例使用 DeepSeek Harness 桌面应用截图。Agent 识别选中的画板，计划按 1440 × 900 重建应用界面，并去除外围桌面背景。
 
-![Reference screenshot and natural-language instruction in DSH](assets/examples/screenshot-to-ui-prompt.png)
+![在 DSH 中提供参考截图和自然语言绘制指令](assets/examples/screenshot-to-ui-prompt.png)
 
-**2. Editable result in Figma.** The result contains the sidebar, conversation area and message composer. Figma's layer panel shows separate text, frame and vector layers; the selected frame measures 1440 × 900. These elements can be selected and refined in Figma.
+**2. 在 Figma 中得到可编辑结果。** 画布呈现了侧边栏、对话区和消息输入区。左侧图层面板展示了独立的文字、Frame 和矢量图层，选中画板的尺寸为 1440 × 900，可以继续选择和调整其中的元素。
 
-![Reconstructed desktop UI with native layers and a 1440 by 900 frame in Figma](assets/examples/screenshot-to-ui-figma.png)
+![Figma 中重建的桌面界面、原生图层及 1440 × 900 画板](assets/examples/screenshot-to-ui-figma.png)
 
-These screenshots were supplied by the maintainer from an actual run on 2026-10-18. They demonstrate this screenshot-to-UI case; they are not a pixel-perfect comparison or verification of every tool and editor mode.
+以上截图由维护者提供，来自 2026-10-18 的实际运行，展示了这次从截图到 UI 的案例；不代表逐像素一致性或所有工具、编辑器模式均已验收。
 
-## How it works
+## 工作原理
 
 ```mermaid
 flowchart LR
-    A[DSH tools + skills] -->|default: local| B[Authenticated bridge :3055]
-    A --> C[Private paired companion package]
-    C -->|import once| D[Figma companion]
+    A[DSH 工具与 Skill] -->|默认 local| B[鉴权桥接 :3055]
+    A --> C[本机专用已配对插件包]
+    C -->|首次导入一次| D[Figma 插件]
     D <--> B
-    D --> E[Editable canvas + screenshots]
-    A -. optional: desktop .-> F[Official reading + screenshots :3845]
-    A -. optional: remote .-> G[Official remote MCP + approved OAuth]
+    D --> E[编辑画布与截图]
+    A -. 可选 desktop .-> F[官方读取与截图 :3845]
+    A -. 可选 remote .-> G[官方远程 MCP 与获批 OAuth]
 ```
 
-DSH prepares a private companion directory and ZIP in `<DSH_HOME>/figma/` on local-mode startup. Import its manifest into Figma once. Each time you run **DSH to Figma · Local**, it connects automatically to this DSH host. Keep its window open. No remote OAuth or personal access token is needed.
+DSH 在本地模式启动时，会在 `<DSH_HOME>/figma/` 自动生成已配对的插件目录和 ZIP。首次导入 manifest 后，每次在 Figma 运行 **DSH to Figma · Local** 就会自动连接这台 DSH。使用时保持插件窗口打开，无需远程 OAuth 或个人访问令牌。
 
-The private package contains a local credential; keep it on your machine. Public distribution packages contain no credentials. The bridge remains authenticated and loopback-only; automatic pairing does not expose an unauthenticated token endpoint. Idle connections retry automatically, but interrupted canvas operations are never replayed.
+已配对版本包含本机凭证，请保留在本机；公开分发包不含凭证。桥接仍只监听本机并验证密钥，没有新增匿名获取密钥的网络接口。空闲断线会自动重连，执行中断的画布操作不会自动重放。
 
-## Quick start
+## 快速开始
 
-### 1. Install the DSH bundle
+### 1. 安装 DSH 插件
 
-Prerequisites: a supported DSH host and Figma desktop for development-plugin import. Git is only needed for source installation. Use the Node version required by the host; repository development uses Node **24+**. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**. Local mode uses Figma’s Plugin API, not the paid desktop MCP seat entitlement; normal account, file-edit and editor permissions still apply.
+准备兼容的 DSH 宿主，以及用于导入开发插件的 Figma 桌面端；只有源码安装方式需要 Git。Node 使用宿主要求的版本，仓库开发使用 **Node.js 24+**。已测试 DSH 内核 **0.2.0-rc.2** 和 **0.2.1-rc.2**。本地模式使用 Figma Plugin API，不依赖官方桌面 MCP 的付费席位条件，但仍需正常账号、文件编辑权限及编辑器权限。
 
-#### Option A: ask DSH to install it
+#### 方式 A：把安装提示词发给 DSH
 
-Paste the prompt below into a DSH conversation with network access, terminal tools and permission to install locally. DSH performs the installation; follow its instructions when a host restart or the first Figma plugin import is needed.
+在具备联网、终端执行和本机安装权限的 DSH 会话中，复制发送下面这段话。安装动作由 DSH 执行；需要重启宿主或首次导入 Figma 插件时，按它的提示操作。
 
 ```text
-Install DSH to Figma in the DSH host I am currently using:
+帮我在当前使用的 DSH 宿主中安装 DSH to Figma：
 https://github.com/Duoasa/DSH-to-Figma
 
-1. Read the repository README installation instructions. Identify this host's DSH core version, CLI, profile and DSH_HOME. Use this host's CLI without changing another DSH installation or client; ask me if the target is ambiguous.
-2. Download dsh-to-figma-<version>.tgz and SHA256SUMS from the latest stable GitHub Release. Verify SHA-256 and version compatibility. Do not guess an npm package or substitute the generic Figma companion ZIP for the DSH bundle.
-3. Use the host CLI to run plugin --profile <current profile> add "file:<absolute downloaded package path>". Install into the current profile and use local mode. Preserve other plugin settings and avoid enabling an old dsh-figma entry alongside the new one.
-4. Check that the plugin is running. If I need to restart DSH, tell me first and continue after the restart. A successful install command is not proof of a working connection.
-5. Once the tools are available, call figma_setup and give me the full path to the generated manifest.json. Guide me through importing it once in Figma desktop and running DSH to Figma · Local with its window kept open. Do not print the pairing credential, read the generated code or upload the paired package.
-6. After I run the companion in the target file, call figma_status to verify the connection. Ask me to choose if multiple files are connected. Initially, only read frame information and return a screenshot; leave existing designs unchanged.
+1. 阅读仓库 README 的安装说明，确认当前宿主的 DSH 内核版本、CLI、profile 和 DSH_HOME。使用对应宿主的 CLI，不要改到另一份 DSH 或其他客户端；无法确定时先问我。
+2. 从 GitHub 最新正式 Release 下载 dsh-to-figma-<版本>.tgz 和 SHA256SUMS，核对 SHA-256 与版本兼容性。不从 npm 猜测安装包，也不使用通用 Figma companion ZIP 代替 DSH 包。
+3. 使用该宿主的 CLI 执行 plugin --profile <当前 profile> add "file:<下载包的绝对路径>"。安装到当前 profile，使用 local 模式；保留其他插件配置，避免重复启用旧版 dsh-figma。
+4. 检查插件是否运行。若需我重启 DSH，请先告诉我，待重启后继续；不要把安装命令成功当作连接成功。
+5. 工具可用后调用 figma_setup，给我本机生成的 manifest.json 完整路径，指导我在 Figma 桌面端首次导入并运行 DSH to Figma · Local，保持窗口打开。不要输出配对密钥、读取生成的代码或上传已配对安装包。
+6. 等我在目标文件运行配套插件后，调用 figma_status 确认连接。多个文件时让我选择目标；先只读取画板信息并返回截图，不修改已有设计。
 ```
 
-If the original conversation does not discover the new tools after installation, restart or open a new conversation and use the connection prompt in step 2 below. This prompt guides the existing CLI installation workflow; it is not a separate one-click installer. **On 2026-10-18, the Chinese equivalent was sent unchanged to DSH Desktop 0.2.1-rc.2**: DSH downloaded, verified and reinstalled release 0.2.1, then connected to Figma after a host restart, read four frames and returned an actual screenshot. The run required one installation approval, a host restart and a response to a duplicate-name connection question; the next check showed a single connection again. It reused an already-imported Figma companion, so first-time import on a clean environment remains untested in this run. The English prompt was not run separately. See the [verification record](docs/verification.md#installation-prompt-acceptance--安装提示词实测).
+若安装后原会话未发现新工具，重启或新建会话，再发送下方第 2 步的连接提示词。这是对现有 CLI 安装流程的自然语言引导，不是新增的一键安装器。**2026-10-18 已将上面的中文提示词原样发给 DSH Desktop 0.2.1-rc.2 实测**：完成正式版 0.2.1 下载、校验、重新安装，重启后连接 Figma、读取 4 个画板并返回实际截图。过程中需要批准一次安装操作、重启宿主，并回应一次同名连接选择；再次检查时连接已恢复为一个。本轮使用已导入的 Figma 配套插件，不覆盖全新环境首次导入；英文提示词未单独运行。详见[验证记录](docs/verification.md#installation-prompt-acceptance--安装提示词实测)。
 
-#### Option B: install manually with the CLI
+#### 方式 B：手动使用 CLI 安装
 
-Download **dsh-to-figma-0.2.1.tgz** from [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest). **The package is not published to npm.** Install the downloaded package with your host's CLI:
+从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 **dsh-to-figma-0.2.1.tgz**。**尚未发布到 npm**。使用宿主 CLI 安装下载的文件：
 
 ```sh
-dsh plugin --profile web add "file:/absolute/path/dsh-to-figma-0.2.1.tgz"
+dsh plugin --profile web add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
 ```
 
-Use your actual profile instead of `web`. The host package manager installs runtime dependencies; no build is required.
+将 `web` 换成实际使用的 profile。运行时依赖由宿主包管理器安装，无需自行构建。
 
-**Official macOS DSH Desktop:** use the desktop-bundled CLI for the reserved `desktop` profile:
+**官方 macOS DSH Desktop：** 使用桌面应用自带的 CLI 管理保留的 `desktop` profile：
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.2.1.tgz"
+  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
 ```
 
-Replace the package path with the file you downloaded. Adjust the app path if needed. A separate globally installed `dsh` may be older and refuse to manage `desktop`.
+将包路径替换为实际下载位置；应用路径不同时也请相应调整。全局安装的另一份 `dsh` 可能版本较旧，且拒绝管理 `desktop`。
 
-Alternatively, clone the source and install its folder using the same host CLI, replacing the package argument with `"file:$PWD"` from inside the repository. Git is required only for this alternative.
+也可克隆源码，在仓库目录中用同一宿主 CLI 安装 `"file:$PWD"`。只有这种备用方式需要 Git。
 
-Open **Plugins → DSH to Figma** and confirm the component is **running**. Restart the host if it does not reload automatically. Installation success alone does not prove runtime health.
+打开 **插件 → DSH to Figma**，确认组件显示**运行中**。未自动重载时重启宿主。安装命令成功不等于插件已正常运行。
 
-Use the CLI, profile and `DSH_HOME` belonging to the host with a compatible DSH core. Disable/remove any earlier development version of this plugin before enabling this package; duplicate versions share the same entry ID and local bridge port.
+请使用兼容 DSH 内核宿主对应的 CLI、profile 和 `DSH_HOME`。如果已安装此插件的早期开发版本，请先禁用或移除，再启用当前包；重复版本使用相同的入口 ID 和桥接端口。
 
-### 2. Import the automatically paired Figma plugin once
+### 2. 首次导入自动配对的 Figma 插件
 
-After DSH starts in local mode, ask it:
+DSH 以本地模式启动后，对它说：
 
-> Help me connect Figma. Call figma_setup and give me the paired manifest path. Do not show the credential or read the generated code.
+> 帮我连接 Figma，调用 figma_setup，把已配对插件的 manifest 路径给我。不要显示密钥，也不要读取生成的代码。
 
-With the default DSH home, the manifest is:
+默认 DSH home 对应的路径是：
 
 ```text
 ~/.dsh/figma/companion/manifest.json
 ```
 
-1. In Figma desktop, choose **Plugins → Development → Import plugin from manifest…**.
-2. Select the generated manifest. On macOS, use **⌘⇧G** in the file picker to enter its full path.
-3. Open the target Design file and run **DSH to Figma · Local**.
-4. It connects automatically; there is no token field to fill in the normal flow. Keep the plugin window open.
+1. 在 Figma 桌面端选择 **Plugins → Development → Import plugin from manifest…**。
+2. 选择生成的 manifest。macOS 文件选择器可按 **⌘⇧G** 输入完整路径。
+3. 打开目标 Design 文件，运行 **DSH to Figma · Local**。
+4. 插件自动连接，正常流程无需粘贴密钥。保持插件窗口打开即可。
 
-The path is stable across DSH plugin updates; run the Figma plugin again after an update. Do not move/delete that directory. If you prefer an archive, `figma_setup` also returns **DSH-to-Figma-paired.zip**, a private copy for this host. Extract it to a permanent directory before import; that extracted copy must be refreshed manually after updates.
+此目录位置稳定，DSH 插件升级后重新运行 Figma 插件即可。不要移动或删除该目录。`figma_setup` 也会返回本机专用的 **DSH-to-Figma-paired.zip**；如选择压缩包，先解压到固定目录再导入。解压后的独立副本需要在升级时手动更新。
 
-### 3. Start working
+### 3. 开始使用
 
-> Inspect the connected Figma file, then create a separate auto-layout card titled “Hello from DSH”. Return its node ID, read it back, and show a screenshot. Leave existing artwork unchanged.
+> 读取已连接的 Figma 文件，新建一张独立的自动布局卡片，标题为“Hello from DSH”。返回节点 ID，读回内容并截图。不要改动已有设计。
 
-With one connected file, the first canvas call binds it automatically. With multiple files, DSH explicitly chooses a target. Existing bindings never silently switch after disconnect. Writes can leave partial changes on failure; inspect before retrying.
+只有一个连接文件时，首次画布调用自动绑定；同时连接多个文件时明确选择目标。已有绑定断开后不会悄悄切换到其他文件。写入失败可能已产生部分修改，应先检查再重试。
 
-**Upgrading from 0.1.5:** if your profile explicitly sets `backend: desktop`, change it to `local` and reload/restart. The package default does not overwrite an explicit user preference. The [setup guide](docs/setup.md) includes the patch.
+**从 0.1.5 升级：** 若 profile 显式写了 `backend: desktop`，改为 `local` 后重启或重载。新包的默认值不会覆盖用户已有配置。[接入说明](docs/setup.md)包含可直接使用的 patch。
 
-### Standalone Figma package — manual-pairing fallback
+### 独立 Figma 安装包——手动配对备用方案
 
-**Not needed for the recommended setup.** DSH generates your paired companion automatically. The separate `DSH-to-Figma-companion-0.2.1.zip` on [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) is a credential-free generic package that requires manual pairing. Successful [GitHub Actions builds](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml) also provide both public packages as **DSH-to-Figma-packages**.
+**推荐流程不需要下载此包。** DSH 会自动生成已配对插件。[Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 中单独提供的 `DSH-to-Figma-companion-0.2.1.zip` 是不含凭证的通用包，需要手动配对。成功的 [GitHub Actions 构建](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)也会通过 **DSH-to-Figma-packages** 提供两端公开安装包。
 
-The generated private companion directory and `DSH-to-Figma-paired.zip` contain this host’s credential; keep them on your computer and do not upload or share them. They are never included in the public release.
+自动生成的专用插件目录及 `DSH-to-Figma-paired.zip` 含本机凭证，请保留在本机，勿上传或分享；公开 Release 不包含这些私有文件。
 
-`npm run package:companion` creates `dist/DSH-to-Figma-companion-0.2.1.zip`, containing the manifest, compiled plugin, UI, bilingual install notes and license. It is safe to distribute and contains no credentials. For zero-copy pairing, use the private package generated by **your own** DSH instead; the generic package offers a manual-token fallback under Advanced.
+运行 `npm run package:companion`，生成 `dist/DSH-to-Figma-companion-0.2.1.zip`，内含 manifest、编译后的插件、界面、中英文安装说明和许可证。该通用包不含凭证，可公开分发。想免复制密钥，请使用**自己这台 DSH** 生成的已配对版本；通用版也保留“高级设置”中的手动配对入口。
 
-The local CLI alternative is `node /absolute/path/to/plugin/cli.mjs setup --home /absolute/path/to/dsh-home`; it prints installation paths, never the pairing token.
+也可通过 `node /插件绝对路径/cli.mjs setup --home /DSH-home绝对路径` 生成本机安装包，命令只输出安装路径，不输出密钥。
 
-## Tools
+## 工具列表
 
-Default local mode registers **17 canvas tools** under `mcp__figma__…`, plus five setup/guidance tools. Optional official modes dynamically expose their actual server catalog. Desktop MCP has no `use_figma` canvas-writing tool.
+默认本地模式提供 **17 个画布工具**，名称前缀为 `mcp__figma__…`，另有 5 个接入与指南工具。可选官方模式动态提供服务器实际工具目录；官方桌面模式没有 `use_figma` 画布写入工具。
 
-| Workflow | Local tools |
+| 工作流 | 本地工具 |
 | --- | --- |
-| Canvas scripting | `use_figma`, `import_scene` |
-| Inspection | `get_selection`, `list_fonts`, `get_metadata` |
-| Visual/design context | `get_screenshot`, `get_design_context`, `get_figjam` |
-| Design systems | `get_variable_defs`, `get_libraries`, `search_design_system`, `get_component_context` |
-| Component/code references | `get_local_component_links`, `set_local_component_links` |
-| Motion inspection | `get_motion_context` |
-| Asset transfer | `upload_assets`, `download_assets` |
-| Setup and guidance | `figma_setup`, `figma_status`, `figma_select_document`, `figma_read_guide`, `figma_reconnect` |
+| 画布脚本 | `use_figma`、`import_scene` |
+| 结构检查 | `get_selection`、`list_fonts`、`get_metadata` |
+| 截图与设计上下文 | `get_screenshot`、`get_design_context`、`get_figjam` |
+| 设计系统 | `get_variable_defs`、`get_libraries`、`search_design_system`、`get_component_context` |
+| 组件与代码引用 | `get_local_component_links`、`set_local_component_links` |
+| 动效信息 | `get_motion_context` |
+| 素材传输 | `upload_assets`、`download_assets` |
+| 配对与指南 | `figma_setup`、`figma_status`、`figma_select_document`、`figma_read_guide`、`figma_reconnect` |
 
-The bundled `figma-workbench` skill includes focused guides for canvas scripting, design-to-code, components/variables, assets/scenes, FigJam/Slides and official services. Local component links are plugin data, **not published Code Connect mappings**. Search covers the implemented local scope, not all cloud libraries. Public API scripting can target Design, FigJam and Slides; editor-specific acceptance is pending.
+内置 `figma-workbench` Skill，并附带画布脚本、设计转代码、组件与变量、素材与场景、FigJam / Slides、官方服务等专项指南。本地组件引用保存在插件数据中，**不等同于发布 Code Connect 映射**。设计系统搜索按实际实现覆盖本地范围，不是全云端搜索。公开 API 脚本可面向 Design、FigJam 和 Slides；各编辑器的实机验收仍待完成。
 
-See [capability coverage](CAPABILITIES.md) for cloud-only features and contract differences.
+云端专属能力及工具协议差异见[能力矩阵](CAPABILITIES.md)。
 
-## Configuration
+## 配置
 
-Configure the `dsh-figma` entry through your host's native plugin configuration. These are **entry config fields**, not a complete profile patch:
+通过宿主原生插件配置设置 `dsh-figma` 入口。下表是**入口 config 字段**，不是完整的 profile patch：
 
-| Field | Default | Purpose |
+| 字段 | 默认值 | 用途 |
 | --- | --- | --- |
-| `backend` | `local` | `local`, `desktop` or `remote` |
-| `bridgePort` | `3055` | Local companion bridge |
-| `desktopServerUrl` | `http://127.0.0.1:3845/mcp` | Official desktop endpoint |
-| `toolCallTimeoutMs` | `120000` | Tool timeout, 1–300 seconds |
-| `oauthClientId` | empty | Approved remote OAuth client ID, when required |
+| `backend` | `local` | `local`、`desktop` 或 `remote` |
+| `bridgePort` | `3055` | 本机配套插件桥接端口 |
+| `desktopServerUrl` | `http://127.0.0.1:3845/mcp` | 官方桌面 MCP 地址 |
+| `toolCallTimeoutMs` | `120000` | 工具超时，范围 1–300 秒 |
+| `oauthClientId` | 空 | 需要时填写已获批的远程 OAuth client ID |
 
-Changing `bridgePort` regenerates the paired companion with the matching endpoint and manifest allowlist. Restart DSH and rerun/reimport the generated companion as needed. Multiple hosts should use different ports and their own generated companions.
+修改 `bridgePort` 后，DSH 自动为已配对插件生成匹配的地址和 manifest 白名单；重启 DSH 后，按需重新运行或导入生成的插件。多个宿主应使用不同端口和各自生成的配套插件。
 
-- **Local mode (default):** automatic private companion preparation, launch-to-connect and single-document selection.
-- **Desktop mode (optional):** enable Figma’s built-in desktop MCP, set `backend: desktop`, and restart/reload DSH. Reading and screenshots only; no companion. See [Figma’s seat requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/).
-- **Remote mode:** use `dsh-figma login` and `backend: remote`. Official availability depends on Figma client approval, account, seat and server catalog. No Codex credentials are reused.
-- **Disable:** use the native plugin manager, or launch the host with `DSH_FIGMA_DISABLED=1`.
+- **本地模式（默认）：** 自动生成已配对插件，启动即连接，单文件自动选用。
+- **桌面模式（可选）：** 启用 Figma 内置桌面 MCP，设置 `backend: desktop` 并重启或重载 DSH。只支持读取与截图，无需配套插件；套餐条件见[官方说明](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)。
+- **远程模式：** 通过 `dsh-figma login` 登录，设置 `backend: remote`。能力取决于 Figma 客户端审批、账号、席位和服务器实际工具列表，不复用 Codex 凭证。
+- **禁用：** 使用宿主插件管理器，或设置环境变量 `DSH_FIGMA_DISABLED=1` 后启动宿主。
 
-[Detailed setup, OAuth and troubleshooting →](docs/setup.md)
+[详细接入、OAuth 和故障排查 →](docs/setup.md)
 
-## Data and execution boundaries
+## 数据与执行边界
 
-- The local bridge binds only loopback, checks Host/Origin and requires a pairing token on every request. Tokens are stored under `DSH_HOME/figma` with private filesystem permissions; the paired companion contains a private copy on disk and holds it in memory while running. It does not store it in Figma document data or clientStorage.
-- Figma scripts execute inside the editor through the public Plugin API. The DSH bundle itself runs with host process privileges, as other native plugins do.
-- In local mode, one connected document is bound on first use. Multiple documents and disconnected bindings require explicit selection. Operations are ordered per document; unknown writes are never automatically replayed. Mutations are not transactional.
-- Asset uploads must stay inside the Work workspace. Exports use fresh `.figma/assets/<batch>/` directories. Screenshots may be sent to your configured model provider as part of the conversation.
-- OAuth credentials are stored in a private local file, **not encrypted with the OS keychain**. `dsh-figma logout` removes local credentials; revoke Figma app access separately to invalidate the grant server-side.
+- 本地服务仅监听 loopback，检查 Host / Origin，每个请求都需要配对密钥。密钥保存在 `DSH_HOME/figma` 下，使用私有文件权限；已配对插件文件包含本机私有副本，运行时在内存中使用，不写入 Figma 文档数据或 clientStorage。
+- Figma 脚本通过公开 Plugin API 在编辑器中执行。DSH 插件本身与其他原生插件一样，以宿主进程权限运行。
+- 本地模式下，单文件首次自动绑定，多文件或旧绑定断开后需要明确选择；同一文档操作串行执行；结果未知的写入不会自动重放。画布修改不是事务。
+- 素材上传不能超出当前 Work 工作区，导出写入全新的 `.figma/assets/<batch>/` 目录。截图作为对话内容，可能发送给你配置的模型提供方。
+- OAuth 凭证保存在私有本地文件中，**没有使用系统钥匙串加密**。`dsh-figma logout` 删除本地凭证；如需让服务器授权失效，还要在 Figma 中撤销应用访问。
 
-## Development
+## 开发
 
 ```sh
 npm ci --ignore-scripts
@@ -258,24 +258,24 @@ npm run test:all
 npm pack --ignore-scripts
 ```
 
-`check` regenerates `companion/code.js` from its sources and validates syntax/package files. The tests cover HTTP authentication, document queues, cancellation/recovery, assets, OAuth, official MCP discovery, and actual DSH service/attachment integration. Figma API behavior in automated tests uses fixtures.
+`check` 会从源文件重新生成 `companion/code.js`，检查语法和包内容。测试覆盖 HTTP 鉴权、文档队列、取消与恢复、素材、OAuth、官方 MCP 发现，以及真实 DSH 服务与附件集成。自动化中的 Figma API 使用模拟 fixture。
 
 ```text
-index.mjs             Native DSH plugin entry
-cli.mjs               Install, pairing and OAuth helper (dsh-figma)
-lib/                  Bridge, tool catalog, assets and official transports
-companion/            Figma development plugin; generated code.js is shipped
-skills/               Agent workflow skill and focused references
-test/                 Unit, protocol and native DSH integration tests
-docs/                 Setup and verification details
+index.mjs             原生 DSH 插件入口
+cli.mjs               安装、配对与 OAuth 辅助命令（dsh-figma）
+lib/                  桥接、工具目录、素材和官方传输
+companion/            Figma 开发插件，包含生成后的 code.js
+skills/               工作流 Skill 与专项指南
+test/                 单元、协议与原生 DSH 集成测试
+docs/                 接入与验证说明
 ```
 
-For another installed runtime, see [verification instructions](docs/verification.md). Contributions and reproducible issues are welcome; include DSH version, backend and error text, and remove tokens and private design data.
+使用其他已安装内核的方式见[验证说明](docs/verification.md)。欢迎提交改进与可复现的问题；请附上 DSH 版本、backend 和错误信息，并删除密钥及私人设计数据。
 
-## Credits and license
+## 致谢与许可
 
-Built on [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), the [Figma Plugin API](https://developers.figma.com/docs/plugins/api/figma/) and the [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk).
+基于 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)、[Figma Plugin API](https://developers.figma.com/docs/plugins/api/figma/) 和 [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk) 构建。
 
-README organization draws on community projects [dsh-context](https://github.com/bowenliang123/dsh-context), [dsh-plugin-shop](https://github.com/LivXue/dsh-plugin-shop) and [dsh-openpencil](https://github.com/ZSeven-W/dsh-openpencil). Their code and screenshots are not bundled here.
+README 结构参考社区项目 [dsh-context](https://github.com/bowenliang123/dsh-context)、[dsh-plugin-shop](https://github.com/LivXue/dsh-plugin-shop) 和 [dsh-openpencil](https://github.com/ZSeven-W/dsh-openpencil)，本仓库未打包它们的代码或截图。
 
 [MIT](LICENSE) · Copyright © 2026 Duoasa.

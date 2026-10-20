@@ -30,6 +30,8 @@
     "LICENSE",
     "codex-tool-baseline.json",
     "README.zh-CN.md",
+    "README.en.md",
+    "README.ja.md",
     "docs"
   ],
   "scripts": {
