@@ -71,7 +71,7 @@ test('paired companion auto-connects and retries idle startup failure without ma
  h.boot();await h.flush();assert.equal(attempts,1);assert.equal(h.timers.length,1)
  h.timers[0]();await h.flush();assert.equal(attempts,2);assert.equal(vm.runInContext('active',h.ctx),true)
  assert.equal(h.elements.get('#token')?.value??'','')
- assert.match(h.elements.get('#status').textContent,/Ready/)
+ assert.match(h.elements.get('#status').textContent,/可以回到 DSH/)
 })
 test('companion never reconnects or replays after losing an operation result',async()=>{
  let connects=0,results=0

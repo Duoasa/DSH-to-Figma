@@ -1,8 +1,12 @@
 /* Generated entry is built by scripts/check.mjs from runtime.js and this file. */
-figma.showUI(__html__, { width: 380, height: 450, themeColors: true })
+figma.showUI(__html__, { width: 300, height: 210, themeColors: true })
 const runtime = new globalThis.DshFigmaRuntime(figma)
 let busy = false
 figma.ui.onmessage = async message => {
+  if (message.type === 'resize') {
+    if (Number.isFinite(message.height)) figma.ui.resize(300, Math.max(158, Math.min(520, Math.round(message.height))))
+    return
+  }
   if (message.type === 'describe') {
     figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
     return
