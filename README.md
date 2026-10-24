@@ -142,10 +142,10 @@ https://github.com/Duoasa/DSH-to-Figma
 
 #### 方式 B：手动使用 CLI 安装
 
-从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 **dsh-to-figma-0.2.1.tgz**。**尚未发布到 npm**。使用宿主 CLI 安装下载的文件：
+从 [Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 **dsh-to-figma-0.2.3.tgz**。**尚未发布到 npm**。使用宿主 CLI 直接安装 Release 中的包：
 
 ```sh
-dsh plugin --profile web add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
+dsh plugin --profile web add https://github.com/Duoasa/DSH-to-Figma/releases/download/v0.2.3/dsh-to-figma-0.2.3.tgz
 ```
 
 将 `web` 换成实际使用的 profile。运行时依赖由宿主包管理器安装，无需自行构建。
@@ -154,7 +154,7 @@ dsh plugin --profile web add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.2.1.tgz"
+  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.2.3.tgz"
 ```
 
 将包路径替换为实际下载位置；应用路径不同时也请相应调整。全局安装的另一份 `dsh` 可能版本较旧，且拒绝管理 `desktop`。
@@ -194,11 +194,11 @@ DSH 以本地模式启动后，对它说：
 
 ### 独立 Figma 安装包——手动配对备用方案
 
-**推荐流程不需要下载此包。** DSH 会自动生成已配对插件。[Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 中单独提供的 `DSH-to-Figma-companion-0.2.1.zip` 是不含凭证的通用包，需要手动配对。成功的 [GitHub Actions 构建](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)也会通过 **DSH-to-Figma-packages** 提供两端公开安装包。
+**推荐流程不需要下载此包。** DSH 会自动生成已配对插件。[Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 中单独提供的 `DSH-to-Figma-companion-0.2.3.zip` 是不含凭证的通用包，需要手动配对。成功的 [GitHub Actions 构建](https://github.com/Duoasa/DSH-to-Figma/actions/workflows/ci.yml)也会通过 **DSH-to-Figma-packages** 提供两端公开安装包。
 
 自动生成的专用插件目录及 `DSH-to-Figma-paired.zip` 含本机凭证，请保留在本机，勿上传或分享；公开 Release 不包含这些私有文件。
 
-运行 `npm run package:companion`，生成 `dist/DSH-to-Figma-companion-0.2.1.zip`，内含 manifest、编译后的插件、界面、中英文安装说明和许可证。该通用包不含凭证，可公开分发。想免复制密钥，请使用**自己这台 DSH** 生成的已配对版本；通用版也保留“高级设置”中的手动配对入口。
+运行 `npm run package:companion`，生成 `dist/DSH-to-Figma-companion-0.2.3.zip`，内含 manifest、编译后的插件、界面、中英文安装说明和许可证。该通用包不含凭证，可公开分发。想免复制密钥，请使用**自己这台 DSH** 生成的已配对版本；通用版也保留“高级设置”中的手动配对入口。
 
 也可通过 `node /插件绝对路径/cli.mjs setup --home /DSH-home绝对路径` 生成本机安装包，命令只输出安装路径，不输出密钥。
 

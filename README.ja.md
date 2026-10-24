@@ -60,17 +60,17 @@ DSH のネイティブプラグインと、自動ペアリングされる Figma 
 
 ### 1. DSH パッケージをインストール
 
-[Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) から **dsh-to-figma-0.2.1.tgz** をダウンロードし、同じリリースの `SHA256SUMS` で確認します。**npm には公開していません。** 使用中のホストの CLI でインストールしてください。
+[Releases](https://github.com/Duoasa/DSH-to-Figma/releases/latest) から **dsh-to-figma-0.2.3.tgz** をダウンロードし、同じリリースの `SHA256SUMS` で確認します。**npm には公開していません。** 使用中のホストの CLI で Release の URL から直接インストールできます。
 
 ```sh
-dsh plugin --profile web add "file:/absolute/path/dsh-to-figma-0.2.1.tgz"
+dsh plugin --profile web add https://github.com/Duoasa/DSH-to-Figma/releases/download/v0.2.3/dsh-to-figma-0.2.3.tgz
 ```
 
-`web` は実際の profile 名に、パスはダウンロードしたファイルの絶対パスに置き換えます。公式 macOS DSH Desktop では、アプリに同梱された CLI を使用します。
+`web` は実際の profile 名に置き換えます。公式 macOS DSH Desktop では、アプリに同梱された CLI を使用します。
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.2.1.tgz"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.2.3.tgz"
 ```
 
 **プラグイン → DSH to Figma** で実行中になっていることを確認し、自動で再読み込みされない場合はホストを再起動します。別途インストールした古い `dsh` CLI では `desktop` profile を管理できない場合があります。旧開発版と現行版を同時に有効にしないでください。
@@ -104,7 +104,7 @@ DSH に次のように依頼します。
 
 ### 手動ペアリングの代替手順
 
-公開リリースの `DSH-to-Figma-companion-0.2.1.zip` は認証情報を含まない汎用パッケージで、手動ペアリング用です。推奨手順では不要です。DSH が生成する専用版を使用してください。詳しくは[セットアップガイド](docs/setup.md)をご覧ください。
+公開リリースの `DSH-to-Figma-companion-0.2.3.zip` は認証情報を含まない汎用パッケージで、手動ペアリング用です。推奨手順では不要です。DSH が生成する専用版を使用してください。詳しくは[セットアップガイド](docs/setup.md)をご覧ください。
 
 ## ツール
 
