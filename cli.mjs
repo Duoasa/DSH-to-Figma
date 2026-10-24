@@ -27,7 +27,7 @@ async function main(){
   if(opts.command==='login'){
     const port=Number(opts.port??3056);if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Invalid OAuth callback port')
     const provider=await oauthProvider(home,{redirectUrl:`http://127.0.0.1:${port}/callback`,clientId:opts['client-id'],onRedirect:url=>console.log(`Open this Figma authorization URL in your browser:\n${url.href}`)})
-    const callback=await callbackServer({port,state:provider.state}),client=new Client({name:'dsh-to-figma',version:'0.2.2'}),transport=new StreamableHTTPClientTransport(new URL(REMOTE_URL),{authProvider:provider,fetch:oauthFetch,reconnectionOptions:{maxRetries:0}})
+    const callback=await callbackServer({port,state:provider.state}),client=new Client({name:'dsh-to-figma',version:'0.2.3'}),transport=new StreamableHTTPClientTransport(new URL(REMOTE_URL),{authProvider:provider,fetch:oauthFetch,reconnectionOptions:{maxRetries:0}})
     try{
       try{await client.connect(transport,{timeout:15000})}catch(error){if(!(error instanceof UnauthorizedError))throw error;const params=await callback.result;await transport.finishAuth(params)}
       if(!await provider.tokens())throw new Error('Login did not return credentials')

@@ -25,7 +25,7 @@ Read and edit Figma with a native DSH plugin and an automatically paired canvas 
 ## Why DSH to Figma
 
 - **No official Figma MCP quota consumed in local mode.** Read, edit, screenshot and export through the local companion without using official Figma MCP call quotas.
-- **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required. Supported DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**.
+- **Native DSH integration.** Tools, design skills and image attachments use the host's extension points. No agent-loop fork is required. Tested DSH cores: **0.2.0-rc.2** and **0.2.1-rc.2**. Host versions are not blocked at load time; actual compatibility issues in later versions are addressed as they arise.
 - **Editable design work by default (`local`).** The companion executes public Figma Plugin API scripts inside the selected document. Create and update frames, text, auto layout, components, variants, styles and variables.
 - **A design-to-code workflow.** Inspect the layer tree, layout, CSS and assets, then let the host agent implement them in the current workspace.
 - **Visual feedback.** Receive canvas screenshots through DSH's native image attachment path. A text-only model receives an explicit diagnostic instead of a pretend visual review.
