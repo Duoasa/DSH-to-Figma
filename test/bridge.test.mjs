@@ -69,6 +69,20 @@ test('repeated companion handshake is idempotent and preserves active job state'
   await request(b,'/result',{connectionId:id,id:job.id,ok:true,result:{value:1}});await pending
 })
 
+test('document status distinguishes companion versions from feature capability and unknown versions',async t=>{
+  const b=await rig(t)
+  for(const metadata of [
+    {name:'Old',editorType:'figma'},
+    {name:'Current',editorType:'figma',featureVersion:2,companionVersion:'0.2.5'},
+    {name:'Preview',editorType:'figma',featureVersion:2,companionVersion:'0.2.5-preview.1+test'},
+    {name:'Invalid',editorType:'figma',featureVersion:2,companionVersion:'PRIVATE_INVALID_VERSION'},
+  ])await request(b,'/connect',metadata)
+  assert.deepEqual(b.list().map(doc=>[doc.name,doc.featureVersion,doc.companionVersion]),[
+    ['Old',0,null],['Current',2,'0.2.5'],['Preview',2,'0.2.5-preview.1+test'],['Invalid',2,null],
+  ])
+  assert.doesNotMatch(JSON.stringify(b.list()),/PRIVATE_INVALID_VERSION/)
+})
+
 test('bridge reports queue/execution durations once without altering results or replay safety',async t=>{
   const b=await rig(t),id=await connect(b),{runtime}=await fixtureRuntime(),metrics=[]
   const read=b.call(id,'get_metadata',{}, {onMetric:metric=>metrics.push(metric)})

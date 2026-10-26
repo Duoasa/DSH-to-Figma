@@ -18,7 +18,7 @@ async function connect(){if(connecting||active||blocked||!desired||!metadata||!t
  try{
   if(connectionId){try{await request('/heartbeat',{connectionId},5000)}catch(error){if(error.status!==404&&error.status!==410)throw error;connectionId=null}}
   if(!connectionId){let fileKey=metadata.fileKey||null;const value=document.querySelector('#file').value.trim();if(value){const url=new URL(value);if(!['figma.com','www.figma.com'].includes(url.hostname)||!['design','file','board','slides'].includes(url.pathname.split('/')[1]))throw new Error('Invalid Figma file URL');fileKey=url.pathname.split('/')[2];if(!/^[A-Za-z0-9]{5,128}$/.test(fileKey))throw new Error('Invalid Figma file URL')}
-   const result=await request('/connect',{name:metadata.name,editorType:metadata.editorType,fileKey,clientId,featureVersion:metadata.featureVersion},5000);connectionId=result.connectionId}
+   const result=await request('/connect',{name:metadata.name,editorType:metadata.editorType,fileKey,clientId,featureVersion:metadata.featureVersion,companionVersion:metadata.companionVersion},5000);connectionId=result.connectionId}
   if(attempt!==generation||!desired)return
   active=true;retries=0;button.textContent='暂停连接 / Pause';show('可以回到 DSH 开始操作。请保持此窗口打开。 / Ready. Return to DSH; keep this window open.','connected');void poll(attempt)
  }catch(error){if(attempt===generation&&desired)fail(error)}finally{connecting=false;if(!blocked)button.disabled=false}
@@ -26,7 +26,7 @@ async function connect(){if(connecting||active||blocked||!desired||!metadata||!t
 async function poll(epoch){while(active&&desired&&generation===epoch){try{const job=await request('/poll',{connectionId});if(!active||!desired||generation!==epoch)break;if(job.id){inFlight=job.id;show('正在执行 / Running: '+job.method,'connected');const result=await new Promise(resolve=>{pending.set(job.id,resolve);parent.postMessage({pluginMessage:{type:'execute',...job}},'*')});await request('/result',{connectionId,...result});inFlight=null;show(result.ok?'操作完成，等待下一步。 / Done. Ready for the next task.':'操作失败，请让 DSH 检查画布。 / Failed; inspect canvas.','connected')}}catch(error){if(generation===epoch&&desired)fail(error);break}}}
 window.onmessage=event=>{if(event.source!==parent&&!(event.source===top&&['https://www.figma.com','https://figma.com'].includes(event.origin)))return;const message=event.data?.pluginMessage;if(!message)return
  if(message.type==='document'){
-  metadata={name:message.name,editorType:message.editorType,fileKey:message.fileKey,featureVersion:message.featureVersion};document.querySelector('#document').textContent=message.name+' · '+message.editorType
+  metadata={name:message.name,editorType:message.editorType,fileKey:message.fileKey,featureVersion:message.featureVersion,companionVersion:message.companionVersion??null};document.querySelector('#document').textContent=message.name+' · '+message.editorType
   const config=message.connection
   if(config&&/^[a-f0-9]{64}$/.test(config.token)&&Number.isInteger(config.port)&&config.port>=1024&&config.port<=65535){token=config.token;endpoint='http://localhost:'+config.port;document.querySelector('#version').textContent=config.version||'';void connect()}
   else if(!token){show('首次使用：在 DSH 中说“帮我连接 Figma”，导入它提供的已配对 manifest，然后运行该插件。 / Ask DSH to prepare the paired companion and import its manifest once.','unpaired');button.textContent='重试 / Retry'}

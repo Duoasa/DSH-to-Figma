@@ -1,6 +1,6 @@
 {
   "name": "dsh-to-figma",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "DSH to Figma — native canvas editing, design context, assets and screenshots for DeepSeek Harness.",
   "type": "module",
   "license": "MIT",

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { fixtureRuntime } from './fixtures.mjs'
-import { LOCAL_TOOLS, requiresQueryFeatures } from '../lib/catalog.mjs'
+import { LOCAL_TOOLS, requiresQueryFeatures, requiredQueryFeatureVersion } from '../lib/catalog.mjs'
 const plain=value=>JSON.parse(JSON.stringify(value))
 
 test('budget overflow on selection-based context continues at the selected node',async()=>{
@@ -100,7 +100,7 @@ test('variable filters preserve raw aliases and restrict modes, collections and 
     {id:'c1',name:'Theme',modes:[{modeId:'light',name:'Light'},{modeId:'dark',name:'Dark'}],defaultModeId:'light',variableIds:['v1','v2']},
     {id:'c2',name:'Spacing',modes:[{modeId:'base',name:'Base'}],defaultModeId:'base',variableIds:['v3']}]
   const legacy=(await f.runtime.run('get_variable_defs')).value
-  assert.equal(legacy.variables.length,3);assert.equal(legacy.pagination,undefined)
+  assert.equal(legacy.variables.length,3);assert.equal(legacy.pagination,undefined);assert.equal(legacy.coverage,undefined)
   const result=(await f.runtime.run('get_variable_defs',{collectionIds:['c1'],type:'COLOR',query:'surface',modeIds:['dark']})).value
   assert.equal(result.variables.length,1);assert.equal(result.collections.length,1)
   assert.deepEqual(plain(result.variables[0].valuesByMode),{dark:{type:'VARIABLE_ALIAS',id:'v1'}})
@@ -113,6 +113,70 @@ test('variable filters preserve raw aliases and restrict modes, collections and 
   assert.equal(ids.variables[0].id,'v3')
   await assert.rejects(f.runtime.run('get_variable_defs',{modeIds:['absent']}),/unknown mode/)
   await assert.rejects(f.runtime.run('get_variable_defs',{ids:[]}),/IDs/)
+})
+
+test('empty variable pages expose incomplete collection coverage without implying no collections exist',async()=>{
+  const f=await fixtureRuntime(),collections=[
+    {id:'empty',name:'Empty theme',modes:[{modeId:'light',name:'Light'}],defaultModeId:'light',variableIds:[]},
+    {id:'populated',name:'Populated theme',modes:[{modeId:'dark',name:'Dark'}],defaultModeId:'dark',variableIds:['v1']}]
+  f.figma.variables.getLocalVariableCollectionsAsync=async()=>collections
+  f.figma.variables.getLocalVariablesAsync=async()=>[{id:'v1',name:'color/primary',resolvedType:'COLOR',variableCollectionId:'populated',valuesByMode:{dark:{r:0,g:0,b:0}}}]
+  const missing=(await f.runtime.run('get_variable_defs',{profile:'summary',query:'not-present',limit:1})).value
+  assert.equal(missing.variables.length,0);assert.equal(missing.collections.length,0);assert.equal(missing.pagination.total,0)
+  assert.equal(missing.coverage.localCollectionCount,2);assert.equal(missing.coverage.emptyLocalCollectionCount,1)
+  assert.equal(missing.coverage.collectionInventoryComplete,false);assert.equal(missing.coverage.libraryCollectionsIncluded,false)
+  assert.equal(missing.coverage.collections,'returned-variable-page-and-requested-collections')
+  const requested=(await f.runtime.run('get_variable_defs',{collectionIds:['empty','populated'],profile:'summary',limit:1})).value
+  assert.deepEqual(plain(requested.collections.map(c=>c.id)),['empty','populated'])
+  assert.equal(requested.variables.length,1)
+  const past=(await f.runtime.run('get_variable_defs',{profile:'summary',offset:99,limit:1})).value
+  assert.equal(past.pagination.total,1);assert.equal(past.collections.length,0)
+  assert.equal(past.coverage.localCollectionCount,2);assert.equal(past.coverage.collectionInventoryComplete,false)
+  const legacy=(await f.runtime.run('get_variable_defs')).value
+  assert.deepEqual(Object.keys(legacy).sort(),['collections','variables'])
+  assert.deepEqual(plain(legacy.collections.map(c=>c.id)),['empty','populated'])
+  assert.deepEqual(plain(legacy.collections[0].variableIds),[])
+})
+
+test('collection inventory finds empty collections without reading variables and pages the collection list',async()=>{
+  const f=await fixtureRuntime(),collections=[
+    {id:'c1',name:'Empty theme',modes:[{modeId:'light',name:'Light'},{modeId:'dark',name:'Dark'}],defaultModeId:'light',variableIds:[]},
+    {id:'c2',name:'Theme tokens',modes:[{modeId:'base',name:'Base'}],defaultModeId:'base',variableIds:['v1','v2']},
+    {id:'c3',name:'Spacing',modes:[{modeId:'space',name:'Base'}],defaultModeId:'space',variableIds:['v3']}]
+  f.figma.variables.getLocalVariableCollectionsAsync=async()=>collections
+  f.figma.variables.getLocalVariablesAsync=async()=>{throw Error('Inventory must not fetch variables')}
+  const first=(await f.runtime.run('get_variable_defs',{collectionsOnly:true,query:'THEME',limit:1})).value
+  assert.equal(first.collections[0].id,'c1');assert.equal(first.collections[0].variableCount,0)
+  assert.equal(first.collections[0].variableIds,undefined);assert.equal(first.variables.length,0)
+  assert.equal(first.pagination.total,2);assert.equal(first.pagination.hasMore,true)
+  assert.equal(first.coverage.variables,'not-read');assert.equal(first.coverage.localCollectionCount,3)
+  assert.equal(first.coverage.collectionInventoryComplete,false)
+  const second=(await f.runtime.run('get_variable_defs',{collectionsOnly:true,query:'theme',offset:first.pagination.nextOffset,limit:1})).value
+  assert.equal(second.collections[0].id,'c2');assert.equal(second.collections[0].variableCount,2)
+  assert.equal(second.pagination.hasMore,false);assert.equal(second.coverage.collectionInventoryComplete,false)
+  const scoped=(await f.runtime.run('get_variable_defs',{collectionsOnly:true,collectionIds:['c1'],modeIds:['dark']})).value
+  assert.equal(scoped.collections[0].modes.length,1);assert.equal(scoped.collections[0].modes[0].modeId,'dark')
+  assert.equal(scoped.coverage.collectionInventoryComplete,false)
+  const all=(await f.runtime.run('get_variable_defs',{collectionsOnly:true})).value
+  assert.equal(all.collections.length,3);assert.equal(all.coverage.collectionInventoryComplete,true)
+  assert.equal(all.coverage.collections,'filtered-collection-page-including-empty')
+  for(const args of [{ids:['v1']},{type:'COLOR'},{limit:0},{offset:-1},{modeIds:['absent']}])await assert.rejects(f.runtime.run('get_variable_defs',{collectionsOnly:true,...args}))
+  await assert.rejects(f.runtime.run('get_variable_defs',{collectionsOnly:'yes'}),/boolean/)
+})
+
+test('a file with only an empty collection is distinguishable from a file with none',async()=>{
+  const f=await fixtureRuntime()
+  f.figma.variables.getLocalVariableCollectionsAsync=async()=>[{id:'empty',name:'Existing empty',modes:[{modeId:'base',name:'Base'}],defaultModeId:'base',variableIds:[]}]
+  f.figma.variables.getLocalVariablesAsync=async()=>[]
+  const summary=(await f.runtime.run('get_variable_defs',{profile:'summary'})).value
+  assert.equal(summary.collections.length,0);assert.equal(summary.variables.length,0)
+  assert.equal(summary.coverage.localCollectionCount,1);assert.equal(summary.coverage.emptyLocalCollectionCount,1)
+  const inventory=(await f.runtime.run('get_variable_defs',{collectionsOnly:true})).value
+  assert.equal(inventory.collections[0].id,'empty');assert.equal(inventory.coverage.collectionInventoryComplete,true)
+  f.figma.variables.getLocalVariableCollectionsAsync=async()=>[]
+  const none=(await f.runtime.run('get_variable_defs',{collectionsOnly:true})).value
+  assert.equal(none.collections.length,0);assert.equal(none.coverage.localCollectionCount,0)
+  assert.equal(none.coverage.collectionInventoryComplete,true)
 })
 
 test('design-system kind avoids unrelated APIs and explicit page searches do not change current page',async()=>{
@@ -151,6 +215,12 @@ test('schema feature detection keeps legacy calls available to old companions',(
   assert.equal(requiresQueryFeatures('use_figma',{code:'return 1'}),false)
   assert.equal(requiresQueryFeatures('get_metadata',{unknown:true}),false)
   assert.ok(LOCAL_TOOLS.find(t=>t.name==='get_metadata').inputSchema.properties.maxBytes)
+  assert.equal(requiredQueryFeatureVersion('get_metadata',{nodeId:'1:2',depth:1}),0)
+  assert.equal(requiredQueryFeatureVersion('get_variable_defs',{profile:'summary'}),1)
+  assert.equal(requiredQueryFeatureVersion('get_variable_defs',{collectionsOnly:true}),2)
+  assert.equal(requiredQueryFeatureVersion('get_variable_defs',{collectionsOnly:false}),2)
+  assert.equal(requiresQueryFeatures('get_variable_defs',{collectionsOnly:true}),true)
+  assert.equal(LOCAL_TOOLS.find(t=>t.name==='get_variable_defs').inputSchema.properties.collectionsOnly.type,'boolean')
 })
 
 test('selection and component summaries retain identity without copying visual properties',async()=>{

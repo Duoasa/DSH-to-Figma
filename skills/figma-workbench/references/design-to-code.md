@@ -1,6 +1,6 @@
 # Figma to application code
 
-1. Locate the smallest useful frame with summary metadata, then get its detailed context and one screenshot. The local result contains a native node tree and `getCSSAsync()` values; it does not claim to reproduce Figma's cloud-generated React output. Later structural reads should use `includeScreenshot:false` until a new image is needed.
+1. If the frame is unknown, locate the smallest useful one with summary metadata. For a known frame, directly get its detailed context and one necessary screenshot, reusing a current image when available. The local result contains a native node tree and `getCSSAsync()` values; it does not claim to reproduce Figma's cloud-generated React output. Later structural reads should use `includeScreenshot:false` until a new image is needed.
 2. Inspect the project's actual framework, components, tokens and conventions. Map design semantics into them instead of pasting absolute coordinates or introducing a new framework.
 3. Read only the relevant variable definitions, modes, component context and local component links to preserve intent. Filter and page discovery results, then follow explicit IDs for details. Official Code Connect mappings are only available when the official backend supplies those tools.
 4. Export real assets with `download_assets`. Use SVG for vectors and original image bytes for photo fills when appropriate. Do not draw a guessed logo or replace provided images with emoji. Exports land in `.figma/assets/<batch>/`.
