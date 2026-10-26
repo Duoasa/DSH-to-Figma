@@ -4,6 +4,8 @@ Choose the shortest sufficient read path. An unknown target needs shallow `get_m
 
 Use query filters and bounded pages for discovery. Follow returned pagination and truncation information; a truncated tree is not a complete inventory. Once found, use explicit IDs and request detailed data only for the affected nodes. Do not repeatedly fetch the entire page, font list or variable collection for a small edit.
 
+When a question asks for a few properties of named descendants under a known frame, a scoped read-only script can find those descendants and return exactly the requested values. Do not retrieve their entire surrounding subtree and several CSS contexts. For preservation during edits, snapshot actual existing labels/bindings; do not invent an expected value and then spend another call repairing that assumption.
+
 For an existing design, return a short internal plan of the affected nodes and intended change. For a new composition, establish typography scale, spacing rhythm, colors, image needs and component reuse. Position new top-level frames away from existing bounds. Respect the requested product rather than forcing a visual template.
 
 Build or modify a coherent subtree in one operation. For a known target and exact requested change, a script can validate current types/values before any mutation, abort on mismatch, load required fonts once, apply related edits, and read back affected properties. Do not add an entire context read solely to satisfy a fixed ritual. Add `await target.screenshot()` in that same operation when visual verification is needed. Avoid a separate model turn for each node. Return newly created IDs and reuse them in subsequent calls; do not recreate by name.

@@ -107,6 +107,10 @@
             const v = target[key]
             return typeof v === 'function' ? (...args) => wrap(v.apply(target, args.map(unwrap))) : wrap(v)
           },
+          has(_target, key) {
+            if (key === 'set' || key === 'query' && value.findAll || key === 'screenshot' && value.exportAsync || key === 'createAutoLayout' && value === figma) return true
+            return key in value
+          },
           set(_target, key, next) { value[key] = unwrap(next); return true }
         })
         cache.set(value, proxy); raws.set(proxy, value); return proxy
