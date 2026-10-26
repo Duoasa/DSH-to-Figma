@@ -7,6 +7,30 @@ test('scripts create editable layout and text, unwrap node arguments, query and 
   const output=await f.runtime.run('use_figma',{code:`const card=figma.createAutoLayout('VERTICAL',{name:'Card',itemSpacing:12});figma.currentPage.appendChild(card);await figma.loadFontAsync({family:'Inter',style:'Regular'});const title=figma.createText();card.appendChild(title);title.set({name:'Title',characters:'Hello',width:200});card.query('TEXT[name="Title"]').set({fontSize:24});await card.screenshot();return {id:card.id,title:title.id,color:dsh.color('#ff0000')}`})
   assert.equal(f.page.children[0].layoutMode,'VERTICAL');assert.equal(f.page.children[0].children[0].fontSize,24);assert.equal(f.fonts.length,1);assert.equal(output.images.length,1);assert.deepEqual(plain(output.value.color),{r:1,g:0,b:0});assert.equal(f.undo,1)
 })
+test('script node membership preserves native properties and recursive traversal through the facade',async()=>{
+  const f=await fixtureRuntime(),frame=f.figma.createFrame(),nested=f.figma.createFrame(),label=f.figma.createText()
+  f.page.appendChild(frame);frame.appendChild(nested);nested.appendChild(label);label.characters='Nested label'
+  delete label.children
+  const {value}=await f.runtime.run('use_figma',{code:`
+    const frame=await figma.getNodeByIdAsync(${JSON.stringify(frame.id)}),ids=[];
+    function walk(node){ids.push(node.id);if('children' in node)for(const child of node.children)walk(child)}
+    walk(frame);
+    return {ids,native:{id:'id' in frame,width:'width' in frame,children:'children' in frame,exportAsync:'exportAsync' in frame,currentPage:'currentPage' in figma,missing:'notARealProperty' in frame}};
+  `})
+  assert.deepEqual(plain(value.ids),[frame.id,nested.id,label.id])
+  assert.deepEqual(plain(value.native),{id:true,width:true,children:true,exportAsync:true,currentPage:true,missing:false})
+})
+test('script helper membership matches helper availability without exposing them on unrelated objects',async()=>{
+  const f=await fixtureRuntime(),frame=f.figma.createFrame(),limited=f.figma.createFrame()
+  limited.findAll=undefined;limited.exportAsync=undefined
+  const {value}=await f.runtime.run('use_figma',{code:`
+    const frame=await figma.getNodeByIdAsync(${JSON.stringify(frame.id)}),limited=await figma.getNodeByIdAsync(${JSON.stringify(limited.id)});
+    function check(target,key){return {present:key in target,callable:typeof target[key]==='function'}}
+    return {set:check(frame,'set'),query:check(frame,'query'),screenshot:check(frame,'screenshot'),createAutoLayout:check(figma,'createAutoLayout'),frameLayout:check(frame,'createAutoLayout'),limitedQuery:check(limited,'query'),limitedScreenshot:check(limited,'screenshot')};
+  `})
+  for(const name of ['set','query','screenshot','createAutoLayout'])assert.deepEqual(plain(value[name]),{present:true,callable:true})
+  for(const name of ['frameLayout','limitedQuery','limitedScreenshot'])assert.deepEqual(plain(value[name]),{present:false,callable:false})
+})
 test('scene/context/variables/assets and local links return real fixture state',async()=>{
   const f=await fixtureRuntime(),scene=await f.runtime.run('import_scene',{nodes:[{type:'FRAME',props:{name:'Card',layoutMode:'VERTICAL'},children:[{type:'TEXT',props:{characters:'Heading',fontName:{family:'Inter',style:'Regular'}}}]}]})
   const id=scene.value.nodeIds[0];assert.equal(scene.value.count,2)

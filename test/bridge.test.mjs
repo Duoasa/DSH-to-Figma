@@ -68,3 +68,30 @@ test('repeated companion handshake is idempotent and preserves active job state'
   assert.equal(retry.connectionId,id);assert.equal(b.list().length,1);assert.equal(b.documents.get(id).active.id,job.id)
   await request(b,'/result',{connectionId:id,id:job.id,ok:true,result:{value:1}});await pending
 })
+
+test('document status distinguishes companion versions from feature capability and unknown versions',async t=>{
+  const b=await rig(t)
+  for(const metadata of [
+    {name:'Old',editorType:'figma'},
+    {name:'Current',editorType:'figma',featureVersion:2,companionVersion:'0.2.5'},
+    {name:'Preview',editorType:'figma',featureVersion:2,companionVersion:'0.2.5-preview.1+test'},
+    {name:'Invalid',editorType:'figma',featureVersion:2,companionVersion:'PRIVATE_INVALID_VERSION'},
+  ])await request(b,'/connect',metadata)
+  assert.deepEqual(b.list().map(doc=>[doc.name,doc.featureVersion,doc.companionVersion]),[
+    ['Old',0,null],['Current',2,'0.2.5'],['Preview',2,'0.2.5-preview.1+test'],['Invalid',2,null],
+  ])
+  assert.doesNotMatch(JSON.stringify(b.list()),/PRIVATE_INVALID_VERSION/)
+})
+
+test('bridge reports queue/execution durations once without altering results or replay safety',async t=>{
+  const b=await rig(t),id=await connect(b),{runtime}=await fixtureRuntime(),metrics=[]
+  const read=b.call(id,'get_metadata',{}, {onMetric:metric=>metrics.push(metric)})
+  await runJob(b,id,runtime);await read
+  assert.equal(metrics.length,1);assert.ok(metrics[0].queueMs>=0);assert.ok(metrics[0].bridgeMs>=0)
+  const controller=new AbortController()
+  const canceled=b.call(id,'get_metadata',{}, {signal:controller.signal,onMetric:metric=>metrics.push(metric)})
+  controller.abort();await assert.rejects(canceled,/before dispatch/)
+  assert.equal(metrics.length,2);assert.equal(metrics[1].bridgeMs,null)
+  const robust=b.call(id,'get_metadata',{}, {onMetric:()=>{throw Error('diagnostics failed')}})
+  await runJob(b,id,runtime);await robust
+})

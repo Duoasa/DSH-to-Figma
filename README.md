@@ -260,6 +260,8 @@ npm pack --ignore-scripts
 
 `check` 会从源文件重新生成 `companion/code.js`，检查语法和包内容。测试覆盖 HTTP 鉴权、文档队列、取消与恢复、素材、OAuth、官方 MCP 发现，以及真实 DSH 服务与附件集成。自动化中的 Figma API 使用模拟 fixture。
 
+`npm run benchmark` 可运行固定数据的读取基准。摘要、筛选分页、截图策略及性能统计见[第一批性能优化与验证](docs/performance.md)。基准返回字节数不等于真实模型 token。
+
 ```text
 index.mjs             原生 DSH 插件入口
 cli.mjs               安装、配对与 OAuth 辅助命令（dsh-figma）

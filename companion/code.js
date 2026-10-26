@@ -1,38 +1,73 @@
 /* MIT — Copyright (c) 2026 Duoasa. Runs inside the Figma plugin sandbox only. */
 ;(function (scope) {
   const MAX_NODES = 1500
+  const summaryFields = ['id','name','type','visible','locked','x','y','width','height','rotation']
+  const now = () => typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : Date.now()
+  const bytesOf = text => { if(/^[\x00-\x7f]*$/.test(text))return text.length;let size=0; for(let i=0;i<text.length;i++){const c=text.charCodeAt(i);if(c<128)size++;else if(c<2048)size+=2;else if(c>=0xd800&&c<=0xdbff&&i+1<text.length&&text.charCodeAt(i+1)>=0xdc00&&text.charCodeAt(i+1)<=0xdfff){size+=4;i++}else size+=3};return size }
+  const integer = (value, fallback, min, max, name) => { const n=value??fallback;if(!Number.isInteger(n)||n<min||n>max)throw new Error(name+' must be an integer from '+min+' to '+max);return n }
+  const textFilter = (value,name) => { if(value!==undefined&&typeof value!=='string')throw new Error(name+' must be a string');return (value||'').toLowerCase() }
+  const idFilter = (value,name) => { if(value===undefined)return null;if(!Array.isArray(value)||!value.length||value.length>200||value.some(id=>typeof id!=='string'||!id))throw new Error(name+' must contain 1–200 IDs');return new Set(value) }
+  const pageOf = (items,args={}) => { const offset=integer(args.offset,0,0,1000000,'offset'),limit=integer(args.limit,50,1,200,'limit'),selected=items.slice(offset,offset+limit);return {items:selected,pagination:{offset,limit,returned:selected.length,total:items.length,hasMore:offset+selected.length<items.length,nextOffset:offset+selected.length<items.length?offset+selected.length:null}} }
+  const opted = (args,keys) => keys.some(key=>args[key]!==undefined)
+
   const fields = ['id','name','type','visible','locked','x','y','width','height','rotation','opacity','blendMode','fills','strokes','strokeWeight','strokeAlign','effects','cornerRadius','layoutMode','layoutWrap','primaryAxisSizingMode','counterAxisSizingMode','primaryAxisAlignItems','counterAxisAlignItems','layoutSizingHorizontal','layoutSizingVertical','itemSpacing','counterAxisSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft','clipsContent','characters','fontName','fontSize','fontWeight','textAlignHorizontal','textAlignVertical','textAutoResize','lineHeight','letterSpacing','boundVariables','componentProperties','componentPropertyDefinitions','variantProperties','reactions']
   const jsonValue = value => value === undefined || typeof value === 'symbol' ? undefined : JSON.parse(JSON.stringify(value))
   class Runtime {
-    constructor(figma) { this.figma = figma }
+    constructor(figma) { this.figma = figma; this.metrics = null; this.readOptions = {} }
     async node(id) {
       const node = id ? await this.figma.getNodeByIdAsync(id.replace(/^(\d+)-(\d+)$/, '$1:$2')) : this.figma.currentPage.selection[0]
       if (!node) throw new Error('Select a node in Figma or provide an existing nodeId')
       return node
     }
-    snapshot(node, depth, budget = { count: 0 }) {
-      if (++budget.count > MAX_NODES) return { id: node.id, truncated: true }
-      const result = {}
-      for (const key of fields) { try { const value = jsonValue(node[key]); if (value !== undefined) result[key] = value } catch {} }
-      if (node.type === 'TEXT' && typeof node.getStyledTextSegments === 'function') {
-        try { result.textSegments = jsonValue(node.getStyledTextSegments(['fontName','fontSize','fills','textDecoration','textCase','lineHeight','letterSpacing'])).slice(0,2000) } catch {}
+    snapshot(node, depth, budget, root = true) {
+      const options=this.readOptions
+      budget ||= this.snapshotBudget ||= {count:0,bytes:0,maxNodes:options.maxNodes??MAX_NODES,maxBytes:options.maxBytes??Infinity}
+      const result={},reserved=320
+      if(++budget.count>budget.maxNodes)return {id:node.id,truncated:true,reason:'maxNodes',continuation:{nodeId:node.id,depth}}
+      if(this.metrics)this.metrics.nodeCount++
+      budget.bytes+=reserved
+      const add=(key,raw)=>{
+        const value=jsonValue(raw);if(value===undefined)return
+        const size=Number.isFinite(budget.maxBytes)?bytesOf(JSON.stringify({[key]:value})):0
+        if(budget.bytes+size>budget.maxBytes){result.truncated=true;result.reason='maxBytes';(result.omittedFields??=[]).push(key);result.fieldContinuation={nodeId:node.id,profile:options.profile??'full',depth:0};result.continuation={nodeId:node.id,profile:options.profile??'full',depth};return}
+        result[key]=value;budget.bytes+=size
       }
-      if (node.children) {
-        result.childCount = node.children.length
-        if (depth > 0) {
-          result.children = []
-          for (const child of node.children) { if (budget.count >= MAX_NODES) { result.truncated = true; break }; result.children.push(this.snapshot(child, depth - 1, budget)) }
+      for(const key of options.profile==='summary'?summaryFields:fields){try{add(key,node[key])}catch{}}
+      // IDs are necessary to recover a bounded read even if a large name/property exhausted its budget.
+      result.id=node.id;result.type=node.type
+      if(options.profile!=='summary'&&node.type==='TEXT'&&typeof node.getStyledTextSegments==='function'){
+        try{const segments=node.getStyledTextSegments(['fontName','fontSize','fills','textDecoration','textCase','lineHeight','letterSpacing']);add('textSegments',segments.slice(0,2000));if(segments.length>2000){result.truncated=true;result.reason='textSegments';result.continuation={nodeId:node.id,hint:'Read text ranges with use_figma'}}}catch{}
+      }
+      if(node.children){
+        result.childCount=node.children.length
+        if(depth>0){
+          result.children=[]
+          const paged=root&&opted(options,['offset','limit']),offset=paged?options.offset??0:0,limit=paged?options.limit??50:node.children.length
+          const end=Math.min(node.children.length,offset+limit)
+          let next=offset
+          for(;next<end;next++){
+            if(budget.count>=budget.maxNodes||budget.bytes+reserved+128>budget.maxBytes){result.truncated=true;result.reason=budget.count>=budget.maxNodes?'maxNodes':'maxBytes';break}
+            result.children.push(this.snapshot(node.children[next],depth-1,budget,false))
+          }
+          if(next<node.children.length){
+            result.continuation={nodeId:node.id,depth,offset:next,limit:Math.min(200,limit||50),profile:options.profile??'full'}
+            if(!paged||next<end)result.truncated=true
+          }
+          if(paged)result.pagination={offset,limit,returned:result.children.length,total:node.children.length,hasMore:next<node.children.length,nextOffset:next<node.children.length?next:null}
         }
       }
       return result
     }
     async screenshot(node, args = {}) {
-      if (typeof node.exportAsync !== 'function') throw new Error('This node cannot be exported; choose a frame or scene node')
-      const scale = args.scale ?? Math.min(1, 1600 / Math.max(node.width || 1, node.height || 1))
-      if (!Number.isFinite(scale) || scale < 0.01 || scale > 4) throw new Error('Screenshot scale must be 0.01–4')
-      const bytes = await node.exportAsync({ format: 'PNG', constraint: { type: 'SCALE', value: scale }, contentsOnly: args.contentsOnly !== false })
-      if (bytes.length > 8 * 1024 * 1024) throw new Error('Screenshot exceeds 8 MiB; select a smaller node or scale')
-      return { type: 'image', mimeType: 'image/png', data: this.figma.base64Encode(bytes) }
+      if(typeof node.exportAsync!=='function')throw new Error('This node cannot be exported; choose a frame or scene node')
+      if(args.quality!==undefined&&!['overview','detail'].includes(args.quality))throw new Error('quality must be overview or detail')
+      const edge=args.quality==='overview'?800:1600
+      const scale=args.scale??Math.min(1,edge/Math.max(node.width||1,node.height||1))
+      if(!Number.isFinite(scale)||scale<0.01||scale>4)throw new Error('Screenshot scale must be 0.01–4')
+      const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false})
+      if(this.metrics){this.metrics.exportMs+=now()-started;const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3];this.metrics.images.push({...(bytes.length>=24&&bytes[0]===137&&bytes[1]===80?{width:dimension(16),height:dimension(20)}:{}),bytes:bytes.length})}
+      if(bytes.length>8*1024*1024)throw new Error('Screenshot exceeds 8 MiB; select a smaller node or scale')
+      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes)}
     }
     facade(images) {
       const runtime = this, figma = this.figma, cache = new WeakMap(), raws = new WeakMap()
@@ -72,6 +107,10 @@
             const v = target[key]
             return typeof v === 'function' ? (...args) => wrap(v.apply(target, args.map(unwrap))) : wrap(v)
           },
+          has(_target, key) {
+            if (key === 'set' || key === 'query' && value.findAll || key === 'screenshot' && value.exportAsync || key === 'createAutoLayout' && value === figma) return true
+            return key in value
+          },
           set(_target, key, next) { value[key] = unwrap(next); return true }
         })
         cache.set(value, proxy); raws.set(proxy, value); return proxy
@@ -79,7 +118,44 @@
       return wrap(figma)
     }
     async run(method, args = {}) {
-      const f = this.figma, images = [], depth = Math.max(0, Math.min(10, args.depth ?? 3))
+      if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Arguments must be an object')
+      const started=now()
+      this.metrics={runtimeMs:0,exportMs:0,serializationMs:0,nodeCount:0,imageCount:0,images:[],valueBytes:0}
+      this.readOptions={};this.snapshotBudget=null
+      try{
+        if(['get_metadata','get_selection','get_component_context','get_design_context','get_figjam','search_design_system'].includes(method)){
+          if(args.profile!==undefined&&!['summary','full'].includes(args.profile))throw new Error('profile must be summary or full')
+          this.readOptions={profile:args.profile??'full',maxNodes:integer(args.maxNodes,MAX_NODES,1,MAX_NODES,'maxNodes'),maxBytes:args.maxBytes===undefined?Infinity:integer(args.maxBytes,65536,1024,2097152,'maxBytes')}
+          if(method==='get_metadata'&&opted(args,['offset','limit'])){
+            if(!args.nodeId)throw new Error('Child pagination requires nodeId')
+            if((args.depth??3)<1)throw new Error('Child pagination requires depth of at least 1')
+            this.readOptions.offset=integer(args.offset,0,0,1000000,'offset');this.readOptions.limit=integer(args.limit,50,1,200,'limit')
+          }
+        }
+        const result=await this.execute(method,args)
+        const serializeStart=now()
+        result.value=jsonValue(result.value)??null
+        let valueJson=JSON.stringify(result.value)
+        if(Number.isFinite(this.readOptions.maxBytes)&&bytesOf(valueJson)>this.readOptions.maxBytes){
+          const target=args.nodeId||['get_design_context','get_figjam','get_component_context'].includes(method)?await this.node(args.nodeId):this.figma.currentPage
+          const marker={id:target.id,type:target.type,truncated:true,reason:'maxBytes',continuation:{nodeId:target.id,depth:1,profile:args.profile??'full',offset:args.offset??0,limit:1},hint:'Increase maxBytes or use profile summary; omitted content was not inspected.'}
+          if(method==='get_design_context'||method==='get_figjam')result.value={node:marker,truncated:true,reason:'maxBytes'}
+          else if(method==='get_selection')result.value={page:marker,selection:[],truncated:true,reason:'maxBytes',omittedSelectionCount:this.figma.currentPage.selection.length,hint:'Read selection without maxBytes to obtain IDs, then read individual nodes.'}
+          else if(method==='get_metadata'&&!args.nodeId)result.value={pages:[],currentPage:marker,truncated:true,reason:'maxBytes',pagesTruncated:true,hint:'Read the page index with depth:0 and a larger maxBytes, or read currentPage by ID.'}
+          else result.value=marker
+          valueJson=JSON.stringify(result.value)
+        }
+        this.metrics.valueBytes=bytesOf(valueJson)
+        if(this.metrics.valueBytes+JSON.stringify({images:result.images,assets:result.assets}).length+32+(result.assets||[]).reduce((n,a)=>n+bytesOf(a.name||''),0)>23*1024*1024)throw new Error('Result too large; return IDs and bounded metadata')
+        this.metrics.serializationMs+=now()-serializeStart
+        this.metrics.imageCount=result.images.length
+        this.metrics.runtimeMs=now()-started
+        result.metrics=this.metrics
+        return result
+      }finally{this.metrics=null;this.readOptions={};this.snapshotBudget=null}
+    }
+    async execute(method, args = {}) {
+      const f = this.figma, images = [], depth = integer(args.depth,3,0,10,'depth')
       let value, assets
       switch (method) {
         case 'use_figma': {
@@ -89,7 +165,13 @@
           f.commitUndo(); break
         }
         case 'get_selection': value = { page: this.snapshot(f.currentPage, 0), selection: f.currentPage.selection.map(n => this.snapshot(n, 0)) }; break
-        case 'list_fonts': value = await f.listAvailableFontsAsync(); break
+        case 'list_fonts': {
+          const fonts=await f.listAvailableFontsAsync()
+          if(!opted(args,['query','family','style','offset','limit'])){value=fonts;break}
+          const query=textFilter(args.query,'query'),family=textFilter(args.family,'family'),style=textFilter(args.style,'style')
+          const page=pageOf(fonts.filter(font=>{const name=font.fontName||{};return (!query||(name.family+' '+name.style).toLowerCase().includes(query))&&(!family||(name.family||'').toLowerCase()===family)&&(!style||(name.style||'').toLowerCase()===style)}),args)
+          value={fonts:page.items,pagination:page.pagination};break
+        }
         case 'get_metadata': {
           if(args.nodeId) { const target=await this.node(args.nodeId); if(target.type==='PAGE'&&typeof target.loadAsync==='function')await target.loadAsync(); value=this.snapshot(target,depth) }
           else value={pages:f.root.children.map(p=>({id:p.id,name:p.name,type:p.type})),currentPage:this.snapshot(f.currentPage,depth)}
@@ -99,22 +181,47 @@
         case 'get_design_context':
         case 'get_figjam': {
           const node = await this.node(args.nodeId); value = { node: this.snapshot(node, depth), source: 'local-plugin-api', codeGeneration: 'Adapt structure and CSS to the project; no cloud code generation was called.' }
-          if (typeof node.getCSSAsync === 'function') value.css = await node.getCSSAsync()
+          if (args.profile!=='summary' && typeof node.getCSSAsync === 'function') value.css = await node.getCSSAsync()
           if (node.type === 'INSTANCE') { const main = await node.getMainComponentAsync(); value.mainComponent = main ? this.snapshot(main, 0) : null }
           if (args.includeScreenshot !== false) images.push(await this.screenshot(node,args))
           break
         }
         case 'get_variable_defs': {
-          const collections = await f.variables.getLocalVariableCollectionsAsync(), variables = await f.variables.getLocalVariablesAsync()
-          value = { collections: collections.map(c => ({ id: c.id,name:c.name,modes:c.modes,defaultModeId:c.defaultModeId,variableIds:c.variableIds })), variables: variables.map(v => ({ id:v.id,key:v.key,name:v.name,resolvedType:v.resolvedType,valuesByMode:v.valuesByMode,scopes:v.scopes,description:v.description,variableCollectionId:v.variableCollectionId })) }; break
+          if(args.profile!==undefined&&!['summary','full'].includes(args.profile))throw new Error('profile must be summary or full')
+          if(args.type!==undefined&&!['COLOR','FLOAT','BOOLEAN','STRING'].includes(args.type))throw new Error('Unsupported variable type')
+          if(args.collectionsOnly!==undefined&&typeof args.collectionsOnly!=='boolean')throw new Error('collectionsOnly must be a boolean')
+          if(args.collectionsOnly&&(args.ids!==undefined||args.type!==undefined))throw new Error('collectionsOnly does not accept variable ids or type filters')
+          const collectionIds=idFilter(args.collectionIds,'collectionIds'),ids=idFilter(args.ids,'ids'),modeIds=idFilter(args.modeIds,'modeIds'),q=textFilter(args.query,'query')
+          if(args.collectionsOnly){
+            const collections=await f.variables.getLocalVariableCollectionsAsync()
+            const filtered=collections.filter(c=>(!collectionIds||collectionIds.has(c.id))&&(!q||c.name.toLowerCase().includes(q)))
+            if(modeIds){const available=new Set(filtered.flatMap(c=>c.modes.map(mode=>mode.modeId)));if([...modeIds].some(id=>!available.has(id)))throw new Error('modeIds contains an unknown mode for the selected collections')}
+            const page=pageOf(filtered,args)
+            value={collections:page.items.map(c=>({id:c.id,name:c.name,modes:modeIds?c.modes.filter(mode=>modeIds.has(mode.modeId)):c.modes,defaultModeId:c.defaultModeId,variableCount:c.variableIds.length})),variables:[],pagination:page.pagination,
+              coverage:{source:'local-file',collections:'filtered-collection-page-including-empty',variables:'not-read',localCollectionCount:collections.length,emptyLocalCollectionCount:collections.filter(c=>c.variableIds.length===0).length,collectionInventoryComplete:!collectionIds&&!q&&page.pagination.offset===0&&!page.pagination.hasMore,libraryCollectionsIncluded:false}}
+            break
+          }
+          const [collections,variables]=await Promise.all([f.variables.getLocalVariableCollectionsAsync(),f.variables.getLocalVariablesAsync(args.type)])
+          const filtered=variables.filter(v=>(!collectionIds||collectionIds.has(v.variableCollectionId))&&(!ids||ids.has(v.id))&&(!args.type||v.resolvedType===args.type)&&(!q||v.name.toLowerCase().includes(q)))
+          const active=opted(args,['collectionIds','ids','modeIds','query','type','profile','offset','limit','collectionsOnly']),page=active?pageOf(filtered,args):{items:filtered}
+          const relevant=new Set(page.items.map(v=>v.variableCollectionId))
+          if(modeIds){const available=new Set(collections.filter(c=>!collectionIds||collectionIds.has(c.id)).flatMap(c=>c.modes.map(mode=>mode.modeId)));if([...modeIds].some(id=>!available.has(id)))throw new Error('modeIds contains an unknown mode')}
+          value={collections:collections.filter(c=>!active||relevant.has(c.id)||collectionIds?.has(c.id)).map(c=>({id:c.id,name:c.name,modes:modeIds?c.modes.filter(mode=>modeIds.has(mode.modeId)):c.modes,defaultModeId:c.defaultModeId,...(args.profile==='summary'?{}:{variableIds:active?page.items.filter(v=>v.variableCollectionId===c.id).map(v=>v.id):c.variableIds,...(active?{variableIdsScope:'returned-page'}:{})})})),variables:page.items.map(v=>args.profile==='summary'?{id:v.id,name:v.name,resolvedType:v.resolvedType,variableCollectionId:v.variableCollectionId}:{id:v.id,key:v.key,name:v.name,resolvedType:v.resolvedType,valuesByMode:modeIds?Object.fromEntries(Object.entries(v.valuesByMode).filter(([id])=>modeIds.has(id))):v.valuesByMode,scopes:v.scopes,description:v.description,variableCollectionId:v.variableCollectionId}),...(active?{pagination:page.pagination,coverage:{source:'local-file',collections:'returned-variable-page-and-requested-collections',variables:'filtered-variable-page',localCollectionCount:collections.length,emptyLocalCollectionCount:collections.filter(c=>c.variableIds.length===0).length,collectionInventoryComplete:false,libraryCollectionsIncluded:false}}:{})};break
         }
         case 'get_libraries': value = { variableCollections: await f.teamLibrary.getAvailableLibraryVariableCollectionsAsync(), scope: 'Libraries exposed to this plugin; component discovery is local-page only.' }; break
         case 'search_design_system': {
-          const q = String(args.query || '').toLowerCase()
-          const nodes = f.currentPage.findAllWithCriteria({ types: ['COMPONENT','COMPONENT_SET'] }).filter(n => n.name.toLowerCase().includes(q)).slice(0,200)
-          const variables = (await f.variables.getLocalVariablesAsync()).filter(v => v.name.toLowerCase().includes(q)).slice(0,200)
-          const styles = (await Promise.all([f.getLocalPaintStylesAsync(), f.getLocalTextStylesAsync(), f.getLocalEffectStylesAsync(), f.getLocalGridStylesAsync()])).flat().filter(s => s.name.toLowerCase().includes(q)).slice(0,200)
-          value = { scope: 'current-page components, local-file variables and styles', components: nodes.map(n=>this.snapshot(n,0)), variables: variables.map(v=>({id:v.id,name:v.name,resolvedType:v.resolvedType})), styles: styles.map(s=>({id:s.id,key:s.key,name:s.name,type:s.type})) }; break
+          const q=textFilter(args.query,'query'),kind=args.kind??'all'
+          if(!['all','components','variables','styles'].includes(kind))throw new Error('kind must be all, components, variables or styles')
+          const active=opted(args,['kind','pageId','profile','offset','limit'])
+          if(active)pageOf([],args)
+          let page=f.currentPage
+          if(args.pageId&&(kind==='all'||kind==='components')){page=await this.node(args.pageId);if(page.type!=='PAGE')throw new Error('pageId must identify a page');if(typeof page.loadAsync==='function')await page.loadAsync()}
+          const components=kind==='all'||kind==='components'?page.findAllWithCriteria({types:['COMPONENT','COMPONENT_SET']}).filter(n=>n.name.toLowerCase().includes(q)):[]
+          const variables=kind==='all'||kind==='variables'?(await f.variables.getLocalVariablesAsync()).filter(v=>v.name.toLowerCase().includes(q)):[]
+          const styles=kind==='all'||kind==='styles'?(await Promise.all([f.getLocalPaintStylesAsync(),f.getLocalTextStylesAsync(),f.getLocalEffectStylesAsync(),f.getLocalGridStylesAsync()])).flat().filter(s=>s.name.toLowerCase().includes(q)):[]
+          const paginate=items=>active?pageOf(items,args):{items:items.slice(0,200)}
+          const cp=paginate(components),vp=paginate(variables),sp=paginate(styles)
+          value={scope:args.pageId?'specified-page components, local-file variables and styles':'current-page components, local-file variables and styles',components:cp.items.map(n=>this.snapshot(n,0)),variables:vp.items.map(v=>({id:v.id,name:v.name,resolvedType:v.resolvedType})),styles:sp.items.map(s=>({id:s.id,key:s.key,name:s.name,type:s.type})),...(active?{pagination:{components:cp.pagination,variables:vp.pagination,styles:sp.pagination}}:{})};break
         }
         case 'get_component_context': { const n = await this.node(args.nodeId); if (!['COMPONENT','COMPONENT_SET','INSTANCE'].includes(n.type)) throw new Error('Expected a component, component set, or instance'); value = this.snapshot(n,depth); break }
         case 'get_local_component_links': { const n=await this.node(args.nodeId); value = JSON.parse(n.getPluginData('dsh-code-links') || '[]'); break }
@@ -133,7 +240,9 @@
           for (const id of ids) {
             const node = await this.node(id), options={format}
             if (['PNG','JPG'].includes(format)) { const scale=args.scale??1; if(!Number.isFinite(scale)||scale<0.01||scale>4) throw new Error('Scale must be 0.01–4'); options.constraint={type:'SCALE',value:scale} }
-            add(node.name+'.'+format.toLowerCase(),{PNG:'image/png',JPG:'image/jpeg',SVG:'image/svg+xml',PDF:'application/pdf'}[format],await node.exportAsync(options))
+            const exportStarted=now(),exported=await node.exportAsync(options)
+            if(this.metrics)this.metrics.exportMs+=now()-exportStarted
+            add(node.name+'.'+format.toLowerCase(),{PNG:'image/png',JPG:'image/jpeg',SVG:'image/svg+xml',PDF:'application/pdf'}[format],exported)
             if(args.includeOriginalImages) {
               const nodes=[node,...(node.findAll?node.findAll(n=>Array.isArray(n.fills)&&n.fills.some(p=>p.type==='IMAGE')):[])]
               for(const child of nodes) for(const paint of Array.isArray(child.fills)?child.fills:[]) if(paint.type==='IMAGE'&&paint.imageHash&&!hashes.has(paint.imageHash)) {
@@ -180,9 +289,7 @@
         }
         default: throw new Error('Unknown local Figma operation: '+method)
       }
-      const result = { value: jsonValue(value) ?? null, images, ...(assets ? { assets } : {}) }
-      if(JSON.stringify(result).length>23*1024*1024) throw new Error('Result too large; return IDs and bounded metadata')
-      return result
+      return {value,images,...(assets?{assets}:{})}
     }
   }
   scope.DshFigmaRuntime = Runtime
@@ -198,7 +305,7 @@ figma.ui.onmessage = async message => {
     return
   }
   if (message.type === 'describe') {
-    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
+    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 2, companionVersion: globalThis.DSH_FIGMA_BOOTSTRAP?.version || null, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
     return
   }
   if (message.type !== 'execute') return

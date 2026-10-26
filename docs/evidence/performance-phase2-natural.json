@@ -1,0 +1,2288 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "kind": "Real DSH GUI and Figma natural-language A/B, exploratory sample",
+  "environment": {
+    "host": "DeepSeek Harness 0.2.1-rc.3",
+    "figma": "126.9.16",
+    "platform": "macOS",
+    "modelDisplay": "DeepSeek-V4.1-Flash /1017 /High",
+    "provider": "deepseek-official",
+    "model": "deepseek-flash",
+    "reasoningEffort": "high",
+    "baseline": {
+      "version": "0.2.4",
+      "commit": "daaf77d16a67abc8efbe91cd5f7fe78fad489633"
+    },
+    "candidate": {
+      "version": "0.2.5",
+      "commit": "d67a9d6",
+      "companionVersion": "0.2.5"
+    }
+  },
+  "protocol": {
+    "repetitionsPerTaskPerVersion": 3,
+    "freshSessionPerRun": true,
+    "pairedPromptHashesMatch": true,
+    "order": "All 9 baseline runs; 3 exploratory candidate runs; fix and restore fixture; all 9 final candidate runs. Within each version: read, empty, edit for repeats 1, 2, 3.",
+    "prompts": {
+      "read": "In the connected Figma file inspect the frame with node ID <READ_FRAME_ID>. Report the exact dashboard heading text and font family style and size. Also report the Card 01 button label and dimensions and corner radius and its color variable binding. Do not edit anything. No screenshot is needed. Answer concisely.",
+      "empty": "In the connected Figma file check whether the local variable collection DSH Benchmark Empty already exists. Report its modes and variable count. Do not create or edit anything. Answer concisely.",
+      "edit": "In the connected Figma file change the corner radius of all 12 Benchmark Button instances inside frame with node ID <EDIT_FRAME_ID_FOR_REPEAT> to 12 pixels. Keep all existing labels and main component relationships and color variable bindings. Do not change the main component or other frames. Check the result visually and report how many buttons were updated. Answer concisely."
+    },
+    "fixture": {
+      "synthetic": true,
+      "frameSize": [
+        1920,
+        1080
+      ],
+      "cardsPerFrame": 12,
+      "readFrames": 1,
+      "editFrames": 3,
+      "buttonSize": [
+        160,
+        44
+      ],
+      "initialRadius": 8,
+      "targetRadius": 12,
+      "heading": {
+        "text": "Benchmark overview",
+        "fontFamily": "Inter",
+        "fontStyle": "Bold",
+        "fontSize": 32
+      },
+      "buttonLabels": "Open 01 through Open 12",
+      "emptyCollection": {
+        "name": "DSH Benchmark Empty",
+        "modes": [
+          "Mode 1"
+        ],
+        "variableCount": 0
+      },
+      "themeCollection": {
+        "modes": [
+          "Light",
+          "Dark"
+        ],
+        "variableCount": 24,
+        "buttonFill": "alias to palette/blue; preserved through edits"
+      },
+      "baselineResetVerified": true,
+      "exploratoryResetVerified": true
+    },
+    "usage": "Actual provider-reported DSH adapter usage; inputTokens is uncached input. Total includes cache reads and output, not a monetary cost estimate. Recorded failures and recovery calls are included.",
+    "excluded": "Fixture setup, state verification/reset, session-title generation, other sessions, and user waiting between turns. One prompt-entry pilot with an incorrectly typed ID and three pre-fix exploratory runs are not part of the 18 final runs."
+  },
+  "summaries": [
+    {
+      "version": "0.2.4",
+      "passed": 7,
+      "runs": 9,
+      "totals": {
+        "totalTokens": 1001501,
+        "inputTokens": 54116,
+        "cacheReadTokens": 932352,
+        "cacheWriteTokens": 0,
+        "outputTokens": 15033,
+        "activeWallMs": 145519,
+        "modelRequests": 58,
+        "toolCalls": 63,
+        "toolErrors": 5
+      },
+      "tasks": [
+        {
+          "task": "read",
+          "passed": 3,
+          "runs": 3,
+          "median": {
+            "totalTokens": 121172,
+            "activeWallMs": 12700,
+            "modelRequests": 7,
+            "toolCalls": 8
+          },
+          "range": {
+            "totalTokens": [
+              106866,
+              146190
+            ],
+            "activeWallMs": [
+              10966,
+              24597
+            ]
+          }
+        },
+        {
+          "task": "empty",
+          "passed": 1,
+          "runs": 3,
+          "median": {
+            "totalTokens": 58277,
+            "activeWallMs": 7424,
+            "modelRequests": 4,
+            "toolCalls": 4
+          },
+          "range": {
+            "totalTokens": [
+              44862,
+              58924
+            ],
+            "activeWallMs": [
+              7264,
+              9890
+            ]
+          }
+        },
+        {
+          "task": "edit",
+          "passed": 3,
+          "runs": 3,
+          "median": {
+            "totalTokens": 167631,
+            "activeWallMs": 26890,
+            "modelRequests": 9,
+            "toolCalls": 9
+          },
+          "range": {
+            "totalTokens": [
+              115053,
+              182526
+            ],
+            "activeWallMs": [
+              17031,
+              28757
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "version": "0.2.5",
+      "passed": 9,
+      "runs": 9,
+      "totals": {
+        "totalTokens": 840051,
+        "inputTokens": 53861,
+        "cacheReadTokens": 772736,
+        "cacheWriteTokens": 0,
+        "outputTokens": 13454,
+        "activeWallMs": 130277,
+        "modelRequests": 48,
+        "toolCalls": 46,
+        "toolErrors": 0
+      },
+      "tasks": [
+        {
+          "task": "read",
+          "passed": 3,
+          "runs": 3,
+          "median": {
+            "totalTokens": 116490,
+            "activeWallMs": 14725,
+            "modelRequests": 7,
+            "toolCalls": 6
+          },
+          "range": {
+            "totalTokens": [
+              71150,
+              185300
+            ],
+            "activeWallMs": [
+              14253,
+              24919
+            ]
+          }
+        },
+        {
+          "task": "empty",
+          "passed": 3,
+          "runs": 3,
+          "median": {
+            "totalTokens": 44447,
+            "activeWallMs": 6136,
+            "modelRequests": 3,
+            "toolCalls": 3
+          },
+          "range": {
+            "totalTokens": [
+              28344,
+              58485
+            ],
+            "activeWallMs": [
+              5110,
+              6237
+            ]
+          }
+        },
+        {
+          "task": "edit",
+          "passed": 3,
+          "runs": 3,
+          "median": {
+            "totalTokens": 124233,
+            "activeWallMs": 17088,
+            "modelRequests": 7,
+            "toolCalls": 7
+          },
+          "range": {
+            "totalTokens": [
+              82214,
+              129388
+            ],
+            "activeWallMs": [
+              15192,
+              26617
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "version": "0.2.4",
+      "task": "read",
+      "repeat": 1,
+      "promptSha256": "0e037523421b544a8b0981f02dfcf966fff67bdc5ef4ad0e9e9db44a2f156d0e",
+      "sessionSha256": "f059b64ea17a5349a19fe4b9170cd0883cec081fe05a5142e7a49c57e6bfbb4f",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 24597,
+        "modelRequests": 8,
+        "steps": 8,
+        "toolCalls": 9,
+        "toolErrors": 2,
+        "usage": {
+          "complete": true,
+          "samples": 8,
+          "missingSamples": 0,
+          "inputTokens": 7715,
+          "cacheReadTokens": 135296,
+          "cacheWriteTokens": 0,
+          "outputTokens": 3179,
+          "reasoningTokens": null,
+          "totalTokens": 146190
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 2,
+        "mcp__figma__use_figma": 4,
+        "mcp__figma__get_variable_defs": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 9
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 22
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1972
+          },
+          "status": "completed",
+          "wallMs": 26
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 22
+        },
+        {
+          "sequence": 42,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 977
+          },
+          "status": "error",
+          "wallMs": 11
+        },
+        {
+          "sequence": 48,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1200
+          },
+          "status": "error",
+          "wallMs": 7
+        },
+        {
+          "sequence": 54,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 23
+        },
+        {
+          "sequence": 60,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1334
+          },
+          "status": "completed",
+          "wallMs": 704
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "empty",
+      "repeat": 1,
+      "promptSha256": "9398d26b886fc8d2c4abec479ee3a6d6903b421cf6b257db98205dde35719074",
+      "sessionSha256": "bc6b3176a51631c65aeef871fac2d0a6500118ac74f397f4e79ae4261b6976bf",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 9890,
+        "modelRequests": 4,
+        "steps": 4,
+        "toolCalls": 5,
+        "toolErrors": 1,
+        "usage": {
+          "complete": true,
+          "samples": 4,
+          "missingSamples": 0,
+          "inputTokens": 3309,
+          "cacheReadTokens": 54784,
+          "cacheWriteTokens": 0,
+          "outputTokens": 831,
+          "reasoningTokens": null,
+          "totalTokens": 58924
+        }
+      },
+      "toolCounts": {
+        "figma_status": 1,
+        "mcp__figma__get_variable_defs": 2,
+        "mcp__figma__get_libraries": 1,
+        "mcp__figma__use_figma": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 22,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "summary",
+            "hasQuery": true
+          },
+          "status": "completed",
+          "wallMs": 21
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "limit": 200,
+            "profile": "summary"
+          },
+          "status": "completed",
+          "wallMs": 24
+        },
+        {
+          "sequence": 30,
+          "tool": "mcp__figma__get_libraries",
+          "arguments": {},
+          "status": "error",
+          "wallMs": 12
+        },
+        {
+          "sequence": 36,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 405
+          },
+          "status": "completed",
+          "wallMs": 26
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "edit",
+      "repeat": 1,
+      "promptSha256": "d6a92346ac06cf38eb4a639c88d7d6b070f01725ea3cd27233c92c92e630d808",
+      "sessionSha256": "fe3d2e02fc86dcd34a13e8564c1ce0dcda7ea85d539300cc389b60da0bed5506",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 17031,
+        "modelRequests": 7,
+        "steps": 7,
+        "toolCalls": 7,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 7,
+          "missingSamples": 0,
+          "inputTokens": 6289,
+          "cacheReadTokens": 107008,
+          "cacheWriteTokens": 0,
+          "outputTokens": 1756,
+          "reasoningTokens": null,
+          "totalTokens": 115053
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 3,
+        "mcp__figma__get_screenshot": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 2,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 20
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 521
+          },
+          "status": "completed",
+          "wallMs": 25
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 822
+          },
+          "status": "completed",
+          "wallMs": 35
+        },
+        {
+          "sequence": 46,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1213
+          },
+          "status": "completed",
+          "wallMs": 439
+        },
+        {
+          "sequence": 52,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "quality": "detail",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 257
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "read",
+      "repeat": 2,
+      "promptSha256": "0e037523421b544a8b0981f02dfcf966fff67bdc5ef4ad0e9e9db44a2f156d0e",
+      "sessionSha256": "edf978519196b5a23fdef91909e3834ddb5a0ccd2707e788b0d4d1b2a81a720c",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 12700,
+        "modelRequests": 7,
+        "steps": 7,
+        "toolCalls": 8,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 7,
+          "missingSamples": 0,
+          "inputTokens": 6090,
+          "cacheReadTokens": 113920,
+          "cacheWriteTokens": 0,
+          "outputTokens": 1162,
+          "reasoningTokens": null,
+          "totalTokens": 121172
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 2,
+        "mcp__figma__get_design_context": 2,
+        "mcp__figma__get_variable_defs": 2
+      },
+      "calls": [
+        {
+          "sequence": 19,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 21,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 2,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 21
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "includeScreenshot": false,
+            "profile": "full",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 33
+        },
+        {
+          "sequence": 36,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 17
+        },
+        {
+          "sequence": 42,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "includeScreenshot": false,
+            "profile": "full",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 29
+        },
+        {
+          "sequence": 48,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 22
+        },
+        {
+          "sequence": 54,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 21
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "empty",
+      "repeat": 2,
+      "promptSha256": "9398d26b886fc8d2c4abec479ee3a6d6903b421cf6b257db98205dde35719074",
+      "sessionSha256": "ebc553c4b405f26b4bb70c0c4c42f524e15691e43b77ee91f72d6a9112f96c20",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 7424,
+        "modelRequests": 3,
+        "steps": 3,
+        "toolCalls": 3,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 3,
+          "missingSamples": 0,
+          "inputTokens": 2167,
+          "cacheReadTokens": 41984,
+          "cacheWriteTokens": 0,
+          "outputTokens": 711,
+          "reasoningTokens": null,
+          "totalTokens": 44862
+        }
+      },
+      "toolCounts": {
+        "figma_status": 1,
+        "skill": 1,
+        "mcp__figma__get_variable_defs": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 22,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "limit": 200,
+            "profile": "summary"
+          },
+          "status": "completed",
+          "wallMs": 21
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": false,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "edit",
+      "repeat": 2,
+      "promptSha256": "66c3e8280eb0769822e4e1ea0067e5e5b45bbf8b7cf1c494780a40596bcda90e",
+      "sessionSha256": "6c39cfa612be39a450f15a63d6a099a73c243bb937fce85bb6b8e0cffc5adf55",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 26890,
+        "modelRequests": 9,
+        "steps": 9,
+        "toolCalls": 9,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 9,
+          "missingSamples": 0,
+          "inputTokens": 8643,
+          "cacheReadTokens": 155648,
+          "cacheWriteTokens": 0,
+          "outputTokens": 3340,
+          "reasoningTokens": null,
+          "totalTokens": 167631
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__get_design_context": 2,
+        "mcp__figma__use_figma": 2,
+        "mcp__figma__get_screenshot": 2
+      },
+      "calls": [
+        {
+          "sequence": 19,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 15
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 6
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 24
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "depth": 2,
+            "includeScreenshot": false,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 21
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1332
+          },
+          "status": "completed",
+          "wallMs": 32
+        },
+        {
+          "sequence": 46,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "depth": 1,
+            "includeScreenshot": false,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 17
+        },
+        {
+          "sequence": 52,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 2724
+          },
+          "status": "completed",
+          "wallMs": 77
+        },
+        {
+          "sequence": 58,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "quality": "overview",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 124
+        },
+        {
+          "sequence": 64,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "scale": 4,
+            "quality": "detail",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 68
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "read",
+      "repeat": 3,
+      "promptSha256": "0e037523421b544a8b0981f02dfcf966fff67bdc5ef4ad0e9e9db44a2f156d0e",
+      "sessionSha256": "6ff5782b8c934504e85ab23d567828b6435b359d2185172e65891c2e46c7918f",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 10966,
+        "modelRequests": 6,
+        "steps": 6,
+        "toolCalls": 7,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 6,
+          "missingSamples": 0,
+          "inputTokens": 7280,
+          "cacheReadTokens": 98688,
+          "cacheWriteTokens": 0,
+          "outputTokens": 898,
+          "reasoningTokens": null,
+          "totalTokens": 106866
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__get_design_context": 2,
+        "mcp__figma__get_variable_defs": 2
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 6
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 21
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "includeScreenshot": false,
+            "profile": "full",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 26
+        },
+        {
+          "sequence": 36,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "includeScreenshot": false,
+            "profile": "full",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 25
+        },
+        {
+          "sequence": 42,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 23
+        },
+        {
+          "sequence": 48,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 18
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "empty",
+      "repeat": 3,
+      "promptSha256": "9398d26b886fc8d2c4abec479ee3a6d6903b421cf6b257db98205dde35719074",
+      "sessionSha256": "959ba924e124d564b1d9f844c748ae5d35e111aefdd0875a50e88799143779c1",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 7264,
+        "modelRequests": 4,
+        "steps": 4,
+        "toolCalls": 4,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 4,
+          "missingSamples": 0,
+          "inputTokens": 2042,
+          "cacheReadTokens": 55808,
+          "cacheWriteTokens": 0,
+          "outputTokens": 427,
+          "reasoningTokens": null,
+          "totalTokens": 58277
+        }
+      },
+      "toolCounts": {
+        "figma_status": 1,
+        "figma_read_guide": 1,
+        "mcp__figma__get_variable_defs": 2
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 12
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_read_guide",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "limit": 200,
+            "profile": "summary",
+            "hasQuery": true
+          },
+          "status": "completed",
+          "wallMs": 21
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "limit": 200,
+            "profile": "summary"
+          },
+          "status": "completed",
+          "wallMs": 21
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": false,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.4",
+      "task": "edit",
+      "repeat": 3,
+      "promptSha256": "df624f1460d4514cf867cd7a9369e847b75706d7e2b3ebe093ca933175269384",
+      "sessionSha256": "0bc4076357457fdeb425db201e8bad0e9897e6df6363070116c69525cef9eff5",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 28757,
+        "modelRequests": 10,
+        "steps": 10,
+        "toolCalls": 11,
+        "toolErrors": 2,
+        "usage": {
+          "complete": true,
+          "samples": 10,
+          "missingSamples": 0,
+          "inputTokens": 10581,
+          "cacheReadTokens": 169216,
+          "cacheWriteTokens": 0,
+          "outputTokens": 2729,
+          "reasoningTokens": null,
+          "totalTokens": 182526
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 4,
+        "mcp__figma__get_design_context": 1,
+        "mcp__figma__use_figma": 3,
+        "mcp__figma__get_screenshot": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 9
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 22
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__get_design_context",
+          "arguments": {
+            "depth": 4,
+            "includeScreenshot": false,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 24
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 887
+          },
+          "status": "error",
+          "wallMs": 21
+        },
+        {
+          "sequence": 46,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 914
+          },
+          "status": "error",
+          "wallMs": 10
+        },
+        {
+          "sequence": 52,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 2,
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 29
+        },
+        {
+          "sequence": 58,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 1,
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 24
+        },
+        {
+          "sequence": 64,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1607
+          },
+          "status": "completed",
+          "wallMs": 73
+        },
+        {
+          "sequence": 70,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 0,
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 20
+        },
+        {
+          "sequence": 72,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "quality": "detail",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 241
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "read",
+      "repeat": 1,
+      "promptSha256": "0e037523421b544a8b0981f02dfcf966fff67bdc5ef4ad0e9e9db44a2f156d0e",
+      "sessionSha256": "68df4ca495cebf75523197196c9e88befe63ea6d4da29211106d70078a90a63e",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 14725,
+        "modelRequests": 4,
+        "steps": 4,
+        "toolCalls": 4,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 4,
+          "missingSamples": 0,
+          "inputTokens": 14646,
+          "cacheReadTokens": 54400,
+          "cacheWriteTokens": 0,
+          "outputTokens": 2104,
+          "reasoningTokens": null,
+          "totalTokens": 71150
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 13
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 9
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 4,
+            "maxNodes": 300,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 34
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 3259
+          },
+          "status": "completed",
+          "wallMs": 28
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "empty",
+      "repeat": 1,
+      "promptSha256": "9398d26b886fc8d2c4abec479ee3a6d6903b421cf6b257db98205dde35719074",
+      "sessionSha256": "f5c3989d32bc332ceba0c41d1419d7bdc1d370f0813ed408972099bc3c79c493",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 6237,
+        "modelRequests": 2,
+        "steps": 2,
+        "toolCalls": 2,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 2,
+          "missingSamples": 0,
+          "inputTokens": 2058,
+          "cacheReadTokens": 26112,
+          "cacheWriteTokens": 0,
+          "outputTokens": 174,
+          "reasoningTokens": null,
+          "totalTokens": 28344
+        }
+      },
+      "toolCounts": {
+        "figma_status": 1,
+        "mcp__figma__get_variable_defs": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 9
+        },
+        {
+          "sequence": 22,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "collectionsOnly": true,
+            "hasQuery": true
+          },
+          "status": "completed",
+          "wallMs": 17
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "edit",
+      "repeat": 1,
+      "promptSha256": "d6a92346ac06cf38eb4a639c88d7d6b070f01725ea3cd27233c92c92e630d808",
+      "sessionSha256": "de9966404cc74b1b23467c1b2ea05a61ce0a3d3449f193a16b1e75b6cbf446b8",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 26617,
+        "modelRequests": 7,
+        "steps": 7,
+        "toolCalls": 7,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 7,
+          "missingSamples": 0,
+          "inputTokens": 8313,
+          "cacheReadTokens": 118784,
+          "cacheWriteTokens": 0,
+          "outputTokens": 2291,
+          "reasoningTokens": null,
+          "totalTokens": 129388
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 2,
+        "mcp__figma__get_screenshot": 2
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 23
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 975
+          },
+          "status": "completed",
+          "wallMs": 27
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1336
+          },
+          "status": "completed",
+          "wallMs": 33
+        },
+        {
+          "sequence": 46,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "quality": "detail",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 287
+        },
+        {
+          "sequence": 52,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "quality": "detail",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 79
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "read",
+      "repeat": 2,
+      "promptSha256": "0e037523421b544a8b0981f02dfcf966fff67bdc5ef4ad0e9e9db44a2f156d0e",
+      "sessionSha256": "b69475fccbaa015b488388ebb448e94705e1a6d70b5e1889b2192a8d2699572f",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 24919,
+        "modelRequests": 9,
+        "steps": 9,
+        "toolCalls": 9,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 9,
+          "missingSamples": 0,
+          "inputTokens": 7960,
+          "cacheReadTokens": 173952,
+          "cacheWriteTokens": 0,
+          "outputTokens": 3388,
+          "reasoningTokens": null,
+          "totalTokens": 185300
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 3,
+        "figma_read_guide": 1,
+        "mcp__figma__get_variable_defs": 2
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 10
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 4,
+            "includeScreenshot": false,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 33
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 2570
+          },
+          "status": "completed",
+          "wallMs": 26
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 2181
+          },
+          "status": "completed",
+          "wallMs": 20
+        },
+        {
+          "sequence": 46,
+          "tool": "figma_read_guide",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 52,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1460
+          },
+          "status": "completed",
+          "wallMs": 25
+        },
+        {
+          "sequence": 58,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 20
+        },
+        {
+          "sequence": 64,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "summary",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 33
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "empty",
+      "repeat": 2,
+      "promptSha256": "9398d26b886fc8d2c4abec479ee3a6d6903b421cf6b257db98205dde35719074",
+      "sessionSha256": "7cb72235e26ae0928d2811358e88365648448364879417cc69f298e52a43ad10",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 5110,
+        "modelRequests": 3,
+        "steps": 3,
+        "toolCalls": 3,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 3,
+          "missingSamples": 0,
+          "inputTokens": 1601,
+          "cacheReadTokens": 42624,
+          "cacheWriteTokens": 0,
+          "outputTokens": 222,
+          "reasoningTokens": null,
+          "totalTokens": 44447
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_variable_defs": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 9
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "collectionsOnly": true,
+            "hasQuery": true
+          },
+          "status": "completed",
+          "wallMs": 18
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "edit",
+      "repeat": 2,
+      "promptSha256": "66c3e8280eb0769822e4e1ea0067e5e5b45bbf8b7cf1c494780a40596bcda90e",
+      "sessionSha256": "b8cd869d5972397689310b6a1dbfe895567376097c40373b0ca300fad9b36e75",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 15192,
+        "modelRequests": 5,
+        "steps": 5,
+        "toolCalls": 5,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 5,
+          "missingSamples": 0,
+          "inputTokens": 5933,
+          "cacheReadTokens": 74624,
+          "cacheWriteTokens": 0,
+          "outputTokens": 1657,
+          "reasoningTokens": null,
+          "totalTokens": 82214
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 2
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 10
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 10
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 2,
+            "maxNodes": 400,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 20
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 745
+          },
+          "status": "completed",
+          "wallMs": 21
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1658
+          },
+          "status": "completed",
+          "wallMs": 182
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "read",
+      "repeat": 3,
+      "promptSha256": "0e037523421b544a8b0981f02dfcf966fff67bdc5ef4ad0e9e9db44a2f156d0e",
+      "sessionSha256": "b1f6fafd917911b01e8fcf7a020f9ddbf715b392a3823a4a1ad1edad78875b39",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 14253,
+        "modelRequests": 7,
+        "steps": 7,
+        "toolCalls": 6,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 7,
+          "missingSamples": 0,
+          "inputTokens": 4468,
+          "cacheReadTokens": 110592,
+          "cacheWriteTokens": 0,
+          "outputTokens": 1430,
+          "reasoningTokens": null,
+          "totalTokens": 116490
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 1,
+        "mcp__figma__get_variable_defs": 2
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 26,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 32,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 3,
+            "maxNodes": 200,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 23
+        },
+        {
+          "sequence": 38,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1358
+          },
+          "status": "completed",
+          "wallMs": 19
+        },
+        {
+          "sequence": 44,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "full",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 19
+        },
+        {
+          "sequence": 50,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "profile": "summary",
+            "hasIds": true
+          },
+          "status": "completed",
+          "wallMs": 20
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "empty",
+      "repeat": 3,
+      "promptSha256": "9398d26b886fc8d2c4abec479ee3a6d6903b421cf6b257db98205dde35719074",
+      "sessionSha256": "e786a7392750a1f777328e9ca3193ad30f0423a4ec91acf21d586ce3e4ac3bfa",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 6136,
+        "modelRequests": 4,
+        "steps": 4,
+        "toolCalls": 3,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 4,
+          "missingSamples": 0,
+          "inputTokens": 1564,
+          "cacheReadTokens": 56704,
+          "cacheWriteTokens": 0,
+          "outputTokens": 217,
+          "reasoningTokens": null,
+          "totalTokens": 58485
+        }
+      },
+      "toolCounts": {
+        "figma_status": 1,
+        "skill": 1,
+        "mcp__figma__get_variable_defs": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 26,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 9
+        },
+        {
+          "sequence": 32,
+          "tool": "mcp__figma__get_variable_defs",
+          "arguments": {
+            "collectionsOnly": true,
+            "hasQuery": true
+          },
+          "status": "completed",
+          "wallMs": 19
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    },
+    {
+      "version": "0.2.5",
+      "task": "edit",
+      "repeat": 3,
+      "promptSha256": "df624f1460d4514cf867cd7a9369e847b75706d7e2b3ebe093ca933175269384",
+      "sessionSha256": "6a3531197f3ae634a0dd96811d07d32a347a60593664f7408892aacb2295e1fd",
+      "models": [
+        {
+          "provider": "deepseek-official",
+          "model": "deepseek-flash",
+          "reasoningEffort": "high"
+        }
+      ],
+      "totals": {
+        "turns": 1,
+        "completedTurns": 1,
+        "activeWallMs": 17088,
+        "modelRequests": 7,
+        "steps": 7,
+        "toolCalls": 7,
+        "toolErrors": 0,
+        "usage": {
+          "complete": true,
+          "samples": 7,
+          "missingSamples": 0,
+          "inputTokens": 7318,
+          "cacheReadTokens": 114944,
+          "cacheWriteTokens": 0,
+          "outputTokens": 1971,
+          "reasoningTokens": null,
+          "totalTokens": 124233
+        }
+      },
+      "toolCounts": {
+        "skill": 1,
+        "figma_status": 1,
+        "mcp__figma__get_metadata": 1,
+        "mcp__figma__use_figma": 3,
+        "mcp__figma__get_screenshot": 1
+      },
+      "calls": [
+        {
+          "sequence": 20,
+          "tool": "skill",
+          "arguments": {},
+          "status": "completed",
+          "wallMs": 8
+        },
+        {
+          "sequence": 22,
+          "tool": "figma_status",
+          "arguments": {
+            "compact": true
+          },
+          "status": "completed",
+          "wallMs": 7
+        },
+        {
+          "sequence": 28,
+          "tool": "mcp__figma__get_metadata",
+          "arguments": {
+            "depth": 2,
+            "profile": "summary",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 20
+        },
+        {
+          "sequence": 34,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1359
+          },
+          "status": "completed",
+          "wallMs": 33
+        },
+        {
+          "sequence": 40,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 689
+          },
+          "status": "completed",
+          "wallMs": 62
+        },
+        {
+          "sequence": 46,
+          "tool": "mcp__figma__use_figma",
+          "arguments": {
+            "hasCode": true,
+            "scriptBytes": 1160
+          },
+          "status": "completed",
+          "wallMs": 25
+        },
+        {
+          "sequence": 52,
+          "tool": "mcp__figma__get_screenshot",
+          "arguments": {
+            "quality": "detail",
+            "hasNodeId": true
+          },
+          "status": "completed",
+          "wallMs": 250
+        }
+      ],
+      "retriedAttempts": 0,
+      "correctness": {
+        "passed": true,
+        "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+      }
+    }
+  ],
+  "exploratoryCandidate": {
+    "commit": "66c9db84c724270480e38100cd08d83e9a939341",
+    "includedInFinalComparison": false,
+    "reason": "Scoped walker exposed a missing Proxy has trap; fixed and fixture restored before collecting all final candidate runs.",
+    "runs": [
+      {
+        "task": "read",
+        "totals": {
+          "turns": 1,
+          "completedTurns": 1,
+          "activeWallMs": 18214,
+          "modelRequests": 8,
+          "steps": 8,
+          "toolCalls": 9,
+          "toolErrors": 0,
+          "usage": {
+            "complete": true,
+            "samples": 8,
+            "missingSamples": 0,
+            "inputTokens": 34573,
+            "cacheReadTokens": 161536,
+            "cacheWriteTokens": 0,
+            "outputTokens": 1364,
+            "reasoningTokens": null,
+            "totalTokens": 197473
+          }
+        },
+        "correctness": {
+          "passed": true,
+          "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+        }
+      },
+      {
+        "task": "empty",
+        "totals": {
+          "turns": 1,
+          "completedTurns": 1,
+          "activeWallMs": 5926,
+          "modelRequests": 4,
+          "steps": 4,
+          "toolCalls": 3,
+          "toolErrors": 0,
+          "usage": {
+            "complete": true,
+            "samples": 4,
+            "missingSamples": 0,
+            "inputTokens": 3210,
+            "cacheReadTokens": 55680,
+            "cacheWriteTokens": 0,
+            "outputTokens": 289,
+            "reasoningTokens": null,
+            "totalTokens": 59179
+          }
+        },
+        "correctness": {
+          "passed": true,
+          "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+        }
+      },
+      {
+        "task": "edit",
+        "totals": {
+          "turns": 1,
+          "completedTurns": 1,
+          "activeWallMs": 34530,
+          "modelRequests": 12,
+          "steps": 12,
+          "toolCalls": 12,
+          "toolErrors": 0,
+          "usage": {
+            "complete": true,
+            "samples": 12,
+            "missingSamples": 0,
+            "inputTokens": 9018,
+            "cacheReadTokens": 206848,
+            "cacheWriteTokens": 0,
+            "outputTokens": 4018,
+            "reasoningTokens": null,
+            "totalTokens": 219884
+          }
+        },
+        "correctness": {
+          "passed": true,
+          "basis": "Requested facts, actual tool results and independent structural verification; not a claim that unsolicited extra facts are error-free."
+        }
+      }
+    ]
+  },
+  "independentVerification": {
+    "versions": {
+      "plugin": "0.2.5",
+      "companion": "0.2.5"
+    },
+    "pass": true,
+    "checkedInstances": 48,
+    "framesChecked": 4,
+    "mainRadius": 8,
+    "collectionsPass": true,
+    "allFramesPass": true,
+    "allChildrenMembershipChecksPass": true,
+    "interval": {
+      "beforeSequence": 0,
+      "afterSequence": 1,
+      "window": {
+        "afterSequence": 0,
+        "throughSequence": 1,
+        "expected": 1,
+        "returned": 1,
+        "dropped": 0,
+        "complete": true
+      },
+      "totals": {
+        "succeeded": 1,
+        "failed": 0,
+        "hostMs": 30.978,
+        "textBytes": 4851,
+        "imageBytes": 0,
+        "imageCount": 0
+      },
+      "entries": [
+        {
+          "sequence": 1,
+          "tool": "use_figma",
+          "status": "ok",
+          "hostMs": 30.978,
+          "queueMs": 0.041,
+          "bridgeMs": 30.865,
+          "runtimeMs": 18,
+          "exportMs": 0,
+          "serializationMs": 0,
+          "nodeCount": 0,
+          "textBytes": 4851,
+          "imageCount": 0,
+          "imageBytes": 0,
+          "imageDimensions": []
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Three runs per task per version; exploratory evidence, not a stable latency guarantee or P95. Versions were sequential, not randomized/interleaved; model and cache/network variation remain confounders.",
+    "Old empty-collection runs 2 and 3 were incorrect but remain in cost totals; equal cost does not imply equal task quality.",
+    "Candidate known-target read run 2 omitted the outer script return twice and retried. Tool error count zero does not mean no wasted work.",
+    "Candidate read run 3 volunteered #2563EA; the actual rounded color is #2563EB. Requested binding facts were correct; the extra color claim was not.",
+    "No complete variable creation/component generation benchmark is claimed; these remain scripted operations for later phases.",
+    "Published rows omit private session paths, design IDs, scripts, responses, credentials and raw logs. Prompts use placeholder IDs; hashes refer to the actual identical paired prompts."
+  ]
+}
