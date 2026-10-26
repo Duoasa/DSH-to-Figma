@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "0.2.4",
+  "fixture": "phase-one-fixed-data-v1",
+  "environment": {
+    "node": "v24.18.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "measurement": {
+    "source": "synthetic Plugin API fixtures; no Figma editor or model calls",
+    "warmupRuns": 2,
+    "measuredRuns": 7,
+    "actualModelUsage": null,
+    "modelTurns": null,
+    "taskWallMs": null,
+    "screenshotExportMs": null
+  },
+  "dataset": {
+    "subtreeNodes": 521,
+    "fonts": 800,
+    "variables": 300
+  },
+  "comparisons": [
+    {
+      "task": "Discover the same subtree identities and bounds",
+      "full": {
+        "method": "get_metadata",
+        "args": {
+          "nodeId": "1:3",
+          "depth": 3
+        },
+        "modelTextUtf8Bytes": 664692,
+        "syntheticRuntimeP50Ms": 20.561,
+        "syntheticRuntimeMinMs": 20.332,
+        "syntheticRuntimeMaxMs": 22.063,
+        "imageCount": 0
+      },
+      "optimized": {
+        "method": "get_metadata",
+        "args": {
+          "nodeId": "1:3",
+          "depth": 3,
+          "profile": "summary"
+        },
+        "modelTextUtf8Bytes": 82096,
+        "syntheticRuntimeP50Ms": 3.011,
+        "syntheticRuntimeMinMs": 2.817,
+        "syntheticRuntimeMaxMs": 3.453,
+        "imageCount": 0
+      },
+      "identityCheck": "passed",
+      "textByteReductionPercent": 87.649
+    },
+    {
+      "task": "Find the four available styles for Bench Sans 025",
+      "full": {
+        "method": "list_fonts",
+        "args": {},
+        "modelTextUtf8Bytes": 46601,
+        "syntheticRuntimeP50Ms": 0.32,
+        "syntheticRuntimeMinMs": 0.292,
+        "syntheticRuntimeMaxMs": 0.373,
+        "imageCount": 0
+      },
+      "optimized": {
+        "method": "list_fonts",
+        "args": {
+          "family": "Bench Sans 025",
+          "limit": 10
+        },
+        "modelTextUtf8Bytes": 338,
+        "syntheticRuntimeP50Ms": 0.029,
+        "syntheticRuntimeMinMs": 0.028,
+        "syntheticRuntimeMaxMs": 0.081,
+        "imageCount": 0
+      },
+      "matchCheck": "passed"
+    },
+    {
+      "task": "Read five known variables in Light mode",
+      "full": {
+        "method": "get_variable_defs",
+        "args": {},
+        "modelTextUtf8Bytes": 97500,
+        "syntheticRuntimeP50Ms": 0.736,
+        "syntheticRuntimeMinMs": 0.733,
+        "syntheticRuntimeMaxMs": 1.003,
+        "imageCount": 0
+      },
+      "optimized": {
+        "method": "get_variable_defs",
+        "args": {
+          "ids": [
+            "VariableID:bench-20",
+            "VariableID:bench-21",
+            "VariableID:bench-22",
+            "VariableID:bench-23",
+            "VariableID:bench-24"
+          ],
+          "modeIds": [
+            "light"
+          ],
+          "limit": 10
+        },
+        "modelTextUtf8Bytes": 1680,
+        "syntheticRuntimeP50Ms": 0.046,
+        "syntheticRuntimeMinMs": 0.035,
+        "syntheticRuntimeMaxMs": 0.054,
+        "imageCount": 0
+      },
+      "matchCheck": "passed"
+    }
+  ],
+  "pagination": {
+    "method": "get_metadata",
+    "args": {
+      "nodeId": "1:3",
+      "profile": "summary",
+      "depth": 1,
+      "offset": 10,
+      "limit": 5
+    },
+    "modelTextUtf8Bytes": 1059,
+    "syntheticRuntimeP50Ms": 0.041,
+    "syntheticRuntimeMinMs": 0.04,
+    "syntheticRuntimeMaxMs": 0.043,
+    "imageCount": 0
+  },
+  "limits": [
+    "UTF-8 bytes are not model tokens or billed usage.",
+    "Fixture timings exclude model generation, host scheduling, bridge transfer and real Figma API work.",
+    "P50/min/max describe this run only; no P95 claim from a small sample.",
+    "Compare end-to-end task correctness and total calls before claiming user-visible savings."
+  ]
+}

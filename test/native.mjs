@@ -35,6 +35,10 @@ try{
   const id=await connect(bridge),fixture=await fixtureRuntime()
   assert.equal((await call(chat,'figma_select_document',{connectionId:id})).isError,true)
   const autoRead=call(b,'mcp__figma__get_metadata');await runJob(bridge,id,fixture.runtime);assert.equal((await autoRead).isError,false)
+  const summaryRead=call(b,'mcp__figma__get_metadata',{profile:'summary'});await runJob(bridge,id,fixture.runtime);const summary=await summaryRead
+  assert.equal(summary.isError,false,JSON.stringify(summary));assert.doesNotMatch(JSON.stringify(summary.content),/runtimeMs|serializationMs/)
+  const health=(await call(b,'figma_status',{compact:true,includeMetrics:true})).value.structuredContent
+  assert.equal(health.tools,undefined);assert.equal(health.performance.completed,2);assert.equal(health.performance.modelUsage,null)
   for(const owner of [a,text])assert.equal((await call(owner,'figma_select_document',{connectionId:id})).isError,false)
   const write=call(a,'mcp__figma__use_figma',{code:"const card=figma.createAutoLayout('VERTICAL',{name:'Native smoke'});figma.currentPage.appendChild(card);return {id:card.id}"})
   await runJob(bridge,id,fixture.runtime);const written=await write;assert.equal(written.isError,false,JSON.stringify(written));const nodeId=written.value.structuredContent.result.id
