@@ -4,6 +4,7 @@ import { mkdtemp,rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { applyWithDependencies } from '../index.mjs'
+import packageJson from '../package.json' with { type: 'json' }
 function context(){const definitions=new Map(),listeners=new Map();return {definitions,listeners,ctx:{tools:{register(def){if(definitions.has(def.name))throw Error('duplicate');definitions.set(def.name,def);return()=>definitions.delete(def.name)}},skills:{registerProvider(){}},systemPrompt:{section(){},getSectionOrder(){return 1}},logger:{warn(){},info(){}},effect(){},on(name,fn){listeners.set(name,fn)},get(){return undefined}}}}
 const response=value=>({content:[{type:'text',text:JSON.stringify(value)}],structuredContent:value})
 test('official catalog, raw contracts, isolated sessions, resources/prompts and failed-call non-replay',async t=>{
@@ -109,17 +110,53 @@ test('compact status, optimized-query capability gate and private performance di
   const invoke=(name,args={})=>definitions.get(name).execute(args,exec)
   const compact=(await invoke('figma_status',{compact:true})).structuredContent
   assert.equal(compact.available,true);assert.equal(compact.tools,undefined);assert.equal(compact.setup,undefined);assert.equal(compact.performance,undefined)
+  assert.equal(compact.pluginVersion,packageJson.version)
   const old=(await (await request(bridge,'/connect',{name:'Old',editorType:'figma'})).json()).connectionId
   await assert.rejects(invoke('mcp__figma__get_metadata',{profile:'summary'}),/rerun/)
   assert.equal(calls.length,0)
   await invoke('mcp__figma__get_metadata');assert.equal(calls.at(-1).inspect,true)
   bridge.remove(old)
-  const fresh=(await (await request(bridge,'/connect',{name:'Current',editorType:'figma',featureVersion:1})).json()).connectionId
+  const fresh=(await (await request(bridge,'/connect',{name:'Current',editorType:'figma',featureVersion:1,companionVersion:'0.2.4'})).json()).connectionId
   await invoke('figma_select_document',{connectionId:fresh})
   const output=await invoke('mcp__figma__get_metadata',{profile:'summary'})
   assert.equal(calls.at(-1).inspect,false)
   assert.doesNotMatch(JSON.stringify(output),/runtimeMs|queueMs/)
-  const performance=(await invoke('figma_status',{compact:true,includeMetrics:true})).structuredContent.performance
+  const summary=(await invoke('figma_status',{compact:true,includeMetrics:true})).structuredContent
+  assert.equal(summary.documents[0].companionVersion,'0.2.4')
+  assert.equal(summary.performance.entries,undefined)
+  const performance=(await invoke('figma_status',{compact:true,includeMetrics:true,metricsDetails:true})).structuredContent.performance
   assert.equal(performance.completed,2);assert.equal(performance.entries[1].queueMs,1);assert.equal(performance.modelUsage,null)
   assert.doesNotMatch(JSON.stringify(performance),/sensitive-node|private-design/)
+  await assert.rejects(invoke('mcp__figma__get_variable_defs',{collectionsOnly:true}),/rerun/)
+  assert.equal(calls.length,2)
+})
+
+test('performance cursors isolate Work sessions and reset on session disposal',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs')
+  const {connect}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-metrics-session-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions,listeners}=context(),bridge=new LocalBridge({token:'a'.repeat(64),port:0})
+  bridge.call=async()=>({value:{ok:true},images:[]})
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  await connect(bridge)
+  const agentA={session:{id:'PRIVATE_SESSION_A',header:{cwd:home}}},agentB={session:{id:'PRIVATE_SESSION_B',header:{cwd:home}}}
+  const invoke=(agent,name,args={})=>definitions.get(name).execute(args,{agent,signal:new AbortController().signal})
+  const status=(agent,args={})=>invoke(agent,'figma_status',{compact:true,includeMetrics:true,...args}).then(result=>result.structuredContent.performance)
+  const baseline=(await status(agentA)).cursor
+  await invoke(agentA,'mcp__figma__get_metadata')
+  await invoke(agentB,'mcp__figma__get_metadata')
+  await invoke(agentA,'mcp__figma__get_metadata')
+  const a=await status(agentA,{metricsSince:baseline,metricsDetails:true}),b=await status(agentB)
+  assert.equal(a.completed,2);assert.equal(a.window.returned,2);assert.equal(a.totals.succeeded,2)
+  assert.equal(b.completed,1);assert.equal(b.window.returned,1)
+  assert.equal(a.window.complete,true);assert.equal(a.entries.length,2)
+  assert.equal((await status(agentA,{metricsSince:a.cursor})).window.returned,0,'status reads are not counted as canvas calls')
+  assert.doesNotMatch(JSON.stringify([a,b]),/PRIVATE_SESSION/)
+  await assert.rejects(status(agentB,{metricsSince:baseline}),/another session or plugin run/)
+  await assert.rejects(invoke(agentA,'figma_status',{metricsSince:baseline}),/require includeMetrics/)
+  await assert.rejects(definitions.get('figma_status').execute({includeMetrics:true}),/active Work session/)
+  listeners.get('agent/disposed')({agent:agentA})
+  const reopened={session:{id:agentA.session.id,header:{cwd:home}}}
+  await assert.rejects(status(reopened,{metricsSince:baseline}),/another session or plugin run/)
+  assert.equal((await status(reopened)).completed,0)
 })

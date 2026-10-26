@@ -36,3 +36,5 @@ Combine related edits and structural readback in one script; return IDs, changed
 Append before setting child `layoutSizingHorizontal/Vertical = 'FILL'`. HUG belongs on compatible auto-layout containers. Set width before wrapping text; use `textAutoResize='HEIGHT'` and a fixed horizontal dimension. Do not apply `characters` to containers or component-property definitions to a component variant when the parent set owns them.
 
 Use `await figma.setCurrentPageAsync(page)` for dynamic-page access. Load a page before inspecting its children; `await page.loadAsync()` is available. Avoid loading all pages for a targeted edit. `getNodeByIdAsync`, font loads, variable/style lookups and exports must be awaited.
+
+For instance relationships, use `await instance.getMainComponentAsync()`. The synchronous `instance.mainComponent` getter is unavailable with dynamic-page access and can fail even in an otherwise read-only script.
