@@ -96,3 +96,30 @@ test('default local prepares a private companion and binds one file without sile
   await definitions.get('figma_select_document').execute({connectionId:second},exec)
   assert.equal((await invoke()).structuredContent.result.id,second)
 })
+
+test('compact status, optimized-query capability gate and private performance diagnostics',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs')
+  const {request}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-performance-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions}=context(),bridge=new LocalBridge({token:'a'.repeat(64),port:0})
+  const calls=[]
+  bridge.call=async(id,method,args,options)=>{calls.push({id,method,args,inspect:options.inspect});options.onMetric({queueMs:1,bridgeMs:3});return{value:{id:'sensitive-node',name:'private-design'},images:[],metrics:{runtimeMs:2,nodeCount:1,exportMs:0,serializationMs:0,images:[]}}}
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  const exec={agent:{session:{id:'a',header:{cwd:home}}},signal:new AbortController().signal}
+  const invoke=(name,args={})=>definitions.get(name).execute(args,exec)
+  const compact=(await invoke('figma_status',{compact:true})).structuredContent
+  assert.equal(compact.available,true);assert.equal(compact.tools,undefined);assert.equal(compact.setup,undefined);assert.equal(compact.performance,undefined)
+  const old=(await (await request(bridge,'/connect',{name:'Old',editorType:'figma'})).json()).connectionId
+  await assert.rejects(invoke('mcp__figma__get_metadata',{profile:'summary'}),/rerun/)
+  assert.equal(calls.length,0)
+  await invoke('mcp__figma__get_metadata');assert.equal(calls.at(-1).inspect,true)
+  bridge.remove(old)
+  const fresh=(await (await request(bridge,'/connect',{name:'Current',editorType:'figma',featureVersion:1})).json()).connectionId
+  await invoke('figma_select_document',{connectionId:fresh})
+  const output=await invoke('mcp__figma__get_metadata',{profile:'summary'})
+  assert.equal(calls.at(-1).inspect,false)
+  assert.doesNotMatch(JSON.stringify(output),/runtimeMs|queueMs/)
+  const performance=(await invoke('figma_status',{compact:true,includeMetrics:true})).structuredContent.performance
+  assert.equal(performance.completed,2);assert.equal(performance.entries[1].queueMs,1);assert.equal(performance.modelUsage,null)
+  assert.doesNotMatch(JSON.stringify(performance),/sensitive-node|private-design/)
+})

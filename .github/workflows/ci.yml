@@ -17,6 +17,8 @@ jobs:
       - run: npm run test:all
       - name: Generated companion must be committed
         run: git diff --exit-code -- companion/code.js
+      - name: Bounded query benchmark and discovery equivalence
+        run: npm run benchmark -- --runs 3 --output /tmp/dsh-figma-benchmark.json
       - run: npm run package:companion
       - run: npm pack --ignore-scripts --pack-destination dist
       - uses: actions/upload-artifact@v4

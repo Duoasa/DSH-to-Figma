@@ -32,7 +32,7 @@ export async function fixtureRuntime(){
 export async function request(bridge,path,data={},overrides={}){
   return fetch(`http://127.0.0.1:${bridge.port}${path}`,{method:'POST',headers:{authorization:`Bearer ${bridge.token}`,'content-type':'application/json',...overrides.headers},body:JSON.stringify(data),...overrides})
 }
-export async function connect(bridge,name='Canvas'){const response=await request(bridge,'/connect',{name,editorType:'figma'});return (await response.json()).connectionId}
+export async function connect(bridge,name='Canvas',featureVersion=1){const response=await request(bridge,'/connect',{name,editorType:'figma',featureVersion});return (await response.json()).connectionId}
 export async function runJob(bridge,id,runtime){
   const response=await request(bridge,'/poll',{connectionId:id}),job=await response.json()
   if(!job.id)throw new Error('No queued job')
