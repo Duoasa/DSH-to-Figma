@@ -54,7 +54,7 @@ test('rejects invalid script, selector, missing selection and oversized/malforme
   const f=await fixtureRuntime()
   await assert.rejects(f.runtime.run('use_figma',{code:''}),/script/)
   await assert.rejects(f.runtime.run('get_screenshot'),/Select/)
-  await assert.rejects(f.runtime.run('use_figma',{code:'return figma.currentPage.query("TEXT > RECTANGLE")'}),/supports/)
+  await assert.rejects(f.runtime.run('use_figma',{code:'return figma.currentPage.query("TEXT > > RECTANGLE")'}),/selector/)
   await assert.rejects(f.runtime.run('download_assets',{nodeIds:[],format:'PNG'}),/1–20/)
   await assert.rejects(f.runtime.run('import_scene',{nodes:[{type:'NOT_A_NODE'}]}),/Unsupported/)
 })

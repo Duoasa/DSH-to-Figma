@@ -7,7 +7,7 @@ export async function fixtureRuntime(){
     constructor(type){this.id=`1:${sequence++}`;this.name=type;this.type=type;this.width=100;this.height=100;this.x=0;this.y=0;this.fills=[];this.children=[];this.data={};nodes.set(this.id,this)}
     appendChild(child){if(!nodes.has(child.id)||!(child instanceof Node))throw new Error('Expected actual Figma node');if(child.parent)child.parent.children=child.parent.children.filter(n=>n!==child);this.children.push(child);child.parent=this}
     resize(w,h){this.width=w;this.height=h}
-    findAll(fn){return this.children.flatMap(n=>[...(fn(n)?[n]:[]),...n.findAll(fn)])}
+    findAll(fn){return (this.children||[]).flatMap(n=>[...(fn(n)?[n]:[]),...(n.findAll?n.findAll(fn):[])])}
     findAllWithCriteria({types}){return this.findAll(n=>types.includes(n.type))}
     async exportAsync(){return new Uint8Array(PNG)}
     async getCSSAsync(){return {display:'flex'}}
@@ -25,6 +25,7 @@ export async function fixtureRuntime(){
     teamLibrary:{getAvailableLibraryVariableCollectionsAsync:async()=>[]},getLocalPaintStylesAsync:async()=>[{id:'paint:1',name:'Surface',type:'PAINT'}],getLocalTextStylesAsync:async()=>[],getLocalEffectStylesAsync:async()=>[],getLocalGridStylesAsync:async()=>[],
     createImage:bytes=>({hash:'imagehash',getSizeAsync:async()=>({width:320,height:200})}),getImageByHash:()=>({getBytesAsync:async()=>new Uint8Array(PNG)}),createNodeFromSvg:()=>new Node('FRAME')}
   const context=vm.createContext({Uint8Array,Promise,Buffer,console,setTimeout,clearTimeout})
+  vm.runInContext(await readFile(new URL('../companion/helpers.js',import.meta.url),'utf8'),context)
   vm.runInContext(await readFile(new URL('../companion/runtime.js',import.meta.url),'utf8'),context)
   const runtime=new context.DshFigmaRuntime(figma)
   return {runtime,figma,page,nodes,fonts,get undo(){return undo}}
@@ -37,7 +38,7 @@ export async function runJob(bridge,id,runtime){
   const response=await request(bridge,'/poll',{connectionId:id}),job=await response.json()
   if(!job.id)throw new Error('No queued job')
   let payload
-  try{payload={ok:true,result:await runtime.run(job.method,job.args)}}catch(e){payload={ok:false,error:e.message}}
+  try{payload={ok:true,result:await runtime.run(job.method,job.args)}}catch(e){payload={ok:false,error:e.message,safeToRetryWithoutCanvasRead:e.safeToRetryWithoutCanvasRead===true}}
   const posted=await request(bridge,'/result',{connectionId:id,id:job.id,...payload})
   if(posted.status!==200)throw new Error('Result rejected')
   return job

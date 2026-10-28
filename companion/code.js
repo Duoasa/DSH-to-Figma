@@ -1,3 +1,125 @@
+/* MIT — Copyright (c) 2026 Duoasa. Public figma-use helper contract, local implementation. */
+;(function (scope) {
+  const forbidden = new Set(['__proto__', 'prototype', 'constructor'])
+  function propertyValues(object, path, mainComponent) {
+    const parts = path.split('.')
+    if (parts.some(part => !part || forbidden.has(part))) throw new Error('Invalid property path: ' + path)
+    let values = [object]
+    for (const part of parts) values = values.flatMap(value => {
+      if (value == null || typeof value === 'symbol') return []
+      if (part === '*') return Array.isArray(value) ? value : []
+      if (part === 'mainComponent' && value.type === 'INSTANCE') return [mainComponent(value)]
+      try { return [value[part]] } catch { return [] } // A type-specific getter is not available on every node.
+    })
+    return values
+  }
+  function compileSelector(source, mainComponent, depth = 0) {
+    if (typeof source !== 'string' || !source.trim() || source.length > 8000 || depth > 20) throw new Error('Invalid or excessively nested query selector')
+    let position = 0
+    const fail = () => { throw new Error('Unsupported or malformed query selector near: ' + source.slice(position, position + 60)) }
+    const space = () => { const start = position; while (/\s/.test(source[position] || '') && position < source.length) position++; return position > start }
+    function enclosed(open, close) {
+      if (source[position++] !== open) fail()
+      const start = position
+      let level = 1, quote = null, escaped = false
+      for (; position < source.length; position++) {
+        const c = source[position]
+        if (escaped) { escaped = false; continue }
+        if (c === '\\') { escaped = true; continue }
+        if (quote) { if (c === quote) quote = null; continue }
+        if (c === '"' || c === "'") { quote = c; continue }
+        if (c === open) level++
+        if (c === close && --level === 0) return source.slice(start, position++)
+      }
+      fail()
+    }
+    function compound() {
+      const tests = []
+      const rest = source.slice(position)
+      const id = /^(?:#([\w-]+(?::\d+)?(?:;[\w-]+(?::\d+)?)*)|((?:I?\d+:\d+(?:;\d+:\d+)*)|(?:[0-9a-f]{8}-[0-9a-f-]{27,})))\b/i.exec(rest)
+      if (id) { position += id[0].length; tests.push(node => node.id === (id[1] || id[2])) }
+      else {
+        const type = /^(\*|[a-z_][\w-]*)/i.exec(rest)
+        if (type) { position += type[0].length; if (type[1] !== '*') tests.push(node => node.type === type[1].toUpperCase()); else tests.push(() => true) }
+      }
+      while (position < source.length) {
+        if (source[position] === '[') {
+          const attribute = enclosed('[', ']').trim()
+          const match = /^(\w+(?:\.(?:\w+|\*))*)\s*(?:(\*=|\^=|\$=|=)\s*(.+))?$/.exec(attribute)
+          if (!match || match[1].split('.').some(part => forbidden.has(part))) fail()
+          const [, path, operator, input] = match
+          let expected = input?.trim()
+          if (expected?.startsWith('"') || expected?.startsWith("'")) {
+            const quote = expected[0]
+            if (expected.at(-1) !== quote || expected.length < 2) fail()
+            expected = expected.slice(1, -1).replace(/\\(.)/g, '$1')
+          } else if (expected === 'true' || expected === 'false') expected = expected === 'true'
+          else if (expected && /^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(expected)) expected = Number(expected)
+          tests.push(node => propertyValues(node, path, mainComponent).some(actual => {
+            if (!operator) return actual !== undefined && actual !== null
+            if (path === 'mainComponent' && actual && typeof actual === 'object') actual = actual.id
+            if (operator === '=') return actual === expected
+            if (typeof actual !== 'string' || typeof expected !== 'string') return false
+            return operator === '*=' ? actual.includes(expected) : operator === '^=' ? actual.startsWith(expected) : actual.endsWith(expected)
+          }))
+        } else if (source[position] === ':') {
+          position++
+          const name = /^[a-z-]+/i.exec(source.slice(position))?.[0]?.toLowerCase()
+          if (!name) fail()
+          position += name.length
+          if (['not', 'is', 'where'].includes(name)) {
+            const match = compileSelector(enclosed('(', ')'), mainComponent, depth + 1)
+            tests.push((node, boundary) => name === 'not' ? !match(node, boundary) : match(node, boundary))
+          } else if (['first-child', 'last-child', 'nth-child'].includes(name)) {
+            const number = name === 'nth-child' ? enclosed('(', ')').trim() : null
+            if (number !== null && !/^[1-9]\d*$/.test(number)) fail()
+            tests.push(node => {
+              const siblings = node.parent?.children || [], index = siblings.indexOf(node)
+              return index >= 0 && index === (name === 'first-child' ? 0 : name === 'last-child' ? siblings.length - 1 : Number(number) - 1)
+            })
+          } else fail()
+        } else break
+      }
+      if (!tests.length) fail()
+      return (node, boundary) => tests.every(test => test(node, boundary))
+    }
+    const groups = []
+    while (position < source.length) {
+      space()
+      const parts = [compound()], links = []
+      for (;;) {
+        const separated = space(), c = source[position]
+        if (!c || c === ',') break
+        if ('>+~'.includes(c)) { links.push(c); position++; space() }
+        else if (separated) links.push(' ')
+        else fail()
+        parts.push(compound())
+      }
+      function match(node, index, boundary) {
+        if (!node || !parts[index](node, boundary)) return false
+        if (index === 0) return true
+        if (node === boundary) return false
+        const relation = links[index - 1]
+        if (relation === '>') return match(node.parent, index - 1, boundary)
+        if (relation === ' ') {
+          for (let parent = node.parent; parent; parent = parent.parent) {
+            if (match(parent, index - 1, boundary)) return true
+            if (parent === boundary) break
+          }
+          return false
+        }
+        const siblings = node.parent?.children || [], at = siblings.indexOf(node)
+        if (relation === '+') return at > 0 && match(siblings[at - 1], index - 1, boundary)
+        return siblings.slice(0, Math.max(0, at)).some(sibling => match(sibling, index - 1, boundary))
+      }
+      groups.push((node, boundary) => match(node, parts.length - 1, boundary))
+      if (source[position] === ',') { position++; space(); if (position === source.length) fail() }
+    }
+    return (node, boundary) => groups.some(group => group(node, boundary))
+  }
+  scope.DshFigmaHelpers = { compileSelector, propertyValues }
+})(globalThis)
+
 /* MIT — Copyright (c) 2026 Duoasa. Runs inside the Figma plugin sandbox only. */
 ;(function (scope) {
   const MAX_NODES = 1500
@@ -13,7 +135,7 @@
   const fields = ['id','name','type','visible','locked','x','y','width','height','rotation','opacity','blendMode','fills','strokes','strokeWeight','strokeAlign','effects','cornerRadius','layoutMode','layoutWrap','primaryAxisSizingMode','counterAxisSizingMode','primaryAxisAlignItems','counterAxisAlignItems','layoutSizingHorizontal','layoutSizingVertical','itemSpacing','counterAxisSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft','clipsContent','characters','fontName','fontSize','fontWeight','textAlignHorizontal','textAlignVertical','textAutoResize','lineHeight','letterSpacing','boundVariables','componentProperties','componentPropertyDefinitions','variantProperties','reactions']
   const jsonValue = value => value === undefined || typeof value === 'symbol' ? undefined : JSON.parse(JSON.stringify(value))
   class Runtime {
-    constructor(figma) { this.figma = figma; this.metrics = null; this.readOptions = {} }
+    constructor(figma, {onProgress = () => {}} = {}) { this.figma = figma; this.metrics = null; this.readOptions = {}; this.onProgress = onProgress }
     async node(id) {
       const node = id ? await this.figma.getNodeByIdAsync(id.replace(/^(\d+)-(\d+)$/, '$1:$2')) : this.figma.currentPage.selection[0]
       if (!node) throw new Error('Select a node in Figma or provide an existing nodeId')
@@ -58,68 +180,145 @@
       }
       return result
     }
-    async screenshot(node, args = {}) {
+    async screenshot(node, args = {}, inline = false) {
       if(typeof node.exportAsync!=='function')throw new Error('This node cannot be exported; choose a frame or scene node')
       if(args.quality!==undefined&&!['overview','detail'].includes(args.quality))throw new Error('quality must be overview or detail')
       const edge=args.quality==='overview'?800:1600
-      const scale=args.scale??Math.min(1,edge/Math.max(node.width||1,node.height||1))
-      if(!Number.isFinite(scale)||scale<0.01||scale>4)throw new Error('Screenshot scale must be 0.01–4')
+      const scale=args.scale??(inline&&args.quality===undefined?Math.min(0.5,1024/Math.max(node.width||1,node.height||1)):Math.min(1,edge/Math.max(node.width||1,node.height||1)))
+      if(!Number.isFinite(scale)||scale<=0||scale>4)throw new Error('Screenshot scale must be positive and at most 4')
       const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false})
       if(this.metrics){this.metrics.exportMs+=now()-started;const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3];this.metrics.images.push({...(bytes.length>=24&&bytes[0]===137&&bytes[1]===80?{width:dimension(16),height:dimension(20)}:{}),bytes:bytes.length})}
       if(bytes.length>8*1024*1024)throw new Error('Screenshot exceeds 8 MiB; select a smaller node or scale')
-      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes)}
+      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes),...(inline?{name:`${node.name} (${node.width}x${node.height} at ${node.x},${node.y}).png`}:{})}
     }
-    facade(images) {
+    async facade(images, assets) {
       const runtime = this, figma = this.figma, cache = new WeakMap(), raws = new WeakMap()
+      const components = new WeakMap(), placeholders = new Map()
+      const {compileSelector, propertyValues} = scope.DshFigmaHelpers
+      const isNode = value => value && typeof value.id === 'string' && typeof value.type === 'string'
+      const progress = () => { try { runtime.onProgress([...placeholders.values()].map(n=>({id:n.id,name:n.name}))) } catch {} }
+      // Dynamic-page Figma forbids the synchronous instance.mainComponent getter.
+      // Prime the synchronous query helper from the public async API, scoped to loaded targets.
+      async function hydrate(target) {
+        if (!isNode(target) || target.type==='DOCUMENT') return
+        const instances = [target, ...(target.findAll && target.findAllWithCriteria ? target.findAllWithCriteria({types:['INSTANCE']}) : [])].filter(node=>node.type==='INSTANCE')
+        for (const instance of instances) if (typeof instance.getMainComponentAsync === 'function') components.set(instance, await instance.getMainComponentAsync())
+      }
+      const mainComponent = node => {
+        if (components.has(node)) return components.get(node)
+        try { return node.mainComponent } catch { throw new Error('Call await instance.getMainComponentAsync() or await page.loadAsync() before querying mainComponent') }
+      }
+      await hydrate(figma.currentPage)
       const unwrap = value => raws.get(value) || (Array.isArray(value) ? value.map(unwrap) : value)
       const set = (node, props) => {
+        if (!props || typeof props !== 'object' || Array.isArray(props)) throw new Error('set expects a property object')
+        if (Object.hasOwn(props,'layoutMode')) node.layoutMode = props.layoutMode
         if ('width' in props || 'height' in props) node.resize(props.width ?? node.width, props.height ?? node.height)
-        for (const [key, value] of Object.entries(props)) if (!['width','height','__proto__','constructor','prototype'].includes(key)) node[key] = unwrap(value)
+        for (const [key, value] of Object.entries(props)) if (!['layoutMode','width','height','__proto__','constructor','prototype'].includes(key)) wrap(node)[key] = value
         return wrap(node)
       }
-      const query = (node, selector) => {
-        const m = /^(\*|[A-Z_]+)?(?:\[name=(?:"([^"]*)"|'([^']*)'|([^\]]+))\])?$/.exec(selector)
-        if (!m || !selector) throw new Error('Local query supports TYPE, [name="exact"], or TYPE[name="exact"]')
-        const matches = node.findAll(child => (!m[1] || m[1] === '*' || child.type === m[1]) && (m[2] === undefined && m[3] === undefined && m[4] === undefined || child.name === (m[2] ?? m[3] ?? m[4])))
-        const result = matches.map(wrap)
-        result.set = props => { for (const item of matches) set(item, props); return result }
+      function queryResult(nodes) {
+        const items = [...new Set(nodes)]
+        // Keep numeric indexing/Array.isArray for existing local scripts while exposing QueryResult.
+        const result = items.map(wrap)
+        const methods = {
+          first:()=>result[0]??null, last:()=>result.at(-1)??null, toArray:()=>[...result],
+          each:fn=>{result.forEach(fn);return result},
+          filter:fn=>queryResult(items.filter((node,index)=>fn(wrap(node),index))),
+          values:keys=>{if(!Array.isArray(keys)||keys.some(key=>typeof key!=='string'))throw new Error('values expects property names');return items.map(node=>Object.fromEntries(keys.map(key=>{const values=propertyValues(node,key,mainComponent);return [key,key.includes('*')?values.map(wrap):wrap(values[0])]})))},
+          set:props=>{for(const node of items)set(node,props);return result},
+          query:selector=>{const match=compileSelector(selector,mainComponent);return queryResult(items.flatMap(node=>typeof node.findAll==='function'?node.findAll(child=>match(child,node)):[]))},
+        }
+        for(const [name,value] of Object.entries(methods))Object.defineProperty(result,name,{value,enumerable:false})
         return result
       }
+      const query = (node, selector) => { const match=compileSelector(selector,mainComponent);return queryResult(node.findAll(child=>match(child,node))) }
+      function tree(node, options={}) {
+        const depth=integer(options.maxDepth,3,0,20,'maxDepth'),children=integer(options.maxChildren,50,0,1500,'maxChildren'),keys=options.fields??['id','name','type'],lines=[]
+        if(!Array.isArray(keys)||keys.some(key=>typeof key!=='string'))throw new Error('tree fields must be property paths')
+        let count=0
+        function visit(current,level){
+          if(++count>MAX_NODES)return
+          const data=Object.fromEntries(keys.map(key=>{const values=propertyValues(current,key,mainComponent);return[key,key.includes('*')?values:values[0]]}))
+          lines.push('  '.repeat(level)+JSON.stringify(data,(key,value)=>key&&isNode(value)?{id:value.id,type:value.type}:value))
+          if(level<depth&&'children' in current){for(const child of current.children.slice(0,children))visit(child,level+1);if(current.children.length>children)lines.push('  '.repeat(level+1)+'… '+(current.children.length-children)+' more children')}
+        }
+        visit(node,0);if(count>MAX_NODES)lines.push('… node limit reached');return lines.join('\n')
+      }
+      const io = {write(path,data){
+        if(typeof path!=='string'||!path.trim()||path.length>500)throw new Error('io.write expects an output filename')
+        let bytes
+        if(typeof data==='string')bytes=new Uint8Array(Array.from(unescape(encodeURIComponent(data)),c=>c.charCodeAt(0)))
+        else if(data instanceof Uint8Array)bytes=data
+        else throw new Error('io.write data must be a string or Uint8Array')
+        if(assets.length>=20||assets.reduce((total,a)=>total+a.byteLength,0)+bytes.length>12*1024*1024)throw new Error('io.write output exceeds 20 files or 12 MiB')
+        const mimeType=/\.png$/i.test(path)?'image/png':/\.jpe?g$/i.test(path)?'image/jpeg':/\.svg$/i.test(path)?'image/svg+xml':/\.json$/i.test(path)?'application/json':typeof data==='string'?'text/plain':'application/octet-stream'
+        assets.push({name:path.split(/[\\/]/).pop(),mimeType,data:figma.base64Encode(bytes),byteLength:bytes.length})
+      }}
       function wrap(value) {
         if (!value || typeof value !== 'object') return value
         if (value instanceof Promise) return value.then(wrap)
         if (Array.isArray(value)) return value.map(wrap)
-        if (value !== figma && !(typeof value.id === 'string' && typeof value.type === 'string')) return value
+        if (value !== figma && !isNode(value)) return value
         if (cache.has(value)) return cache.get(value)
         const proxy = new Proxy({}, {
           get(_target, key) {
             const target = value
             if (key === 'set') return props => set(target, props)
             if (key === 'query' && target.findAll) return selector => query(target, selector)
-            if (key === 'screenshot' && target.exportAsync) return async opts => { if (images.length >= 4) throw new Error('Maximum four screenshots per operation'); images.push(await runtime.screenshot(target, opts)); return { id: target.id, screenshot: true } }
+            if (key === 'matches' && isNode(target)) return selector => compileSelector(selector,mainComponent)(target)
+            if (key === 'tree' && isNode(target)) return opts => tree(target,opts)
+            if (key === 'placeholder' && isNode(target)) return placeholders.has(target.id)
+            if (key === 'screenshot' && target.exportAsync) return async opts => { if (images.length >= 4) throw new Error('Maximum four screenshots per operation'); images.push(await runtime.screenshot(target, opts, true)) }
+            if (key === 'findPlacement' && target.type === 'PAGE') return size => {
+              if(target!==figma.currentPage)throw new Error('findPlacement requires the current page')
+              if(!size||!Number.isFinite(size.width)||!Number.isFinite(size.height)||size.width<=0||size.height<=0)throw new Error('findPlacement requires positive finite dimensions')
+              if(typeof target.findPlacement==='function')return target.findPlacement(size)
+              const right=target.children.reduce((edge,node)=>Math.max(edge,(node.absoluteBoundingBox?.x??node.x??0)+(node.absoluteBoundingBox?.width??node.width??0)),0)
+              return {x:right+80,y:80,width:size.width,height:size.height}
+            }
+            if (target === figma && key === 'io') return io
+            if (target === figma && key === 'setCurrentPageAsync') return async page => {
+              if(runtime.pageSwitches>=1)throw new Error('Switch pages at most once per use_figma call')
+              runtime.pageSwitches++;const raw=unwrap(page);await figma.setCurrentPageAsync(raw);await hydrate(raw)
+            }
             if (target === figma && key === 'createAutoLayout') return (direction = 'HORIZONTAL', props = {}) => {
               if (typeof direction === 'object') { props = direction; direction = 'HORIZONTAL' }
               if (!['HORIZONTAL','VERTICAL'].includes(direction)) throw new Error('Invalid auto-layout direction')
               const frame = figma.createFrame(); frame.layoutMode = direction
               frame.primaryAxisSizingMode = 'AUTO'; frame.counterAxisSizingMode = 'AUTO'
+              frame.layoutSizingHorizontal = 'HUG'; frame.layoutSizingVertical = 'HUG'
               return set(frame, props)
             }
             const v = target[key]
-            return typeof v === 'function' ? (...args) => wrap(v.apply(target, args.map(unwrap))) : wrap(v)
+            return typeof v === 'function' ? (...args) => {
+              const out=v.apply(target,args.map(unwrap))
+              if(out&&typeof out.then==='function')return out.then(async resolved=>{if(key==='getMainComponentAsync')components.set(target,resolved);await hydrate(key==='loadAsync'?target:resolved);return wrap(resolved)})
+              if(key==='createInstance'&&target.type==='COMPONENT')components.set(out,target)
+              if(key==='swapComponent')components.set(target,unwrap(args[0]))
+              if(key==='setProperties')components.delete(target)
+              return wrap(out)
+            } : wrap(v)
           },
           has(_target, key) {
-            if (key === 'set' || key === 'query' && value.findAll || key === 'screenshot' && value.exportAsync || key === 'createAutoLayout' && value === figma) return true
+            if (key === 'set' || ['matches','tree','placeholder'].includes(key)&&isNode(value) || key==='findPlacement'&&value.type==='PAGE' || key === 'query' && value.findAll || key === 'screenshot' && value.exportAsync || ['createAutoLayout','io'].includes(key)&&value===figma) return true
             return key in value
           },
-          set(_target, key, next) { value[key] = unwrap(next); return true }
+          set(_target, key, next) {
+            if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
+            if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
+            value[key] = unwrap(next); return true
+          }
         })
         cache.set(value, proxy); raws.set(proxy, value); return proxy
       }
+      runtime.clearPlaceholders=()=>{placeholders.clear();progress()}
       return wrap(figma)
     }
     async run(method, args = {}) {
       if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Arguments must be an object')
       const started=now()
+      this.scriptEntered=false;this.pageSwitches=0;this.clearPlaceholders=null
       this.metrics={runtimeMs:0,exportMs:0,serializationMs:0,nodeCount:0,imageCount:0,images:[],valueBytes:0}
       this.readOptions={};this.snapshotBudget=null
       try{
@@ -152,7 +351,12 @@
         this.metrics.runtimeMs=now()-started
         result.metrics=this.metrics
         return result
-      }finally{this.metrics=null;this.readOptions={};this.snapshotBudget=null}
+      }catch(cause){
+        // Never trust an exception property supplied by user code. Only pre-execution failures are retry-safe.
+        const error=new Error(String(cause&&cause.message||cause))
+        error.safeToRetryWithoutCanvasRead=method==='use_figma'&&!this.scriptEntered
+        throw error
+      }finally{this.clearPlaceholders?.();this.clearPlaceholders=null;this.metrics=null;this.readOptions={};this.snapshotBudget=null}
     }
     async execute(method, args = {}) {
       const f = this.figma, images = [], depth = integer(args.depth,3,0,10,'depth')
@@ -161,7 +365,12 @@
         case 'use_figma': {
           if (typeof args.code !== 'string' || !args.code.trim() || args.code.length > 150000) throw new Error('Provide a script of 1–150000 characters')
           const run = new Function('figma', 'dsh', '"use strict"; return (async () => {\n' + args.code + '\n})()')
-          value = await run(this.facade(images), { color(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex); if (!m) throw new Error('Use a six-digit hex color'); const n = parseInt(m[1],16); return { r: ((n>>16)&255)/255, g: ((n>>8)&255)/255, b: (n&255)/255 } } })
+          const first=f.root.children[0]
+          if(first&&f.currentPage!==first)await f.setCurrentPageAsync(first)
+          assets=[]
+          const facade=await this.facade(images,assets)
+          this.scriptEntered=true
+          value = await run(facade, { color(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex); if (!m) throw new Error('Use a six-digit hex color'); const n = parseInt(m[1],16); return { r: ((n>>16)&255)/255, g: ((n>>8)&255)/255, b: (n&255)/255 } } })
           f.commitUndo(); break
         }
         case 'get_selection': value = { page: this.snapshot(f.currentPage, 0), selection: f.currentPage.selection.map(n => this.snapshot(n, 0)) }; break
@@ -210,6 +419,15 @@
         }
         case 'get_libraries': value = { variableCollections: await f.teamLibrary.getAvailableLibraryVariableCollectionsAsync(), scope: 'Libraries exposed to this plugin; component discovery is local-page only.' }; break
         case 'search_design_system': {
+          if(args.includeLibraryKeys!==undefined&&(!Array.isArray(args.includeLibraryKeys)||args.includeLibraryKeys.length))throw new Error('Cloud library search is unavailable locally; use get_libraries and import known published keys')
+          if(args.queries!==undefined){
+            if(args.query!==undefined||args.kind!==undefined)throw new Error('Use queries or legacy query/kind, not both')
+            if(!Array.isArray(args.queries)||!args.queries.length||args.queries.length>50||args.queries.some(q=>!q||!['component','variable','style'].includes(q.entity)||typeof q.query!=='string'))throw new Error('queries must contain 1–50 entity/query pairs')
+            const results=[]
+            for(const query of args.queries){const {value:found}=await this.execute('search_design_system',{...args,queries:undefined,query:query.query,kind:{component:'components',variable:'variables',style:'styles'}[query.entity]});results.push({...query,...found})}
+            value={results,scope:'local; ordered batch; no cloud libraries or Code Connect'};break
+          }
+          if(typeof args.query!=='string')throw new Error('Provide query or queries')
           const q=textFilter(args.query,'query'),kind=args.kind??'all'
           if(!['all','components','variables','styles'].includes(kind))throw new Error('kind must be all, components, variables or styles')
           const active=opted(args,['kind','pageId','profile','offset','limit'])
@@ -297,7 +515,7 @@
 
 /* Generated entry is built by scripts/check.mjs from runtime.js and this file. */
 figma.showUI(__html__, { width: 300, height: 210, themeColors: true })
-const runtime = new globalThis.DshFigmaRuntime(figma)
+const runtime = new globalThis.DshFigmaRuntime(figma, {onProgress: nodes => figma.ui.postMessage({type:'progress',nodes})})
 let busy = false
 figma.ui.onmessage = async message => {
   if (message.type === 'resize') {
@@ -305,13 +523,13 @@ figma.ui.onmessage = async message => {
     return
   }
   if (message.type === 'describe') {
-    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 2, companionVersion: globalThis.DSH_FIGMA_BOOTSTRAP?.version || null, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
+    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 3, companionVersion: globalThis.DSH_FIGMA_BOOTSTRAP?.version || null, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
     return
   }
   if (message.type !== 'execute') return
   if (busy) { figma.ui.postMessage({ type: 'result', id: message.id, ok: false, error: 'An operation is already running' }); return }
   busy = true
   try { const result = await runtime.run(message.method, message.args); figma.ui.postMessage({ type: 'result', id: message.id, ok: true, result }) }
-  catch (error) { figma.ui.postMessage({ type: 'result', id: message.id, ok: false, error: String(error && error.message || error) }) }
+  catch (error) { figma.ui.postMessage({ type: 'result', id: message.id, ok: false, error: String(error && error.message || error), safeToRetryWithoutCanvasRead: error?.safeToRetryWithoutCanvasRead === true }) }
   finally { busy = false }
 }

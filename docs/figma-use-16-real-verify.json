@@ -1,0 +1,44 @@
+{
+  "value": {
+    "checks": {
+      "firstPageReset": true,
+      "variant": true,
+      "mainComponentQuery": true,
+      "instanceChildIdQuery": true,
+      "label": true,
+      "gap": true,
+      "modeColor": true,
+      "noDuplicateCollections": true,
+      "noDuplicateComponents": true,
+      "noDuplicateInstances": true
+    },
+    "allPassed": true,
+    "pageId": "30:50",
+    "instanceId": "30:61",
+    "mainComponentId": "30:57",
+    "labelId": "I30:61;30:58",
+    "color": {
+      "value": {
+        "r": 0.30000001192092896,
+        "g": 0.20000000298023224,
+        "b": 0.800000011920929,
+        "a": 1
+      },
+      "resolvedType": "COLOR"
+    },
+    "itemSpacing": 18
+  },
+  "images": [
+    {
+      "name": "Contract preview (268x112 at 450,80).png",
+      "mimeType": "image/png",
+      "bytes": 1393
+    }
+  ],
+  "assets": [
+    {
+      "name": "preview.png",
+      "bytes": 3072
+    }
+  ]
+}

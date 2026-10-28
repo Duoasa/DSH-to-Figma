@@ -129,6 +129,9 @@ test('compact status, optimized-query capability gate and private performance di
   assert.doesNotMatch(JSON.stringify(performance),/sensitive-node|private-design/)
   await assert.rejects(invoke('mcp__figma__get_variable_defs',{collectionsOnly:true}),/rerun/)
   assert.equal(calls.length,2)
+  await assert.rejects(invoke('mcp__figma__use_figma',{code:'return 1',description:'Check helpers'}),error=>{
+    const result=JSON.parse(error.message);assert.equal(result.safeToRetryWithoutCanvasRead,true);assert.match(result.error,/rerun/);return true
+  });assert.equal(calls.length,2)
 })
 
 test('performance cursors isolate Work sessions and reset on session disposal',async t=>{
