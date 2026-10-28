@@ -1,0 +1,57 @@
+{
+  "value": {
+    "pageId": "30:50",
+    "collectionId": "VariableCollectionId:30:51",
+    "modeCount": 2,
+    "variableIds": [
+      "VariableID:30:52",
+      "VariableID:30:53",
+      "VariableID:30:54"
+    ],
+    "componentSetId": "30:59",
+    "componentIds": [
+      "30:55",
+      "30:57"
+    ],
+    "previewId": "30:60",
+    "instanceId": "30:61",
+    "mainComponent": "30:55",
+    "variantCount": 2,
+    "instanceQueryCount": 1,
+    "label": [
+      {
+        "characters": "Ready for DSH"
+      }
+    ],
+    "aliasTypes": [
+      "VARIABLE_ALIAS",
+      "VARIABLE_ALIAS"
+    ],
+    "bindings": {
+      "itemSpacing": {
+        "type": "VARIABLE_ALIAS",
+        "id": "VariableID:30:54"
+      },
+      "fills": [
+        {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:30:53"
+        }
+      ]
+    },
+    "tree": "{\"id\":\"30:60\",\"type\":\"FRAME\"}\n  {\"id\":\"30:61\",\"type\":\"INSTANCE\"}\n    {\"id\":\"I30:61;30:56\",\"type\":\"TEXT\"}"
+  },
+  "images": [
+    {
+      "name": "Contract preview (268x112 at 450,80).png",
+      "mimeType": "image/png",
+      "bytes": 1055
+    }
+  ],
+  "assets": [
+    {
+      "name": "contract-result.json",
+      "bytes": 880
+    }
+  ]
+}

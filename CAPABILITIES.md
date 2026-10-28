@@ -1,6 +1,6 @@
 # Capability coverage
 
-Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 17 canvas tools plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
+Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 18 document/task tools plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
 
 | Capability | Local implementation | Official MCP mode |
 | --- | --- | --- |
@@ -31,8 +31,8 @@ The “Official MCP mode” column above describes combined potential across des
 ## Local behavior limits that affect equivalence
 
 - Public Plugin API functionality and fonts depend on the actual Figma editor/version. The companion cannot unlock private APIs.
-- Local `use_figma` accepts `{code}` after document binding (automatic only when exactly one file is connected). It does not claim the same input schema as Codex's remote execution tool.
-- Convenience helpers cover auto layout, property setters, exact type/name queries, inline screenshots and hex colors. Unsupported Codex-only conveniences are documented rather than silently ignored.
+- Local `use_figma` accepts code, description, fileKey, sessionId and skillNames after explicit/automatic binding. create_session supplies a local Work task UUID. Legacy code-only calls remain accepted; see the [16.0.0 alignment contract](docs/figma-use-16-alignment.md).
+- Helpers include selector queries/QueryResult, matches, layout-ordered setters, auto layout, inline screenshots, tree, placement and io.write. Placeholder progress is shown in the companion, not a canvas shimmer. Pages reset to the first page per call; local writes are serial and nontransactional.
 - Public editor scripting is powerful and nontransactional. Unknown write outcomes require inspection. No process on the host evaluates Figma scripts.
 - Server tools requiring MCP task-based execution are surfaced with the native DSH bridge's explicit unsupported-task behavior, not silently run through a different protocol. Sampling, host panels and interactive server elicitation are not advertised as supported capabilities.
 - Remote screenshot base64 is requested if the advertised schema supports it. Ordinary resource URLs stay URLs; they are not fetched through an unrestricted network bridge.

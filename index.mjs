@@ -14,6 +14,7 @@ import { readAssets, saveAssets, localResult } from './lib/assets.mjs'
 import { connectOfficial, desktopUrl } from './lib/official.mjs'
 import { prepareCompanion } from './lib/companion.mjs'
 import { figmaDiagnostic } from './lib/diagnostics.mjs'
+import { FIGMA_USE_CONTRACT, LocalFigmaTasks } from './lib/figma-use-contract.mjs'
 import packageJson from './package.json' with { type: 'json' }
 
 export const name='dsh-figma'
@@ -42,6 +43,7 @@ export async function applyWithDependencies(ctx,config={},deps={}){
   if(!SUPPORTED_BACKENDS.includes(backend))throw new Error('Figma backend must be local, desktop, or remote')
   if(backend==='desktop')desktopUrl(config.desktopServerUrl)
   const disposers=[],dynamic=[],sessions=new Map(),bindings=new Map(),agents=new WeakMap(),dead=new WeakSet(),shutdown=new AbortController(),performanceLogs=new Map()
+  const figmaTasks=new LocalFigmaTasks()
   const metricsFor=session=>{let log=performanceLogs.get(session.id);if(!log){log=new PerformanceLog();performanceLogs.set(session.id,log)}return log}
   const connect=deps.connect??connectOfficial
   let gate=Promise.resolve()
@@ -53,11 +55,11 @@ export async function applyWithDependencies(ctx,config={},deps={}){
     tool.isConcurrencySafe=()=>false // Stateful document selection and mutations are barriers.
     const dispose=ctx.tools.register(tool);(qualified?dynamic:disposers).push(dispose)
   }
-  const closeSession=async id=>{bindings.delete(id);performanceLogs.delete(id);const connection=sessions.get(id);sessions.delete(id);if(connection)await connection.then(c=>c.close()).catch(()=>{})}
+  const closeSession=async id=>{bindings.delete(id);performanceLogs.delete(id);figmaTasks.close(id);const connection=sessions.get(id);sessions.delete(id);if(connection)await connection.then(c=>c.close()).catch(()=>{})}
   const close=async()=>{
     if(stopped)return;stopped=true;shutdown.abort()
     for(const dispose of [...dynamic.splice(0),...disposers.splice(0)])dispose()
-    await bridge?.close();await Promise.all([...sessions.keys()].map(closeSession));performanceLogs.clear();available=false
+    await bridge?.close();await Promise.all([...sessions.keys()].map(closeSession));performanceLogs.clear();figmaTasks.clear();available=false
   }
   ctx.effect(()=>close,'dsh-figma.lifecycle')
   ctx.on('agent/disposed',({agent})=>{dead.add(agent);agents.get(agent)?.abort();void closeSession(agent.session.id)})
@@ -73,10 +75,10 @@ export async function applyWithDependencies(ctx,config={},deps={}){
     return {session,workspace,signal}
   }
   ctx.systemPrompt.section({name:'mcp:figma',order:ctx.systemPrompt.getSectionOrder('MCP_SERVERS'),interpolate:false,text:()=>stopped?'':
-    `DSH to Figma backend: ${backend}. Read figma-workbench before design work. Confirm the intended document with figma_status({compact:true}); recheck after disconnect or target change. Local mode binds a single connected document on first use; multiple documents or disconnected bindings require figma_select_document. Use a shallow summary only to discover unknown targets. For known targets, read only missing context; for exact edits, inspect required properties, abort on mismatch, then edit and read back in one use_figma call. Return IDs and concise results. Query fonts/variables only when needed. Verify visual changes with a real screenshot; reuse unchanged images and skip screenshots for purely structural checks. Metrics are for diagnostics, not routine work. On an unknown write outcome, inspect before retrying; never replay automatically. ${remoteInstructions}`})
+    `DSH to Figma backend: ${backend}. Read figma-workbench before design work. Confirm the intended document with figma_status({compact:true}); recheck after disconnect or target change. Local use_figma follows the installed Codex Figma 16 contract. Call create_session with fileKey from status and a description, then pass sessionId, fileKey, description and skillNames on scripts. Every script starts on the first page; switch at most once using await figma.setCurrentPageAsync(page). Local mode binds a single connected document on first use; multiple documents or disconnected bindings require figma_select_document. Use a shallow summary only to discover unknown targets. For known targets, read only missing context; for exact edits, inspect required properties, abort on mismatch, then edit and read back in one use_figma call. Return IDs and concise results. Query fonts/variables only when needed. Verify visual changes with a real screenshot; reuse unchanged images and skip screenshots for purely structural checks. Metrics are for diagnostics, not routine work. Read safeToRetryWithoutCanvasRead on errors: true means correct and retry; false means inspect affected canvas and resources first. The local editor serializes page calls; do not use the cloud parallel-page policy. ${remoteInstructions}`})
   register('figma_status','Show connected documents and actual plugin/companion versions. Prefer compact:true. includeMetrics:true adds this Work session\'s bounded canvas-call summary. Save performance.cursor before a task and pass it as metricsSince afterward; metricsDetails:true adds per-call records. Not model token usage.',objectSchema({compact:{type:'boolean'},includeMetrics:{type:'boolean'},metricsSince:objectSchema({epoch:{type:'string'},sequence:{type:'integer',minimum:0}},['epoch','sequence']),metricsDetails:{type:'boolean'}}),async(args={},exec)=>{
     if((args.metricsSince!==undefined||args.metricsDetails!==undefined)&&!args.includeMetrics)throw new Error('metricsSince and metricsDetails require includeMetrics:true')
-    const health={backend,pluginVersion:packageJson.version,available,errorCode,diagnostic,documents:bridge?.list()??[]}
+    const health={backend,pluginVersion:packageJson.version,available,errorCode,diagnostic,documents:bridge?.list().map(doc=>({...doc,fileKey:doc.fileKey??`local:${doc.connectionId}`}))??[],...(backend==='local'?{figmaUseContract:FIGMA_USE_CONTRACT}:{})}
     if(!args.compact)Object.assign(health,{tools:toolNames,companion:companion??null,documentSelection:backend==='local'?'A single connected document is selected on first use. Multiple documents and disconnected bindings require explicit selection.':'Use the actual official tool schema and intended file or selection.',bridgePort:bridge?.port??null,skill:'figma-workbench',cloudAccess:backend==='remote'?'Depends on official client approval, account and seat.':backend==='desktop'?'Official desktop MCP provides design reading and screenshots, not canvas writing or cloud generation.':'Cloud-only generation is not provided by the local bridge.',setup:backend==='local'?'Import the paired companion.manifest once in Figma, then run DSH to Figma · Local. It connects automatically; keep it open. Call figma_setup for installation paths.':backend==='desktop'?'Keep Figma desktop open with its built-in MCP enabled, then run figma_reconnect. No companion plugin or remote OAuth login is required.':'Run dsh-figma login with the same DSH home, then figma_reconnect.'})
     if(args.includeMetrics){
       if(!exec?.agent?.session)throw new Error('Performance metrics require an active Work session; ordinary status is available without includeMetrics')
@@ -100,6 +102,8 @@ export async function applyWithDependencies(ctx,config={},deps={}){
       companion=await prepareCompanion(home,{port:bridge.port,token:bridge.token})
       await privateJson(join(await privateDirectory(home),'bridge.json'),{port:bridge.port,pid:process.pid,companion:companion.manifest,startedAt:new Date().toISOString()})
       for(const tool of LOCAL_TOOLS)register(tool.name,tool.description,tool.inputSchema,async(args,exec)=>{
+        let dispatched=false
+        try {
         const {session,workspace,signal}=await execution(exec)
         let binding=bindings.get(session.id)
         if(!binding){
@@ -111,22 +115,35 @@ export async function applyWithDependencies(ctx,config={},deps={}){
         if(!document)throw new Error('The previously selected Figma document disconnected. Explicitly choose the intended document with figma_select_document; it will not switch automatically.')
         if(binding.workspace!==workspace)throw new Error('Work workspace changed; explicitly select the document again')
         if((document.featureVersion??0)<requiredQueryFeatureVersion(tool.name,args))throw new Error('The connected Figma companion does not support these query features yet. Run figma_setup, then close and rerun DSH to Figma · Local from its paired manifest; inspect figma_status and reselect the document. Legacy queries remain available.')
+        const context=figmaTasks.context(session.id,workspace,document,args)
+        if(tool.name==='create_session')return result(figmaTasks.create(session.id,workspace,document,args))
         const id=binding.id
         const performanceLog=metricsFor(session)
         const started=performance.now()
         let payload=args,response,output,bridgeMetric,status='failed'
         try{
           if(tool.name==='upload_assets')payload={parentId:args.parentId,assets:await readAssets(workspace,args.files)}
+          dispatched=true
+          if(context.task){context.task.calls++;context.task.files.add(context.fileKey)}
           response=await bridge.call(id,tool.name,payload,{signal,mutation:tool.mutation,inspect:tool.inspect&&!requiresQueryFeatures(tool.name,args),onMetric:metric=>{bridgeMetric=metric}})
           signal.throwIfAborted()
           if(tool.name==='download_assets')response.value={...response.value,files:await saveAssets(workspace,response.assets)}
-          output=localResult(response);status='ok';return output
+          const files=tool.name==='use_figma'&&response.assets?.length?await saveAssets(workspace,response.assets):[]
+          output=localResult(response)
+          if(files.length){output.structuredContent.files=files;output.content.push({type:'text',text:JSON.stringify({files})})}
+          if(tool.name==='use_figma')output.structuredContent.execution={fileKey:context.fileKey,sessionId:args.sessionId??null,description:args.description??null,skillNames:args.skillNames??null}
+          status='ok';return output
         }finally{
           if(signal.aborted)status='canceled'
           performanceLog.record({tool:tool.name,status,hostMs:performance.now()-started,bridge:bridgeMetric,runtime:response?.metrics,
             textBytes:output?Buffer.byteLength(output.content[0].text):null,
             imageCount:output?output.content.filter(block=>block.type==='image').length:null,
             imageBytes:output?output.content.filter(block=>block.type==='image').reduce((total,block)=>total+Buffer.byteLength(block.data,'base64'),0):null})
+        }
+        }catch(error){
+          if(tool.name!=='use_figma')throw error
+          const value={error:String(error?.message||error),safeToRetryWithoutCanvasRead:!dispatched||error?.safeToRetryWithoutCanvasRead===true}
+          return {...result(value),isError:true}
         }
       })
       toolNames=LOCAL_TOOLS.map(t=>t.name);available=true

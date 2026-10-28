@@ -1,0 +1,40 @@
+{
+  "baseline": "Installed Codex Figma plugin 16.0.0",
+  "observedAt": "2026-10-28",
+  "sources": [
+    {
+      "path": "figma-use/SKILL.md",
+      "sha256": "ac385b80a05c850b5abc6bcae7c56625c4576318510545453a568aa5f21b8a95"
+    },
+    {
+      "path": "figma-use/references/plugin-api-standalone.d.ts",
+      "sha256": "88988a41c31d1f7180c50dce8aa295599ab42d05083e2aac7d3ab2f890aff3cd"
+    },
+    {
+      "path": "figma-generate-library/SKILL.md",
+      "sha256": "b5277050191d1985f59e162e0acc82523a0a39a8cf614069a3d63753d5990f27"
+    },
+    {
+      "path": "figma-generate-design/SKILL.md",
+      "sha256": "f4f05f29f69a5b4628d4574359910fea926735af78c5e264a1c4cd16f69315b0"
+    }
+  ],
+  "use_figma": {
+    "required": [
+      "code",
+      "description",
+      "fileKey"
+    ],
+    "optional": [
+      "sessionId",
+      "skillNames"
+    ]
+  },
+  "create_session": {
+    "required": [
+      "fileKey",
+      "description"
+    ]
+  },
+  "provenance": "Installed skill and live connector schema; server executor source is unavailable. Public openai/plugins main differs from the installed package, so it is not treated as the deployed version. No claim of byte-for-byte server equivalence."
+}
