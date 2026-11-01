@@ -1,6 +1,6 @@
 # Changelog
 
-Versions 0.1.5 through 0.3.0 are recorded in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases). This file resumes at 0.3.1.
+Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions in that span are listed in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) as v0.2.1, v0.2.2, v0.2.3, and v0.3.0. This file continues from 0.3.1.
 
 ## 0.3.1 — 2026-11-01
 
