@@ -117,18 +117,18 @@ DSH が名前、ノード ID、1440 × 900 のサイズ、レイヤー構成と�
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.0.tgz"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.1.tgz"
 ```
 
 **その他の DSH ホスト：**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.0.tgz"
+dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.1.tgz"
 ```
 
 パスと profile は実際の値に変更してください。デスクトップ版はアプリ付属の CLI を優先します。プラグイン画面で **DSH to Figma → 実行中** を確認し、`figma_setup` を呼び出してください。
 
-通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.0.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
+通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.1.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
 
 ## 接続と設定
 
