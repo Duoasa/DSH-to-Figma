@@ -118,18 +118,18 @@ DSH 返回画板名称、节点 ID、1440 × 900 的尺寸、图层结构和截�
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.0.tgz"
+  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.1.tgz"
 ```
 
 **其他 DSH 宿主：**
 
 ```sh
-dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.0.tgz"
+dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.1.tgz"
 ```
 
 把路径和 profile 替换为实际值。桌面版优先使用应用自带 CLI，避免调用另一份旧版全局 `dsh`。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
 
-DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.0.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
+DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.1.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
 
 ## 连接与配置
 

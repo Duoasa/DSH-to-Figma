@@ -1,5 +1,13 @@
 # Changelog
 
+Versions 0.1.5 through 0.3.0 are recorded in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases). This file resumes at 0.3.1.
+
+## 0.3.1 — 2026-11-01
+
+- Declare peer compatibility with DeepSeek Harness 0.2.1-rc.4 and 0.2.1-rc.5 for `@deepseek-ai/dsh-home-paths`, `@deepseek-ai/dsh-mcp-client`, and `@deepseek-ai/dsh-skill`. The ranges still accept 0.2.1-rc.3, 0.2.0-rc.2, and 0.2.1-rc.2.
+- Track the `@deepseek-ai/dsh-*` development dependencies used by the native smoke at 0.2.1-rc.5, so `npm ci` exercises the newest supported kernel.
+- No plugin runtime change. `engines.dsh` stays `*`. cordis 4.0.4/4.0.5 and schemastery 3.18.4/3.18.5 are unchanged.
+
 ## 0.1.4 — 2026-10-18
 
 - Fix local pairing in Figma desktop: accept outer-window messages only from exact Figma origins while preserving the direct-parent route.

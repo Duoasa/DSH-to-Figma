@@ -1,6 +1,6 @@
 {
   "name": "dsh-to-figma",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "DSH to Figma — native canvas editing, design context, assets and screenshots for DeepSeek Harness.",
   "type": "module",
   "license": "MIT",
@@ -49,9 +49,9 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.0.4 || 4.0.5",
     "@deepseek-ai/schemastery": "3.18.4 || 3.18.5",
-    "@deepseek-ai/dsh-home-paths": "0.2.1-rc.3 || 0.2.0-rc.2 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.3 || 0.2.0-rc.2 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-skill": "0.2.1-rc.3 || 0.2.0-rc.2 || 0.2.1-rc.2"
+    "@deepseek-ai/dsh-home-paths": "0.2.1-rc.3 || 0.2.0-rc.2 || 0.2.1-rc.2 || 0.2.1-rc.4 || 0.2.1-rc.5",
+    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.3 || 0.2.0-rc.2 || 0.2.1-rc.2 || 0.2.1-rc.4 || 0.2.1-rc.5",
+    "@deepseek-ai/dsh-skill": "0.2.1-rc.3 || 0.2.0-rc.2 || 0.2.1-rc.2 || 0.2.1-rc.4 || 0.2.1-rc.5"
   },
   "dsh": {
     "bundle": {
@@ -78,16 +78,16 @@
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.5",
     "@deepseek-ai/schemastery": "3.18.5",
-    "@deepseek-ai/dsh-home-paths": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-skill": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-llm": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-session": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-session-projection": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-tools": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-agent": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-attachment-local": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-agent-loop": "0.2.1-rc.2"
+    "@deepseek-ai/dsh-home-paths": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-skill": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-llm": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-session": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-session-projection": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-system-prompt": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-agent": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-attachment-local": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-agent-loop": "0.2.1-rc.5"
   }
 }
