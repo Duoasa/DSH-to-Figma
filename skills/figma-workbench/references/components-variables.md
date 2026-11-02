@@ -34,3 +34,24 @@ Batch related variable/component edits and structural readback in one script, re
 8. For updates, mutate the existing ID. For retries, reconcile actual partial state before deciding which missing objects to create. A successful repeat must not duplicate collections, variables, variants or instances. Stop when requested scope passes.
 
 Errors with safeToRetryWithoutCanvasRead:true mean the script did not run. Otherwise inspect the affected nodes, variables and component state before retrying; the local bridge does not roll back changes. Native font/style/editor restrictions remain authoritative.
+
+## Variant layout and safe readback pattern
+
+For a new set, arrange variants immediately after combining; overlapping input positions can produce overlapping variants. The following assumes `variants` contains the intended newly created components with valid names (for example `State=Default` and `State=Hover`) and `page` is the intended current page. Choose layout dimensions for the actual design; do not re-layout an existing set merely to read it.
+
+```js
+const set = figma.combineAsVariants(variants, page);
+set.set({layoutMode:'VERTICAL', primaryAxisSizingMode:'AUTO',
+  counterAxisSizingMode:'AUTO', itemSpacing:16,
+  paddingTop:16, paddingBottom:16, paddingLeft:16, paddingRight:16});
+const instance = variants[0].createInstance();
+page.appendChild(instance);
+instance.x = set.x + set.width + 80;
+instance.y = set.y;
+// After any setProperties/swapComponent, obtain the current main component again.
+const main = await instance.getMainComponentAsync();
+return {setId:set.id, instanceId:instance.id, mainComponentId:main?.id,
+  mainComponentName:main?.name};
+```
+
+Never put `instance.mainComponent` in a final return: a failing getter can hide an otherwise completed write. For validation, prefer small direct checks and bounded query results over a large custom assertion framework. Keep creation, follow-up modification and independent read-only verification as separate coherent calls when testing a workflow.

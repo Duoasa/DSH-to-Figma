@@ -31,6 +31,8 @@ Use diagnostics only when requested/needed. Metrics count this session's canvas 
 
 ## Recovery
 
+Local scripts are parsed before dispatch. A `diagnostic.stage:"preflight"` error includes a code, one-based line/column and a repair hint; fix the script and retry without a canvas read. `SCRIPT_SYNTAX` points to where parsing failed (the cause can be earlier). `FIGMA_ASYNC_MAIN_COMPONENT` flags known Figma-node synchronous access, including a getter in the final return. Use `const main = await instance.getMainComponentAsync(); return {instanceId:instance.id, mainComponentId:main?.id};`. Preflight does not prove all API calls valid and does not execute or automatically rewrite your code.
+
 Read the structured `safeToRetryWithoutCanvasRead` flag. If true, correct the pre-execution error and retry without a canvas read. If false or absent, writes can have partially succeeded: after failure, timeout, cancellation or disconnect, inspect affected objects before another mutation; never replay a creation script blindly. To reconcile the bridge, use `get_metadata` on the affected target without summary, pagination or custom budgets; partial reads do not clear the write barrier. Also read affected variable definitions or component properties when relevant; an unrelated node read is not proof that those writes succeeded. A still-running operation occupies the queue; if necessary, reopen the companion, reconnect, bind and inspect. Do not automatically undo the user's intervening work.
 
 Keep calls on one document sequential. Poll existing asynchronous runs using returned IDs; do not launch duplicates. Never invent IDs, permissions, outputs or unavailable cloud capabilities.

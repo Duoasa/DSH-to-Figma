@@ -15,6 +15,7 @@ import { connectOfficial, desktopUrl } from './lib/official.mjs'
 import { prepareCompanion } from './lib/companion.mjs'
 import { figmaDiagnostic } from './lib/diagnostics.mjs'
 import { FIGMA_USE_CONTRACT, LocalFigmaTasks } from './lib/figma-use-contract.mjs'
+import { preflightScript, ScriptPreflightError } from './lib/script-preflight.mjs'
 import packageJson from './package.json' with { type: 'json' }
 
 export const name='dsh-figma'
@@ -117,6 +118,7 @@ export async function applyWithDependencies(ctx,config={},deps={}){
         if((document.featureVersion??0)<requiredQueryFeatureVersion(tool.name,args))throw new Error('The connected Figma companion does not support these query features yet. Run figma_setup, then close and rerun DSH to Figma · Local from its paired manifest; inspect figma_status and reselect the document. Legacy queries remain available.')
         const context=figmaTasks.context(session.id,workspace,document,args)
         if(tool.name==='create_session')return result(figmaTasks.create(session.id,workspace,document,args))
+        if(tool.name==='use_figma')preflightScript(args.code)
         const id=binding.id
         const performanceLog=metricsFor(session)
         const started=performance.now()
@@ -143,6 +145,7 @@ export async function applyWithDependencies(ctx,config={},deps={}){
         }catch(error){
           if(tool.name!=='use_figma')throw error
           const value={error:String(error?.message||error),safeToRetryWithoutCanvasRead:!dispatched||error?.safeToRetryWithoutCanvasRead===true}
+          if(!dispatched&&error instanceof ScriptPreflightError)value.diagnostic={stage:'preflight',...error.diagnostic}
           return {...result(value),isError:true}
         }
       })

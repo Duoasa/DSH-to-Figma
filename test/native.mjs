@@ -46,9 +46,15 @@ try{
   const mismatch=await call(a,'mcp__figma__use_figma',{fileKey:'wrong-file',sessionId,code:'return 1'})
   assert.equal(mismatch.isError,true);assert.match(JSON.stringify(mismatch),/safeToRetryWithoutCanvasRead/)
   assert.equal(bridge.documents.get(id).queue.length,0)
-  const syntax=call(a,'mcp__figma__use_figma',{fileKey:`local:${id}`,sessionId,code:'const = invalid'})
-  await runJob(bridge,id,fixture.runtime);const syntaxResult=await syntax
+  const syntaxResult=await call(a,'mcp__figma__use_figma',{fileKey:`local:${id}`,sessionId,code:'const = invalid'})
+  assert.equal(bridge.documents.get(id).queue.length,0,'syntax errors never enter the companion queue')
   assert.equal(syntaxResult.isError,true,JSON.stringify(syntaxResult));assert.equal(bridge.list()[0].needsInspection,false)
+  const getterResult=await call(a,'mcp__figma__use_figma',{fileKey:`local:${id}`,sessionId,code:'const c=figma.createComponent();const instance=c.createInstance();return instance.mainComponent.id;'})
+  assert.equal(getterResult.isError,true,JSON.stringify(getterResult))
+  assert.match(JSON.stringify(getterResult),/FIGMA_ASYNC_MAIN_COMPONENT/)
+  assert.match(JSON.stringify(getterResult),/getMainComponentAsync/)
+  assert.equal(bridge.documents.get(id).queue.length,0,'known unsafe getters are rejected before any creation')
+  assert.equal(bridge.list()[0].needsInspection,false)
   const write=call(a,'mcp__figma__use_figma',{fileKey:`local:${id}`,sessionId,description:'Create test card and return evidence',skillNames:'figma-workbench',code:"const card=figma.createAutoLayout('VERTICAL',{name:'Native smoke'});figma.currentPage.appendChild(card);figma.io.write('smoke.json',JSON.stringify({id:card.id}));await card.screenshot();return {id:card.id,frames:figma.currentPage.query('FRAME').values(['id','name'])}"})
   await runJob(bridge,id,fixture.runtime);const written=await write;assert.equal(written.isError,false,JSON.stringify(written));const nodeId=written.value.structuredContent.result.id
   assert.equal(written.value.structuredContent.files.length,1)

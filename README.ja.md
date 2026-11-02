@@ -20,6 +20,12 @@ DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデ�
 
 **ローカルモードでは公式 Figma MCP の呼び出し枠を消費しません。** DSH がこの PC 用のペアリング済み Figma プラグインを生成します。初回にインポートすれば、以後は起動するだけで接続できます。
 
+## 0.3.2 の更新内容
+
+- スクリプト実行前のチェックを追加。構文エラーやよくある非対応の呼び出しを検出し、エラー位置と修正方法を提示します。
+- コンポーネントの読み取りに失敗した際の復旧案内を改善。既存の変更を確認し、重複作成を減らします。
+- バリアントの配置と非同期読み取りの例を追加し、重なりや API の呼び出しミスを減らします。
+
 ## プロンプトでインストール
 
 普段使っている DSH に、次の文章を送ってください。
@@ -117,18 +123,18 @@ DSH が名前、ノード ID、1440 × 900 のサイズ、レイヤー構成と�
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.1.tgz"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2.tgz"
 ```
 
 **その他の DSH ホスト：**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.1.tgz"
+dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2.tgz"
 ```
 
 パスと profile は実際の値に変更してください。デスクトップ版はアプリ付属の CLI を優先します。プラグイン画面で **DSH to Figma → 実行中** を確認し、`figma_setup` を呼び出してください。
 
-通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.1.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
+通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.2.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
 
 ## 接続と設定
 

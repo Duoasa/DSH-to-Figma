@@ -142,6 +142,7 @@
         const proxy = new Proxy({}, {
           get(_target, key) {
             const target = value
+            if (key === 'mainComponent' && target.type === 'INSTANCE') throw new Error('Synchronous mainComponent access on instance '+target.id+' is not supported. Use const main = await instance.getMainComponentAsync(); then read main?.id or main?.name. This script has started: inspect affected nodes and variables before retrying; do not replay creation.')
             if (key === 'set') return props => set(target, props)
             if (key === 'query' && target.findAll) return selector => query(target, selector)
             if (key === 'matches' && isNode(target)) return selector => compileSelector(selector,mainComponent)(target)

@@ -7,6 +7,35 @@ import { applyWithDependencies } from '../index.mjs'
 import packageJson from '../package.json' with { type: 'json' }
 function context(){const definitions=new Map(),listeners=new Map();return {definitions,listeners,ctx:{tools:{register(def){if(definitions.has(def.name))throw Error('duplicate');definitions.set(def.name,def);return()=>definitions.delete(def.name)}},skills:{registerProvider(){}},systemPrompt:{section(){},getSectionOrder(){return 1}},logger:{warn(){},info(){}},effect(){},on(name,fn){listeners.set(name,fn)},get(){return undefined}}}}
 const response=value=>({content:[{type:'text',text:JSON.stringify(value)}],structuredContent:value})
+test('local preflight returns repair details without dispatch and accepts corrected retry',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs')
+  const {connect}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-preflight-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions}=context(),bridge=new LocalBridge({token:'a'.repeat(64),port:0}),calls=[]
+  bridge.call=async(id,method,args)=>{calls.push(args);return {value:{ok:true},images:[]}}
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  const id=await connect(bridge,'Preflight',3)
+  const exec={agent:{session:{id:'preflight',header:{cwd:home}}},signal:new AbortController().signal}
+  const invoke=code=>definitions.get('mcp__figma__use_figma').execute({code},exec)
+  for(const [code,diagnostic] of [
+    ['figma.createFrame();\nconst checks=[1].map(x {return x;});','SCRIPT_SYNTAX'],
+    ['const c=figma.createComponent();const instance=c.createInstance();return instance.mainComponent.id;','FIGMA_ASYNC_MAIN_COMPONENT'],
+  ]) {
+    await assert.rejects(invoke(code),error=>{
+      const value=JSON.parse(error.message)
+      assert.equal(value.safeToRetryWithoutCanvasRead,true)
+      assert.equal(value.diagnostic.stage,'preflight')
+      assert.equal(value.diagnostic.code,diagnostic)
+      assert.ok(value.diagnostic.line>=1&&value.diagnostic.column>=1)
+      assert.ok(value.diagnostic.hint)
+      return true
+    })
+    assert.equal(calls.length,0)
+    assert.equal(bridge.list().find(doc=>doc.connectionId===id).needsInspection,false)
+  }
+  await invoke('const c=figma.createComponent();const instance=c.createInstance();return (await instance.getMainComponentAsync())?.id;')
+  assert.equal(calls.length,1)
+})
 test('official catalog, raw contracts, isolated sessions, resources/prompts and failed-call non-replay',async t=>{
   const home=await mkdtemp(join(tmpdir(),'figma-plugin-test-'));t.after(()=>rm(home,{recursive:true,force:true}))
   const {ctx,definitions}=context(),connections=[],calls=[]
