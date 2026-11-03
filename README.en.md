@@ -115,6 +115,27 @@ A dark background, green accents and monospaced text create another direction wh
 
 </details>
 
+## Advanced example: a stronger model for a complex UI
+
+**Connecting DSH to a stronger model can help DSH to Figma handle more complex UI recreations with finer layout and detail.** The plugin provides canvas access; the model interprets the reference, breaks down the interface and builds the design step by step.
+
+These screenshots come from actual use on November 3, 2026, with **GPT-6-Astra Max** displayed as the selected model in DSH. A screenshot of the tweakcn theme editor was supplied with this request:
+
+> Recreate this UI on the Figma artboard currently open.
+
+The result is a **2264 × 1308** Figma frame containing a theme editor, stock chart, transaction cards, activity feed and chat panel. Separate text layers and groups are visible in the Layers panel; the DSH response reports that the main UI's text, icons and charts remain editable.
+
+![tweakcn UI recreated with GPT-6-Astra Max in DSH, with layers visible in Figma](assets/examples/advanced-model-ui-figma.png)
+
+<details>
+<summary>See the reference, instruction and response in DSH</summary>
+
+![DSH conversation recreating a complex UI with GPT-6-Astra Max](assets/examples/advanced-model-ui-conversation.png)
+
+</details>
+
+This example illustrates how a stronger model can be used for a complex UI task. Figma disconnected during the final review, leaving a few text-spacing adjustments unconfirmed; the design can be refined further on the canvas.
+
 ## Manual installation
 
 Download the DSH package and `SHA256SUMS` from the [latest Release](https://github.com/Duoasa/DSH-to-Figma/releases/latest), verify the checksum, then use your host's CLI.

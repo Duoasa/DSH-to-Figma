@@ -116,6 +116,27 @@ DSH 返回画板名称、节点 ID、1440 × 900 的尺寸、图层结构和截�
 
 </details>
 
+## 进阶案例：更强模型，复刻复杂界面
+
+**当 DSH 接入更强的模型时，DSH to Figma 可以承载更复杂的界面复刻，呈现更精细的布局与细节。** 插件提供画布读写能力，模型负责理解参考图、拆解界面并逐步完成设计。
+
+这组截图来自 2026 年 11 月 3 日的实际使用，DSH 中显示的模型为 **GPT-6-Astra Max**。输入一张 tweakcn 主题编辑器截图，并提出：
+
+> 在目前开启的 figma 画板上复刻这个 UI
+
+结果在 Figma 中呈现为 **2264 × 1308** 的画板，包含主题编辑区、股票图表、交易卡片、活动列表和聊天面板。左侧图层面板可见独立的文字与分组；DSH 返回说明中记录，主体 UI 的文字、图标和图表均可继续编辑。
+
+![DSH 接入 GPT-6-Astra Max 后复刻的 tweakcn 界面与 Figma 图层](assets/examples/advanced-model-ui-figma.png)
+
+<details>
+<summary>查看 DSH 中的参考图、指令与返回结果</summary>
+
+![DSH 中使用 GPT-6-Astra Max 复刻复杂界面的对话](assets/examples/advanced-model-ui-conversation.png)
+
+</details>
+
+本案例展示了更强模型在复杂界面任务中的应用效果。最终校对时曾断开 Figma 连接，少量文字间距修正尚未确认，仍可继续在画布中细化。
+
 ## 手动安装
 
 从 [最新 Release](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 DSH 安装包与 `SHA256SUMS`，校验后使用当前宿主的 CLI 安装。

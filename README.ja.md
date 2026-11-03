@@ -115,6 +115,27 @@ DSH が名前、ノード ID、1440 × 900 のサイズ、レイヤー構成と�
 
 </details>
 
+## 応用例：より高性能なモデルで複雑な UI を再現
+
+**DSH により高性能なモデルを接続すると、DSH to Figma で複雑な UI を再現し、レイアウトや細部をさらに作り込めます。** プラグインがキャンバスの読み書きを担い、モデルが参考画像を理解し、画面を分解して段階的にデザインを作成します。
+
+2026 年 11 月 3 日の実際の使用例です。DSH の選択モデルには **GPT-6-Astra Max** と表示されています。tweakcn テーマエディターのスクリーンショットを添えて、次のように依頼しました。
+
+> 現在開いている Figma のアートボードに、この UI を再現して。
+
+結果は **2264 × 1308** の Figma フレームで、テーマ編集エリア、株価チャート、取引カード、アクティビティ一覧、チャットパネルを含みます。レイヤーパネルには独立した文字レイヤーやグループが見え、DSH の返答では主要 UI の文字・アイコン・チャートを引き続き編集できると報告されています。
+
+![DSH の GPT-6-Astra Max で再現した tweakcn UI と Figma のレイヤー](assets/examples/advanced-model-ui-figma.png)
+
+<details>
+<summary>DSH の参考画像・指示・返答を見る</summary>
+
+![GPT-6-Astra Max で複雑な UI を再現する DSH の会話](assets/examples/advanced-model-ui-conversation.png)
+
+</details>
+
+複雑な UI タスクに高性能なモデルを活用した一例です。最終確認中に Figma との接続が切れ、一部の文字間隔の修正は未確認ですが、キャンバス上で引き続き調整できます。
+
 ## 手動インストール
 
 [最新 Release](https://github.com/Duoasa/DSH-to-Figma/releases/latest) から DSH パッケージと `SHA256SUMS` を取得し、チェックサムを確認してからホストの CLI でインストールします。
