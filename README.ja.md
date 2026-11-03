@@ -20,6 +20,8 @@ DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデ�
 
 **ローカルモードでは公式 Figma MCP の呼び出し枠を消費しません。** DSH がこの PC 用のペアリング済み Figma プラグインを生成します。初回にインポートすれば、以後は起動するだけで接続できます。
 
+**0.3.2 ホットフィックス：** `dsh-to-figma-0.3.2-hotfix.1.tgz` を優先してダウンロードし、`SHA256SUMS` で検証してください。依存関係の互換範囲を拡張しますが、パッケージのバージョンは 0.3.2 のままです。インストール済みの場合は、現在のホスト/profile にホットフィックスを再インストールしてください。Figma 側のプラグイン更新は不要です。
+
 ## 0.3.2 の更新内容
 
 - スクリプト実行前のチェックを追加。構文エラーやよくある非対応の呼び出しを検出し、エラー位置と修正方法を提示します。
@@ -36,7 +38,7 @@ https://github.com/Duoasa/DSH-to-Figma
 
 リポジトリの最新 README に従って進めてください。
 1. 現在のホストの設定と実行環境から CLI、profile、DSH_HOME を確認し、そのホストの CLI を使用する。既存設定と他のプラグインを保持し、対象を特定できない場合だけ確認する。
-2. GitHub の最新正式 Release から dsh-to-figma-<バージョン>.tgz と SHA256SUMS を取得して SHA-256 を検証する。npm のバージョンを推測したり、Figma 用 ZIP を DSH 用パッケージとして使ったりしない。
+2. GitHub の最新正式 Release の説明で推奨される dsh-to-figma-<バージョン>[-hotfix.N].tgz と SHA256SUMS を取得して SHA-256 を検証する。npm のバージョンを推測したり、Figma 用 ZIP を DSH 用パッケージとして使ったりしない。
 3. ホストの plugin --profile <現在のprofile> add コマンドでインストールまたは更新し、local モードを使用する。既存のものはそのまま更新し、重複が確認できた場合だけ重複項目を整理する。
 4. コンポーネントが実行中で、ツールが利用できることを確認する。ホストの再起動が必要なら伝え、再起動後に接続設定を続ける。
 5. figma_setup を呼び出し、ペアリング済み manifest.json の絶対パスを提示する。Figma Desktop でインポートし DSH to Figma · Local を実行する手順を案内する。導入済みなら同じフォルダーを更新して再実行する。ペアリング情報を表示したり、生成ファイルをアップロードしたりしない。
@@ -144,13 +146,13 @@ DSH が名前、ノード ID、1440 × 900 のサイズ、レイヤー構成と�
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2.tgz"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
 **その他の DSH ホスト：**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2.tgz"
+dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
 パスと profile は実際の値に変更してください。デスクトップ版はアプリ付属の CLI を優先します。プラグイン画面で **DSH to Figma → 実行中** を確認し、`figma_setup` を呼び出してください。
