@@ -2,6 +2,13 @@
 
 Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions in that span are listed in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) as v0.2.1, v0.2.2, v0.2.3, and v0.3.0. This file continues from 0.3.1.
 
+## 0.3.2 hotfix.1 — 2026-11-04
+
+- Broaden cordis peers to `4.0.x` and schemastery peers to `3.18.x`.
+- Replace exact DSH RC lists with `^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0` for `dsh-home-paths`, `dsh-mcp-client`, and `dsh-skill`. This accepts all stable 0.2.x versions and all prereleases (including alpha, beta, and RC) of 0.2.0, 0.2.1, and 0.2.2. It rejects 0.3.0 and its prereleases. Under npm's default semver rules, prereleases of other patch versions, such as 0.2.3-rc.1, still require an explicit range entry.
+- Keep the package version at 0.3.2, development dependencies pinned, and `engines.dsh` at `*`. The pinned development runtime remains 0.2.1-rc.5; broader peer admission is not a claim that every admitted runtime has been tested.
+- Distribute as `dsh-to-figma-0.3.2-hotfix.1.tgz` on the existing v0.3.2 Release, with an updated `SHA256SUMS`. Keep the original archive, tag, and Figma companion unchanged. Existing users must reinstall the hotfix archive in their current host/profile; the package version does not trigger an update by itself.
+
 ## 0.3.2 — 2026-11-02
 
 ### 中文

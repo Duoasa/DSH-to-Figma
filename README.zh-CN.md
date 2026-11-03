@@ -21,6 +21,8 @@
 
 **本地模式不消耗官方 Figma MCP 调用额度。** DSH 会自动生成本机已配对的 Figma 插件，首次导入一次，之后运行即可连接。
 
+**0.3.2 热补丁：** 优先下载 `dsh-to-figma-0.3.2-hotfix.1.tgz` 并校验 `SHA256SUMS`。本补丁放宽依赖兼容范围，包版本仍为 0.3.2；已安装用户需在当前宿主/profile 重新安装热补丁包，Figma 配套插件无需更新。
+
 ## 0.3.2 更新
 
 - 新增脚本执行前检查，提前发现语法错误和常见的不兼容调用，并提供错误位置与修正提示。
@@ -37,7 +39,7 @@ https://github.com/Duoasa/DSH-to-Figma
 
 请按仓库最新 README 完成以下操作：
 1. 从当前宿主配置和运行环境确认对应的 CLI、profile 与 DSH_HOME，使用这个宿主的 CLI。保留其他插件和现有配置；只有无法确定安装目标时才问我。
-2. 从 GitHub 最新正式 Release 获取 dsh-to-figma-<版本>.tgz 和 SHA256SUMS，核对 SHA-256。使用 Release 安装包，不要猜测 npm 包版本，也不要把独立 Figma ZIP 当成 DSH 安装包。
+2. 从 GitHub 最新正式 Release 获取 Release 说明推荐的 dsh-to-figma-<版本>[-hotfix.N].tgz 和 SHA256SUMS，核对 SHA-256。使用 Release 安装包，不要猜测 npm 包版本，也不要把独立 Figma ZIP 当成 DSH 安装包。
 3. 通过宿主原生 plugin --profile <当前 profile> add 命令安装或升级，使用 local 模式。若已有旧版，原位升级；仅在确认有重复入口时处理重复项。
 4. 检查插件组件是否运行、工具是否可用。需要重启宿主时告诉我，重启后继续完成连接。
 5. 调用 figma_setup，给我本机已配对插件 manifest.json 的完整路径，指导我在 Figma 桌面端导入并运行 DSH to Figma · Local。已导入过则更新原目录，关闭旧插件后重新运行。不要显示配对密钥或上传已配对文件。
@@ -145,13 +147,13 @@ DSH 返回画板名称、节点 ID、1440 × 900 的尺寸、图层结构和截�
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.2.tgz"
+  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
 **其他 DSH 宿主：**
 
 ```sh
-dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.2.tgz"
+dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
 把路径和 profile 替换为实际值。桌面版优先使用应用自带 CLI，避免调用另一份旧版全局 `dsh`。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。

@@ -20,6 +20,8 @@ Connect DeepSeek Harness to Figma and turn briefs, reference images and existing
 
 **Local mode does not consume the official Figma MCP call quota.** DSH generates a paired Figma companion for your computer. Import it once, then run it to connect.
 
+**0.3.2 hotfix:** Prefer `dsh-to-figma-0.3.2-hotfix.1.tgz` and verify `SHA256SUMS`. This broadens dependency compatibility while keeping the package version at 0.3.2. Existing users must reinstall the hotfix archive in their current host/profile; the Figma companion does not need an update.
+
 ## What’s new in 0.3.2
 
 - Add script preflight checks for syntax errors and common unsupported calls, with error locations and repair hints.
@@ -36,7 +38,7 @@ https://github.com/Duoasa/DSH-to-Figma
 
 Follow the latest repository README:
 1. Identify this host's CLI, profile and DSH_HOME from its configuration and running environment. Use its own CLI, preserve existing settings and other plugins, and ask only if the target cannot be determined.
-2. Download dsh-to-figma-<version>.tgz and SHA256SUMS from the latest stable GitHub Release. Verify SHA-256. Use the release package, not an assumed npm version or the standalone Figma ZIP.
+2. Download the dsh-to-figma-<version>[-hotfix.N].tgz recommended in the release notes and SHA256SUMS from the latest stable GitHub Release. Verify SHA-256. Use the release package, not an assumed npm version or the standalone Figma ZIP.
 3. Install or update through the host's native plugin --profile <current-profile> add command, using local mode. Upgrade in place; address duplicate entries only if they actually exist.
 4. Confirm that the plugin component is running and its tools are available. If a host restart is required, tell me and continue setup afterward.
 5. Run figma_setup and give me the full path to the generated paired manifest.json. Guide me to import and run DSH to Figma · Local in Figma Desktop. For an existing installation, update the same folder and rerun the companion. Do not display pairing credentials or upload paired files.
@@ -144,13 +146,13 @@ Download the DSH package and `SHA256SUMS` from the [latest Release](https://gith
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2.tgz"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
 **Other DSH hosts:**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2.tgz"
+dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
 Replace the path and profile. Prefer the desktop app's bundled CLI over an older global installation. Confirm **DSH to Figma → Running** in the plugin panel, then call `figma_setup`.
