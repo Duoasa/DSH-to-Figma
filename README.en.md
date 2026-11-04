@@ -2,7 +2,7 @@
 
 ![DSH to Figma](assets/readme-hero.gif)
 
-<sub>Title design and animation made with DSH to Figma.</sub>
+<sub>Title design and animation made with DSH to Figma 0.4.0 development build (unreleased).</sub>
 
 # DSH to Figma
 
@@ -86,7 +86,7 @@ The plugin connects the model to the canvas and tools. Continue refining the res
 
 ## In action
 
-**The title design and animation at the top of this README were made with DSH to Figma.** This 0.4.0 example recreates a reference as editable layers, then adds motion with a follow-up request. Model: GPT-6-Astra High, November 4, 2026.
+**The title design and animation at the top of this README were made with DSH to Figma.** This example uses **DSH to Figma 0.4.0 development build (unreleased)** to recreate a reference as editable layers, then adds motion with a follow-up request. Model: GPT-6-Astra High, November 4, 2026.
 
 ### 1. Share a reference, then ask for motion
 

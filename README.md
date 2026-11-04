@@ -2,7 +2,7 @@
 
 ![DSH to Figma](assets/readme-hero.gif)
 
-<sub>标题设计与动画均使用 DSH to Figma 制作。</sub>
+<sub>标题设计与动画均使用 DSH to Figma 0.4.0 开发版（尚未发布）制作。</sub>
 
 # DSH to Figma
 
@@ -87,7 +87,7 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ## 实机演示
 
-**这份 README 顶部的标题设计与动画，就是用 DSH to Figma 制作的。** 以下是 0.4.0 的实际使用过程：从参考图重建可编辑画板，再用一句话添加动画。模型：GPT-6-Astra High，2026 年 11 月 4 日。
+**这份 README 顶部的标题设计与动画，就是用 DSH to Figma 制作的。** 以下是 DSH to Figma **0.4.0 开发版（尚未发布）** 的实际使用过程：从参考图重建可编辑画板，再用一句话添加动画。模型：GPT-6-Astra High，2026 年 11 月 4 日。
 
 ### 1. 发图描述需求，再继续做动画
 

@@ -2,7 +2,7 @@
 
 ![DSH to Figma](assets/readme-hero.gif)
 
-<sub>タイトルデザインとアニメーションは DSH to Figma で制作。</sub>
+<sub>タイトルデザインとアニメーションは DSH to Figma 0.4.0 開発版（未公開）で制作。</sub>
 
 # DSH to Figma
 
@@ -86,7 +86,7 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 ## 実際の操作例
 
-**この README 冒頭のタイトルデザインとアニメーションも、DSH to Figma で制作しました。** 0.4.0 で参考画像を編集可能なレイヤーとして再現し、続けてアニメーションを追加した例です。モデル：GPT-6-Astra High、2026 年 11 月 4 日。
+**この README 冒頭のタイトルデザインとアニメーションも、DSH to Figma で制作しました。** **DSH to Figma 0.4.0 開発版（未公開）** で参考画像を編集可能なレイヤーとして再現し、続けてアニメーションを追加した例です。モデル：GPT-6-Astra High、2026 年 11 月 4 日。
 
 ### 1. 参考画像を送り、続けてアニメーションを依頼
 
