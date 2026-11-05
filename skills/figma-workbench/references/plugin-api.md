@@ -1,6 +1,6 @@
-# Local figma-use contract (Codex Figma plugin 16.0.0 baseline)
+# Local figma-use contract (Codex Figma plugin 17.0.0 baseline)
 
-Read this guide before writing Plugin API code. This implements the documented helper contract in the real Figma editor, not the private cloud executor. See `docs/figma-use-16-alignment.md` for exact differences. Use `figma_status` to verify companion featureVersion >= 3. Read `components-variables` as well for ANY component creation, and `figjam-slides` for those editors.
+Read this guide before writing Plugin API code. This implements the documented helper contract in the real Figma editor, not the private cloud executor. See `docs/figma-use-17-alignment.md` for exact differences. Use `figma_status` to verify companion featureVersion >= 4 for new capability/motion tools (>= 3 for legacy core scripts). Read `components-variables` as well for ANY component creation, and `figjam-slides` for those editors.
 
 ## Invocation and output
 
@@ -71,3 +71,10 @@ Load current fonts before changing existing text, using `getStyledTextSegments([
 Read `safeToRetryWithoutCanvasRead` on a failed use_figma result. true means no user script ran (validation/compilation/pre-dispatch failure): correct and retry. false means execution may have changed the document: inspect affected nodes AND variables/components before changing anything. The local executor is nontransactional; it does not claim automatic rollback. An unknown outcome stays blocked until a full get_metadata read reconciles the canvas. Never blindly replay creation. If the same API error recurs, inspect that API definition and correct the root cause.
 
 The public native API remains available where Figma exposes it. Cloud-only APIs, cloud file creation, cloud design-system search, Code Connect publication and server recording are not silently emulated. Official backends retain their own discovered schemas.
+
+
+## Bounded reads (17 baseline)
+
+Broad inventories return ID, name, type and counts. Read `componentPropertyDefinitions`, `componentProperties` and `valuesByMode` only for resolved target IDs, never across an unbounded collection. Split file-wide inventories by entity. Measure the UTF-8 byte size of the serialized return when it may be large; array length alone is insufficient. Narrow the requested fields or split into complete batches, preserving all required IDs. Do not silently slice data and claim completeness. `get_motion_context` explicitly reports omitted fields and continuation; use a known node and named tracks when a single field is large.
+
+Advanced native APIs pass through the facade; the bridge cannot enable private server APIs. Read the capability snapshot and the dedicated motion/text-motion/custom-animation-styles/specs guide first. Keep library construction separate from composed screen work; shared components and token bindings should remain native objects, not flattened geometry.

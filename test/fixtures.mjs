@@ -26,6 +26,7 @@ export async function fixtureRuntime(){
     createImage:bytes=>({hash:'imagehash',getSizeAsync:async()=>({width:320,height:200})}),getImageByHash:()=>({getBytesAsync:async()=>new Uint8Array(PNG)}),createNodeFromSvg:()=>new Node('FRAME')}
   const context=vm.createContext({Uint8Array,Promise,Buffer,console,setTimeout,clearTimeout})
   vm.runInContext(await readFile(new URL('../companion/helpers.js',import.meta.url),'utf8'),context)
+  vm.runInContext(await readFile(new URL('../companion/capabilities.js',import.meta.url),'utf8'),context)
   vm.runInContext(await readFile(new URL('../companion/runtime.js',import.meta.url),'utf8'),context)
   const runtime=new context.DshFigmaRuntime(figma)
   return {runtime,figma,page,nodes,fonts,get undo(){return undo}}

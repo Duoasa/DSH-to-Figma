@@ -1,0 +1,55 @@
+{
+  "baseline": "Installed Codex Figma plugin 17.0.0",
+  "observedAt": "2026-11-04",
+  "sources": [
+    {
+      "path": "figma-use/SKILL.md",
+      "sha256": "abffccc5eddba774690364e274db83a3d4b9b7bf9aa5e73e9c4517e2f352c94a"
+    },
+    {
+      "path": "figma-use/references/plugin-api-standalone.d.ts",
+      "sha256": "62c14e4172621d5a140170b7bc84032816a57b87e59e2b4ab38cb60069f27067"
+    },
+    {
+      "path": "figma-generate-design/SKILL.md",
+      "sha256": "4dcebaa45ca3942d0b90f5847cedbff62e040fb381ca643cac79700978402705"
+    },
+    {
+      "path": "figma-generate-library/SKILL.md",
+      "sha256": "65ee2aa9fd565b47bf627b773986f3c121616825d01c9ded78ea314532f5d10c"
+    },
+    {
+      "path": "figma-use-motion/SKILL.md",
+      "sha256": "399193f13154f9d515d5265f301aeaf39b9ff14ef6d67b50123b657ef0dfacc0"
+    },
+    {
+      "path": "figma-use-motion/references/motion-patterns.md",
+      "sha256": "34a6f2df372d875bbae4811c9d32bb383b9258fe21701635e6075502b3f7a40f"
+    },
+    {
+      "path": "figma-use-motion/references/motion-custom-styles.md",
+      "sha256": "b6c4b5a58c67865397f63eac905bb8855b337440756386b14e8f198a8938fe04"
+    },
+    {
+      "path": "figma-use-motion/references/text-animation.md",
+      "sha256": "37a591e80db36db007d321c3aab01ba06dad6deb08efd4c9a5119c925e4f0ff2"
+    },
+    {
+      "path": "figma-spec/SKILL.md",
+      "sha256": "cc2d6fa7a8b14983ba1dd3f537036cf7f266e86cc5d5e847b48b96df6592e746"
+    }
+  ],
+  "use_figma": {
+    "required": [
+      "code",
+      "description",
+      "fileKey"
+    ],
+    "optional": [
+      "sessionId",
+      "skillNames"
+    ]
+  },
+  "provenance": "Installed official skill/API documentation and current exposed tool schema. Original source snapshots are kept locally under ignored .figma/figma-use-17-source; not redistributed in the package. Private server executor is unavailable. Availability is verified against the actual local editor, not inferred from typings.",
+  "previousBaseline": "figma-use-16-baseline.json"
+}

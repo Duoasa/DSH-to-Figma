@@ -1,11 +1,17 @@
 ---
 name: figma-workbench
-description: Inspect, create, edit and implement Figma designs with native layers, components, variables, screenshots and workspace assets. Use the connected backend's actual tools for Design, FigJam, Slides or official services.
+description: Answer DSH to Figma usage, setup, upgrade, Markdown/default-spec and troubleshooting questions from bundled user help; inspect, create, edit and implement Figma designs with native layers, components, variables, screenshots and workspace assets. Use the connected backend's actual tools for Design, FigJam, Slides or official services.
 ---
 
 # Figma workbench
 
-Local use_figma follows the documented Codex Figma plugin 16.0.0 contract (2026-10-28), with explicit local environment differences. Read `plugin-api` before executing a script and `components-variables` before creating or editing a component/library. Companion featureVersion 3 is required.
+## User help
+
+When asked how this plugin works, how to install/update/connect it, what a UI control does, how to manage/default Markdown specs, what capabilities are supported, or how to resolve an error: call `figma_read_guide({topic:"user-guide"})`, then the relevant `help-connection`, `help-design`, `help-specs`, `help-motion` or `help-troubleshooting` chapter. Give clear user-facing steps and an example request. Help is bundled and available without a connected canvas or Work session. Do not mutate canvas/settings for an informational question. For state-dependent diagnosis use live status; never present documentation as proof of the current installation. Continue with technical guides only when performing the requested operation.
+
+## Design execution
+
+Local use_figma follows the documented Codex Figma plugin 17.0.0 contract (2026-11-04), with explicit local environment differences. Read `plugin-api` before executing a script and `components-variables` before creating or editing a component/library. Companion featureVersion 4 provides capability discovery and expanded motion reads. Legacy core scripts remain compatible with featureVersion 3.
 
 Start one task with `create_session({fileKey,description})`; take fileKey from status, including a `local:<connectionId>` fallback when present. Pass the returned sessionId plus fileKey, description and skillNames on use_figma. Keep the same UUID for follow-ups, but explicitly select any other target file. UUIDs cannot cross Work sessions or workspace changes. Legacy code-only calls remain supported.
 
@@ -15,7 +21,13 @@ Use `figma_status({compact:true})` when the backend/target is unknown or disconn
 
 For setup, use `figma_setup`: import its manifest once, run **DSH to Figma · Local**, and keep it open. Generated code and ZIP contain a private credential: never read, display, upload or commit them. No manual token copying is needed.
 
-Read only the needed `figma_read_guide` topic: `workflow`, `plugin-api`, `design-to-code`, `components-variables`, `assets-scenes`, `figjam-slides`, or `official-services`. Reuse loaded guides. These local parameters do not apply to official tools; use their actual schemas. Official desktop offers reads/screenshots; remote access requires independent approval.
+Read only the needed `figma_read_guide` topic: `workflow`, `plugin-api`, `design-to-code`, `components-variables`, `assets-scenes`, `figjam-slides`, `official-services`, `motion`, `text-motion`, `custom-animation-styles`, or `specs`. Reuse loaded guides. These local parameters do not apply to official tools; use their actual schemas. Official desktop offers reads/screenshots; remote access requires independent approval.
+
+## Motion and Specs
+
+Check the document's `capabilities` snapshot in figma_status before gated work. Use `get_capabilities({nodeId})` to refresh against a known target; it never creates nodes or switches pages. `available` means the read/API surface was observed, not that writes or visual playback passed. `unknown` can mean no eligible node or a transient read failure. On `unavailable` or an explicit unsupported-API error, stop that feature; do not retry or silently replace it with different content.
+
+Load `motion` for keyframes/timelines, `text-motion` for within-text animation, `custom-animation-styles` for reusable motion styles, and `specs` for native documents. A screenshot shows only an animation's resting state. Preserve text, instances, unrelated tracks and comment anchors. Do not fake native Specs using ordinary canvas text.
 
 ## Design contract
 
@@ -40,3 +52,5 @@ Keep calls on one document sequential. Poll existing asynchronous runs using ret
 ## Delivery
 
 Return the destination, changes and relevant exported files. Distinguish structural checks, real-editor evidence and user visual acceptance. Local component links are not published Code Connect. Publish external deliverables only when requested.
+
+For local UI specifications, users can import Markdown and explicitly set a persistent default in the companion. On every new design task, check figma_status for localSpecs.defaultSpec and automatically read the active default completely (all pages) before canvas writes; follow its UI rules unless the current user requests otherwise. Do not ask for the filename when a default is active. Switching, clearing, or editing a default takes precedence over old defaults in chat history. Use list_local_specs/read_local_spec/edit_local_spec with an explicit specId and revision. Read the specs guide; these are private copies, not native Specs and not automatic edits to original source files.

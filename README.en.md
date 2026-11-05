@@ -1,6 +1,8 @@
 <div align="center">
 
-![DSH to Figma](assets/readme-hero.png)
+![DSH to Figma](assets/readme-hero.gif)
+
+<sub>Title design and animation made with DSH to Figma 0.4.0 development build (unreleased).</sub>
 
 # DSH to Figma
 
@@ -20,13 +22,20 @@ Connect DeepSeek Harness to Figma and turn briefs, reference images and existing
 
 **Local mode does not consume the official Figma MCP call quota.** DSH generates a paired Figma companion for your computer. Import it once, then run it to connect.
 
-**0.3.2 hotfix:** Prefer `dsh-to-figma-0.3.2-hotfix.1.tgz` and verify `SHA256SUMS`. This broadens dependency compatibility while keeping the package version at 0.3.2. Existing users must reinstall the hotfix archive in their current host/profile; the Figma companion does not need an update.
+## New in 0.4.0 — unreleased
 
-## What’s new in 0.3.2
+| Feature | What you can do |
+| --- | --- |
+| Native motion | Create and edit keyframes, text entrances and animation styles; refine them in Figma’s timeline |
+| Local design specs | Import Markdown, then let DSH read, edit and export a stored copy |
+| Default spec | Set one spec as the default for later designs; it persists across restarts until switched or cleared |
+| Capability checks | Check what the current editor supports before an operation |
+| Built-in help | Ask DSH about setup, usage or errors; it consults the relevant guide |
+| UI and compatibility | Updated icon and spec panel; broad host compatibility without a single-RC lock |
 
-- Add script preflight checks for syntax errors and common unsupported calls, with error locations and repair hints.
-- Improve recovery guidance for component read failures, helping models inspect existing changes and avoid duplicate creation.
-- Add examples for variant layout and asynchronous component reads to reduce overlaps and API errors.
+Motion depends on APIs exposed by the editor. Local Markdown is separate from cloud Specs and does not overwrite the source file. The default-spec check enforces reading the current revision; review the resulting design.
+
+**Upgrading:** Update both the DSH package and Figma companion, run `figma_setup`, then close and reopen Local. Version 0.4.0 is not published yet; installation instructions below still use the current release.
 
 ## Install with a prompt
 
@@ -77,45 +86,27 @@ The plugin connects the model to the canvas and tools. Continue refining the res
 
 ## In action
 
-A continuous workflow from October 19, 2026: inspect an existing dark interface, create a light version on a new artboard, then explore a terminal style.
+**The title design and animation at the top of this README were made with DSH to Figma.** This example uses **DSH to Figma 0.4.0 development build (unreleased)** to recreate a reference as editable layers and add motion with a follow-up request. Model: GPT-6-Astra High, November 4, 2026.
 
-### 1. Inspect the selected artboard
+### 1. Share a reference, then ask for motion
 
-> Can you see the artboard I selected?
+> Recreate this image on the current Figma artboard.
+>
+> Make a Figma animation using this artboard.
 
-DSH returns the artboard name, node ID, 1440 × 900 dimensions, layer structure and screenshot.
+![DSH conversation from reference recreation to animation](assets/examples/v040-hero-conversation.png)
 
-![DSH returns the selected artboard and its structure](assets/examples/read-selected-artboard.png)
+### 2. Keep editing native Figma layers
 
-### 2. Create a light version while keeping the original
+The 2172 × 724 artboard keeps text, logos, shapes and connectors as separate editable layers.
 
-> Turn this UI into light mode on a new artboard.
+![Editable layers in Figma with the DSH to Figma companion connected](assets/examples/v040-hero-editable.png)
 
-The original remains in place. The light version has editable text, sidebar and message-area layers.
+### 3. Refine motion in the timeline
 
-![Dark original and editable light version in Figma](assets/examples/light-mode-figma.png)
+An 8-second loop with 32 tracks: staggered title entrances, floating tiles and a fade-out. The header GIF was exported from Figma.
 
-<details>
-<summary>See the instruction and response in DSH</summary>
-
-![Creating the light version in DSH](assets/examples/light-mode-conversation.png)
-
-</details>
-
-### 3. Explore a terminal style
-
-> Turn the light UI into a terminal-style design on another new artboard.
-
-A dark background, green accents and monospaced text create another direction while preserving the earlier versions.
-
-![Terminal-style design and editable layers in Figma](assets/examples/terminal-style-figma.png)
-
-<details>
-<summary>See the instruction and response in DSH</summary>
-
-![Creating the terminal-style version in DSH](assets/examples/terminal-style-conversation.png)
-
-</details>
+![Hero animation and native keyframe timeline in Figma](assets/examples/v040-hero-motion.png)
 
 ## Advanced example: a stronger model for a complex UI
 
@@ -144,6 +135,8 @@ Download the DSH package and `SHA256SUMS` from the [latest Release](https://gith
 
 **macOS DSH Desktop:**
 
+> **Use the full bundled CLI path below for Desktop.** A global `dsh` command may reject the `desktop` profile with `managed exclusively by the Electron application`. Switch to the bundled CLI; do not delete or recreate the desktop profile.
+
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
   plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
@@ -155,7 +148,7 @@ Download the DSH package and `SHA256SUMS` from the [latest Release](https://gith
 dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
-Replace the path and profile. Prefer the desktop app's bundled CLI over an older global installation. Confirm **DSH to Figma → Running** in the plugin panel, then call `figma_setup`.
+Replace the path and profile. Use the desktop app's bundled CLI for the desktop profile. Confirm **DSH to Figma → Running** in the plugin panel, then call `figma_setup`.
 
 The usual workflow uses the companion generated by DSH. `DSH-to-Figma-companion-0.3.2.zip` is an alternative for manual pairing. Keep generated paired folders and ZIPs private because they contain local pairing credentials.
 

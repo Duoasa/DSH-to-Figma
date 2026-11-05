@@ -50,16 +50,39 @@ test('companion endpoint uses localhost and matches the manifest development all
   assert.deepEqual(manifest.networkAccess.allowedDomains, ['none'])
 })
 
-async function uiHarness(fetcher){
+async function uiHarness(fetcher,specsFetcher=async()=>ok({specs:[],defaultSpec:{state:'none',spec:null}})){
  const html=await readFile(new URL('../companion/ui.html',import.meta.url),'utf8'),elements=new Map(),timers=[],messages=[]
- const parent={postMessage(message){messages.push(message)}},window={},document={body:{dataset:{}},querySelector(selector){if(!elements.has(selector))elements.set(selector,{value:'',textContent:''});return elements.get(selector)}}
- const ctx=vm.createContext({window,parent,top:{},document,crypto:{getRandomValues:values=>crypto.getRandomValues(values)},URL,AbortSignal,fetch:fetcher,setInterval(){},setTimeout(fn){timers.push(fn);return timers.length},clearTimeout(){}})
+ const element=()=>({value:'',textContent:'',dataset:{},children:[],setAttribute(){},getBoundingClientRect(){return {height:400}},replaceChildren(){this.children=[];this.value=''},appendChild(child){this.children.push(child);if(!this.value)this.value=child.value}})
+ const parent={postMessage(message){messages.push(message)}},window={},document={body:{dataset:{}},createElement:element,querySelector(selector){if(!elements.has(selector))elements.set(selector,element());return elements.get(selector)}}
+ const ctx=vm.createContext({window,parent,top:{},document,crypto:{getRandomValues:values=>crypto.getRandomValues(values)},URL,AbortSignal,fetch:(url,options)=>url.includes('/specs/')?specsFetcher(url,options):fetcher(url,options),setInterval(){},setTimeout(fn){timers.push(fn);return timers.length},clearTimeout(){}})
  vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],ctx)
  const send=message=>window.onmessage({source:parent,origin:'null',data:{pluginMessage:message}})
  const flush=async()=>{for(let i=0;i<6;i++)await new Promise(resolve=>setImmediate(resolve))}
- return {ctx,elements,timers,messages,send,flush,boot:()=>send({type:'document',name:'Auto Canvas',editorType:'figma',connection:{token:'a'.repeat(64),port:3055,version:'test'}})}
+ return {ctx,elements,timers,messages,send,flush,boot:(extra={})=>send({type:'document',name:'Auto Canvas',editorType:'figma',connection:{token:'a'.repeat(64),port:3055,version:'test'},...extra})}
 }
 const ok=value=>({ok:true,status:200,json:async()=>value})
+test('native file key survives reconnect and cannot be replaced by a stale manual file link',async()=>{
+ const keys=[]
+ const h=await uiHarness(async(url,options)=>{
+  if(url.endsWith('/connect')){keys.push(JSON.parse(options.body).fileKey);return ok({connectionId:'connection-'+keys.length})}
+  if(url.endsWith('/disconnect'))return ok({disconnected:true})
+  return new Promise(()=>{})
+ })
+ vm.runInContext("document.querySelector('#file').value='https://www.figma.com/design/WrongFile123'",h.ctx)
+ h.boot({fileKey:'NativeFile123'});await h.flush()
+ await h.elements.get('#connect').onclick();await h.flush()
+ await h.elements.get('#connect').onclick();await h.flush()
+ assert.deepEqual(keys,['NativeFile123','NativeFile123'])
+})
+test('manual file link remains a fallback only when the native file key is unavailable',async()=>{
+ let key
+ const h=await uiHarness(async(url,options)=>{
+  if(url.endsWith('/connect')){key=JSON.parse(options.body).fileKey;return ok({connectionId:'connected'})}
+  return new Promise(()=>{})
+ })
+ vm.runInContext("document.querySelector('#file').value='https://www.figma.com/design/ManualFile123'",h.ctx)
+ h.boot();await h.flush();assert.equal(key,'ManualFile123')
+})
 test('placeholder progress is visible with node names, bounded, and cleared when finished',async()=>{
  const h=await uiHarness(async url=>url.endsWith('/connect')?ok({connectionId:'connected'}):ok({id:'job-progress',method:'use_figma',args:{code:'return 1'}}))
  h.boot();await h.flush()
@@ -96,4 +119,38 @@ test('companion never reconnects or replays after losing an operation result',as
  assert.equal(results,1);assert.equal(connects,1);assert.equal(h.timers.length,0);assert.equal(vm.runInContext('blocked',h.ctx),true)
  await h.elements.get('#connect').onclick();await h.flush();assert.equal(connects,1)
  assert.match(h.elements.get('#status').textContent,/不会重放/)
+})
+
+test('default UI requires explicit selection, reflects switches and clears without deleting imported copies',async()=>{
+ const specs=[{specId:'one',name:'One.md'},{specId:'two',name:'Two.md'}];let current=null;const changes=[]
+ const h=await uiHarness(async url=>url.endsWith('/connect')?ok({connectionId:'connected'}):new Promise(()=>{}),async(url,options)=>{
+  if(url.endsWith('/set-default')){current=JSON.parse(options.body).specId;changes.push(current);return ok({})}
+  return ok({specs,defaultSpec:current?{state:'active',spec:specs.find(s=>s.specId===current)}:{state:'none',spec:null}})
+ })
+ h.boot();await h.flush();assert.deepEqual(changes,[])
+ const e=id=>h.elements.get('#'+id)
+ assert.equal(e('spec-set-default').disabled,false);assert.equal(e('spec-clear-default').disabled,true)
+ await e('spec-set-default').onclick();await h.flush();assert.equal(current,'one');assert.equal(e('spec-default-name').textContent,'One.md');assert.equal(e('spec-set-default').disabled,true)
+ e('spec-select').value='two';e('spec-select').onchange();assert.equal(current,'one','dropdown alone does not switch default')
+ await e('spec-set-default').onclick();await h.flush();assert.equal(current,'two');assert.equal(e('spec-default-name').textContent,'Two.md')
+ await e('spec-clear-default').onclick();await h.flush();assert.equal(current,null);assert.equal(e('spec-clear-default').disabled,true);assert.equal(e('spec-select').children.length,2)
+ assert.deepEqual(changes,['one','two',null])
+})
+
+test('corrupt default leaves healthy copies visible and can be cleared from the companion',async()=>{
+ let cleared=false
+ const h=await uiHarness(async url=>url.endsWith('/connect')?ok({connectionId:'connected'}):new Promise(()=>{}),async(url,options)=>{
+  if(url.endsWith('/set-default')){assert.equal(JSON.parse(options.body).specId,null);cleared=true;return ok({})}
+  return ok({specs:[{specId:'healthy',name:'Healthy.md'}],unreadableSpecs:[{specId:'broken',error:'Unreadable'}],defaultSpec:{state:cleared?'none':'unavailable',spec:null}})
+ })
+ h.boot();await h.flush()
+ const e=id=>h.elements.get('#'+id)
+ assert.equal(e('spec-select').children.length,1)
+ assert.equal(e('spec-select').children[0].value,'healthy')
+ assert.equal(e('spec-clear-default').disabled,false)
+ assert.match(e('spec-message').textContent,/1 份副本不可读取/)
+ await e('spec-clear-default').onclick();await h.flush()
+ assert.equal(cleared,true)
+ assert.equal(e('spec-clear-default').disabled,true)
+ assert.equal(e('spec-select').children.length,1)
 })

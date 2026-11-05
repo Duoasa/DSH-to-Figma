@@ -79,3 +79,11 @@ test('unproven dynamic access still gives actionable runtime guidance and remain
   const result=await f.runtime.run('use_figma',{code:'const n=figma.currentPage.children[0];return {main:await n.getMainComponentAsync()};'})
   assert.equal(result.value.main,null)
 })
+
+test('local read-only motion collections fail before earlier creation statements can run',()=>{
+  for(const field of ['manualKeyframeTracks','animationStyles','timelines','animations']) {
+    assert.throws(()=>preflightScript(`const n=figma.createRectangle();n.${field}=[];`),error=>error.diagnostic?.code==='FIGMA_READONLY_MOTION_COLLECTION')
+  }
+  assert.doesNotThrow(()=>preflightScript('const data={};data.animationStyles=[];return data;'))
+  assert.doesNotThrow(()=>preflightScript("const n=await figma.getNodeByIdAsync('1:2');n.applyManualKeyframeTrack({type:'PROPERTY',name:'OPACITY'},{keyframes:[]});"))
+})

@@ -1,6 +1,8 @@
 <div align="center">
 
-![DSH to Figma](assets/readme-hero.png)
+![DSH to Figma](assets/readme-hero.gif)
+
+<sub>标题设计与动画均使用 DSH to Figma 0.4.0 开发版（尚未发布）制作。</sub>
 
 # DSH to Figma
 
@@ -21,13 +23,20 @@
 
 **本地模式不消耗官方 Figma MCP 调用额度。** DSH 会自动生成本机已配对的 Figma 插件，首次导入一次，之后运行即可连接。
 
-**0.3.2 热补丁：** 优先下载 `dsh-to-figma-0.3.2-hotfix.1.tgz` 并校验 `SHA256SUMS`。本补丁放宽依赖兼容范围，包版本仍为 0.3.2；已安装用户需在当前宿主/profile 重新安装热补丁包，Figma 配套插件无需更新。
+## 0.4.0 新功能（发布准备中）
 
-## 0.3.2 更新
+| 新功能 | 你可以做什么 |
+| --- | --- |
+| 原生动效 | 创建和调整关键帧、文字入场与动画样式，继续在 Figma 时间线中编辑 |
+| 本地设计规范 | 导入 Markdown，让 DSH 读取、修改并导出规范副本 |
+| 默认规范 | 选择一份设为默认，后续设计自动读取；重启后保留，直到切换或清除 |
+| 能力检测 | 操作前确认当前编辑器支持什么，明确提示不可用的功能 |
+| 内置使用指南 | 直接问 DSH 如何连接、使用或排错，自动查阅对应章节 |
+| 界面与兼容性 | 更新插件图标和规范面板，延续宽松的宿主兼容范围，不锁定单个 RC |
 
-- 新增脚本执行前检查，提前发现语法错误和常见的不兼容调用，并提供错误位置与修正提示。
-- 改善组件读取失败时的恢复提示，帮助模型核对已有修改，减少重复创建。
-- 补充组件变体排列与异步读取示例，减少重叠和调用错误。
+动效以当前编辑器开放的 API 为准。本地 Markdown 不等于云端 Specs，修改副本不会自动覆盖原文件；默认规范保证读取当前版本，设计效果仍需检查。
+
+**升级要点：** 同步更新 DSH 包与 Figma 配套插件，运行 `figma_setup` 后关闭并重新打开 Local 插件。0.4.0 尚未发布，下面的安装说明仍使用当前正式版。
 
 ## 安装：把下面这段话发给 DSH
 
@@ -78,45 +87,27 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ## 实机演示
 
-下面是一组连续操作：读取现有深色界面，在新画板中生成浅色版，再继续探索终端风格。截图来自 2026 年 10 月 19 日的实际使用。
+**这份 README 顶部的标题设计与动画，就是用 DSH to Figma 制作的。** 以下是 DSH to Figma **0.4.0 开发版（尚未发布）** 的实际使用过程：从参考图重建可编辑画板，再用一句话添加动画。模型：GPT-6-Astra High，2026 年 11 月 4 日。
 
-### 1. 读取选中的画板
+### 1. 发图描述需求，再继续做动画
 
-> 现在能看到我选中的画板吗？
+> 把这张图复刻到 figma 的当前画板上。
+>
+> 用这个画板做个 figma 动画。
 
-DSH 返回画板名称、节点 ID、1440 × 900 的尺寸、图层结构和截图，确认接下来操作的目标。
+![DSH 中从参考图复刻到添加动画的完整对话](assets/examples/v040-hero-conversation.png)
 
-![DSH 读取选中画板并返回结构与截图](assets/examples/read-selected-artboard.png)
+### 2. 得到可继续编辑的 Figma 图层
 
-### 2. 保留原稿，新建浅色版本
+2172 × 724 的画板中，文字、Logo、图形和连线分别保留为可编辑图层。
 
-> 把这个 UI 改成浅色模式，放在一个新画板里。
+![Figma 中的原生图层与已连接的 DSH to Figma 插件](assets/examples/v040-hero-editable.png)
 
-深色原稿保留，浅色版放到独立画板。Figma 左侧仍能看到文字、侧边栏、消息区等图层，可以继续选择和编辑。
+### 3. 在时间线中继续调整动画
 
-![Figma 中并列保留的深色原稿与浅色改版](assets/examples/light-mode-figma.png)
+8 秒循环、32 条动画轨道：标题依次入场，图块轻微悬浮，结尾淡出。顶部 GIF 由 Figma 导出。
 
-<details>
-<summary>查看 DSH 中的指令与返回结果</summary>
-
-![在 DSH 对话中生成浅色版本](assets/examples/light-mode-conversation.png)
-
-</details>
-
-### 3. 继续探索终端风格
-
-> 给这个浅色模式的 UI 改成终端风格的设计，放在一个新的画板。
-
-在新的画板中调整为深色背景、绿色强调色和等宽文字，保留之前的版本，方便来回比较。
-
-![Figma 中的终端风格设计与可编辑图层](assets/examples/terminal-style-figma.png)
-
-<details>
-<summary>查看 DSH 中的指令与返回结果</summary>
-
-![在 DSH 对话中继续生成终端风格版本](assets/examples/terminal-style-conversation.png)
-
-</details>
+![Figma 中的标题动画与原生关键帧时间线](assets/examples/v040-hero-motion.png)
 
 ## 进阶案例：更强模型，复刻复杂界面
 
@@ -145,6 +136,8 @@ DSH 返回画板名称、节点 ID、1440 × 900 的尺寸、图层结构和截�
 
 **macOS DSH Desktop：**
 
+> **桌面版请使用下面的应用内置 CLI 完整路径。** 全局 `dsh` 操作 `desktop` profile 可能报 `managed exclusively by the Electron application`。遇到该提示，请改用内置 CLI；不要删除或重建 desktop profile。
+
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
   plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
@@ -156,7 +149,7 @@ DSH 返回画板名称、节点 ID、1440 × 900 的尺寸、图层结构和截�
 dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
-把路径和 profile 替换为实际值。桌面版优先使用应用自带 CLI，避免调用另一份旧版全局 `dsh`。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
+把路径和 profile 替换为实际值。桌面版使用应用自带 CLI；其他宿主按实际 profile 安装。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
 
 DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.2.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
 

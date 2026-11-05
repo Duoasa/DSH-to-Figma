@@ -14,6 +14,7 @@ test('private companion is paired, stable, permission-restricted, and has a stan
  assert.doesNotMatch(JSON.stringify(one),new RegExp(token))
  assert.match(await readFile(join(one.folder,'code.js'),'utf8'),new RegExp(token))
  assert.deepEqual(JSON.parse(await readFile(one.manifest,'utf8')).networkAccess.devAllowedDomains,['http://localhost:41234'])
+ assert.equal(JSON.parse(await readFile(one.manifest,'utf8')).enablePrivatePluginApi,true,'local development companion exposes native file identity')
  for(const path of [one.manifest,one.archive,join(one.folder,'code.js')])assert.equal((await stat(path)).mode&0o777,0o600)
  assert.equal((await stat(one.folder)).mode&0o777,0o700)
  const unpacked=unzipStored(await readFile(one.archive));assert.equal(unpacked['code.js'],await readFile(join(one.folder,'code.js'),'utf8'));assert.ok(unpacked['README.txt'].includes('PRIVATE'))
@@ -24,6 +25,7 @@ test('public companion archive has no credentials and custom ports are validated
  const files=await companionFiles();const bootstrap=files['code.js'].split('\n')[0]
  assert.doesNotMatch(bootstrap,/token/)
  assert.equal(JSON.parse(files['manifest.json']).id,'dsh-figma-workbench-local')
+ assert.equal(JSON.parse(files['manifest.json']).enablePrivatePluginApi,true)
  assert.deepEqual(unzipStored(zipFiles(files)),files)
  await assert.rejects(companionFiles({token:'secret'}),/token/)
  await assert.rejects(companionFiles({port:1}),/port/)

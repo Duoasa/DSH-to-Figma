@@ -2,6 +2,32 @@
 
 Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions in that span are listed in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) as v0.2.1, v0.2.2, v0.2.3, and v0.3.0. This file continues from 0.3.1.
 
+## 0.4.0 — Unreleased
+
+- Enable Figma's documented private-plugin API flag for the local development companion, exposing native file keys for reliable reconnect identity. Native keys take precedence over manual file links; preserve explicit target selection and operation non-replay.
+
+- Make the bundled macOS Desktop CLI requirement prominent, including the managed-profile error and recovery instructions. Add Work-scoped reconnect hints to figma_status: last selected document, same-file-key matches and explicitly unverified name matches, without automatic rebinding or replay.
+
+- Recover the Markdown list when an individual stored copy is corrupt: preserve unreadable data, keep healthy copies usable, and allow switching/clearing a broken default. Validate persisted filenames and timestamps.
+- Upgrade the plugin-owned MCP client to 2.4.0 and pin Zod 4.6.7 as a runtime dependency so fresh installs resolve the patched validator independently of older host dependencies. Host compatibility ranges remain unchanged.
+
+- Bundle a Chinese user manual and five task-focused help chapters, with DSH skill/prompt routing and offline figma_read_guide access for setup, design, specs, motion and troubleshooting.
+
+- Add persistent default Markdown specification selection and clearing in the companion. Refresh the default in DSH prompt/status; require complete reads of its current revision before local canvas writes, with switch/edit invalidation and missing-file diagnostics.
+
+- Restyle the local Markdown panel to match the companion, with compact disclosure, consistent controls, explicit persistence guidance and a clear empty state.
+
+- Use the selected light-background blue whale/edit-frame icon for the DSH plugin; retain the original connection illustration inside the companion window. Figma native development-plugin list and titlebar icons remain host-managed.
+
+- Align local workflow guidance with installed Codex Figma 17.0.0 while preserving 0.3.2 hotfix.1 compatibility ranges and the existing bridge.
+- Add read-only capability discovery with explicit available/unavailable/unknown states; bounded motion reads expose manual tracks, applied styles and timelines.
+- Add native Motion/TextStagger/custom-style guides and targeted replacement helpers. Native collection properties are read-only; detect unsupported assignments before execution. Replacement returns new application/entry IDs and rejects changes that would reorder other applications.
+- Fix animation binding objects being mistaken for scene nodes, which previously lost enumerable fields when copied.
+- Add local Markdown design specs: user-selected import, persistent private copies, paginated reads, exact edits guarded by revisions, and companion export. The original Markdown file is never automatically overwritten.
+- Document native Specs gating. Native cloud Specs and local Markdown are separate routes; no claim of unavailable native local API support.
+- Keep legacy featureVersion 3 scripts usable; companion featureVersion 4 is needed for new capability/motion read APIs. Upgrade the companion for the Markdown UI and helpers.
+- Local verification artifacts only. No tag, release or registry publication.
+
 ## 0.3.2 hotfix.1 — 2026-11-04
 
 - Broaden cordis peers to `4.0.x` and schemastery peers to `3.18.x`.
