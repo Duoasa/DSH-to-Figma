@@ -136,6 +136,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 **macOS DSH Desktop：**
 
+> **桌面版请使用下面的应用内置 CLI 完整路径。** 全局 `dsh` 操作 `desktop` profile 可能报 `managed exclusively by the Electron application`。遇到该提示，请改用内置 CLI；不要删除或重建 desktop profile。
+
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
   plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
@@ -147,7 +149,7 @@ https://github.com/Duoasa/DSH-to-Figma
 dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
 ```
 
-把路径和 profile 替换为实际值。桌面版优先使用应用自带 CLI，避免调用另一份旧版全局 `dsh`。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
+把路径和 profile 替换为实际值。桌面版使用应用自带 CLI；其他宿主按实际 profile 安装。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
 
 DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.2.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
 

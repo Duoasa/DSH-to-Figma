@@ -1,6 +1,6 @@
 # Capability coverage
 
-Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 18 document/task tools plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
+Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 22 local tools (19 canvas/task/capability and 3 Markdown-spec tools) plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
 
 | Capability | Local implementation | Official MCP mode |
 | --- | --- | --- |
@@ -14,13 +14,21 @@ Baseline: 48 Codex Figma connector tools exposed in this development session on 
 | Asset upload/download | Workspace images, editable SVG, PNG/JPG/SVG/PDF export and original fill bytes | Original upload/download contracts |
 | Webpage → canvas | Host can inspect DOM then import a scene; no automatic HTML/browser capture implementation | `generate_figma_design` / `html_to_figma` when offered |
 | Figma Code / Make | Not emulated | Threads, code import, prompts and generation polling when offered |
-| Prototype/motion | Public reactions and exposed Plugin API scripting; no cloud timeline/code conversion | `get_motion_context` and `export_video` when offered |
+| Prototype/motion | Bounded native tracks/styles/timelines; native write methods and explicit final-binding/entry replacement helpers, TextStagger and custom styles when exposed; no cloud rendering/code conversion | `get_motion_context` and `export_video` when offered |
 | Shaders and generative plugins | Public API can use capabilities actually exposed by the editor; no cloud source-library authoring service | List/read/create/update tools when offered |
 | Image generation / Weave | Not emulated by the local bridge | Advertised generation, workflow, model, upload, status and cancel tools |
 | Gallery/site publication | Not implemented locally | Only when offered and explicitly requested by user |
 | Host embedded Figma panel | No Codex panel copied; use the actual Figma app | Host-specific panel is not an MCP capability guaranteed to DSH |
-| Resources/prompts | Seven focused local guides | MCP resource list/templates/read and prompt list/get |
+| Resources/prompts | Seventeen bundled topics: six user-help chapters and eleven technical guides | MCP resource list/templates/read and prompt list/get |
 | OAuth | Local editor pairing requires no Figma OAuth | Independent Figma PKCE login, private storage, refresh, logout |
+
+0.4.0 is an **unreleased local build**, based on 0.3.2 hotfix.1. The current use_figma reference is Codex Figma **17.0.0**, observed 2026-11-04. [Baseline hashes](docs/figma-use-17-baseline.json), [alignment](docs/figma-use-17-alignment.md), [verification](docs/figma-use-17-verification.md).
+
+| Added workflow | Local behavior |
+| --- | --- |
+| Capability discovery | Non-mutating probe, available/unavailable/unknown per feature. `readOnly:true` describes the probe, not the whole plugin. Successful reads are not proof of writes. |
+| Native Specs | Pass through only when the local Plugin API exposes `figma.spec`. It was absent in the tested desktop environment; official cloud Spec tests do not prove local support. |
+| Local Markdown UI specs | Companion file picker imports a private UTF-8 Markdown copy; list/read/exact edit tools, revision conflicts, pagination, persistence and UI download. Does not overwrite source, sync to cloud, or supply native comments. |
 
 ## Default local backend and optional desktop mode
 
@@ -31,7 +39,7 @@ The “Official MCP mode” column above describes combined potential across des
 ## Local behavior limits that affect equivalence
 
 - Public Plugin API functionality and fonts depend on the actual Figma editor/version. The companion cannot unlock private APIs.
-- Local `use_figma` accepts code, description, fileKey, sessionId and skillNames after explicit/automatic binding. create_session supplies a local Work task UUID. Legacy code-only calls remain accepted; see the [16.0.0 alignment contract](docs/figma-use-16-alignment.md).
+- Local `use_figma` accepts code, description, fileKey, sessionId and skillNames after explicit/automatic binding. create_session supplies a local Work task UUID. Legacy code-only calls remain accepted; see the [17.0.0 alignment contract](docs/figma-use-17-alignment.md).
 - Helpers include selector queries/QueryResult, matches, layout-ordered setters, auto layout, inline screenshots, tree, placement and io.write. Placeholder progress is shown in the companion, not a canvas shimmer. Pages reset to the first page per call; local writes are serial and nontransactional.
 - Public editor scripting is powerful and nontransactional. Unknown write outcomes require inspection. No process on the host evaluates Figma scripts.
 - Server tools requiring MCP task-based execution are surfaced with the native DSH bridge's explicit unsupported-task behavior, not silently run through a different protocol. Sampling, host panels and interactive server elicitation are not advertised as supported capabilities.

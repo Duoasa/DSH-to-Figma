@@ -127,6 +127,61 @@ test('default local prepares a private companion and binds one file without sile
   assert.equal((await invoke()).structuredContent.result.id,second)
 })
 
+test('reconnect status identifies a previous file key without rebinding or leaking another Work selection',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs'),{request}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-reconnect-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const other=await mkdtemp(join(tmpdir(),'figma-other-work-'));t.after(()=>rm(other,{recursive:true,force:true}))
+  const {ctx,definitions,listeners}=context(),bridge=new LocalBridge({token:'a'.repeat(64),port:0});let calls=0
+  bridge.call=async id=>{calls++;return {value:{id},images:[]}}
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  const exec={agent:{session:{id:'a',header:{cwd:home}}},signal:new AbortController().signal}
+  const call=(name,args={},owner=exec)=>definitions.get(name).execute(args,owner)
+  const status=async owner=>(await call('figma_status',{compact:true},owner)).structuredContent
+  const connect=async(name,fileKey,editorType='figma')=>(await (await request(bridge,'/connect',{name,fileKey,editorType,featureVersion:4})).json()).connectionId
+  const first=await connect('Original','FileKey123')
+  await call('mcp__figma__get_metadata')
+  assert.equal((await status()).documents[0].bindingMatch,'selected')
+  bridge.remove(first)
+  const fresh=await connect('Renamed','FileKey123'),wrong=await connect('Original','Different123'),otherEditor=await connect('Original','FileKey123','slides')
+  const health=await status()
+  assert.equal(health.documentBinding.state,'disconnected')
+  assert.equal(health.documentBinding.lastSelected.connectionId,first)
+  assert.equal(health.documentBinding.requiresSelection,true)
+  assert.equal(health.documents.find(d=>d.connectionId===fresh).bindingMatch,'same-file-key')
+  for(const id of [wrong,otherEditor])assert.equal(health.documents.find(d=>d.connectionId===id).bindingMatch,'none')
+  await assert.rejects(call('mcp__figma__get_metadata'),/will not switch automatically/)
+  assert.equal(calls,1,'status cannot cause canvas dispatch or silent selection')
+  const unrelated=await status({...exec,agent:{session:{id:'b',header:{cwd:home}}}})
+  assert.equal(unrelated.documentBinding.lastSelected,null)
+  assert.ok(unrelated.documents.every(d=>d.bindingMatch==='none'))
+  assert.equal((await definitions.get('figma_status').execute({})).structuredContent.documentBinding.lastSelected,null)
+  await call('figma_select_document',{connectionId:fresh})
+  assert.equal((await status()).documentBinding.state,'connected')
+  exec.agent.session.header.cwd=other
+  const changed=await status();assert.equal(changed.documentBinding.state,'workspace-changed');assert.ok(changed.documents.every(d=>d.bindingMatch==='none'))
+  await assert.rejects(call('mcp__figma__get_metadata'),/workspace changed/)
+  listeners.get('agent/disposed')({agent:exec.agent})
+  assert.equal((await status()).documentBinding.lastSelected,null)
+})
+
+test('reconnect without a file key reports all name matches as unverified candidates',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs'),{connect}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-reconnect-name-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions}=context(),bridge=new LocalBridge({token:'a'.repeat(64),port:0})
+  bridge.call=async id=>({value:{id},images:[]})
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  const exec={agent:{session:{id:'a',header:{cwd:home}}},signal:new AbortController().signal}
+  const first=await connect(bridge,'Untitled')
+  await definitions.get('figma_select_document').execute({connectionId:first},exec)
+  bridge.remove(first)
+  await connect(bridge,'Untitled');await connect(bridge,'Untitled');await connect(bridge,'Other')
+  const health=(await definitions.get('figma_status').execute({compact:true},exec)).structuredContent
+  assert.equal(health.documentBinding.lastSelected.fileKey,null)
+  assert.equal(health.documents.filter(d=>d.bindingMatch==='same-name-unverified').length,2)
+  assert.equal(health.documents.filter(d=>d.bindingMatch==='none').length,1)
+  await assert.rejects(definitions.get('mcp__figma__get_metadata').execute({},exec),/will not switch automatically/)
+})
+
 test('compact status, optimized-query capability gate and private performance diagnostics',async t=>{
   const {LocalBridge}=await import('../lib/bridge.mjs')
   const {request}=await import('./fixtures.mjs')
@@ -191,4 +246,21 @@ test('performance cursors isolate Work sessions and reset on session disposal',a
   const reopened={session:{id:agentA.session.id,header:{cwd:home}}}
   await assert.rejects(status(reopened,{metricsSince:baseline}),/another session or plugin run/)
   assert.equal((await status(reopened)).completed,0)
+})
+
+
+test('bundled help remains readable without a backend or Work session and rejects unknown paths',async t=>{
+  const home=await mkdtemp(join(tmpdir(),'figma-help-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const {ctx,definitions}=context();let connections=0
+  const handle=await applyWithDependencies(ctx,{backend:'desktop'},{home,connect:async()=>{connections++;throw Error('offline')}})
+  t.after(()=>handle.close())
+  assert.equal(handle.available,false)
+  const guide=definitions.get('figma_read_guide')
+  for(const topic of ['user-guide','help-connection','help-design','help-specs','help-motion','help-troubleshooting']){
+    const output=await guide.execute({topic})
+    assert.match(output.content[0].text,/^# /)
+    assert.ok(output.content[0].text.length>500)
+  }
+  for(const topic of ['../SKILL','../../../../package','missing'])await assert.rejects(guide.execute({topic}),/Unknown Figma guide/)
+  assert.equal(connections,1,'reading help must not reconnect or call a canvas')
 })

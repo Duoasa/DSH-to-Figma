@@ -1,6 +1,6 @@
 {
   "name": "dsh-to-figma",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "DSH to Figma — native canvas editing, design context, assets and screenshots for DeepSeek Harness.",
   "type": "module",
   "license": "MIT",
@@ -28,6 +28,7 @@
     "cordis.patch.yml",
     "README.md",
     "CAPABILITIES.md",
+    "CHANGELOG.md",
     "LICENSE",
     "codex-tool-baseline.json",
     "README.zh-CN.md",
@@ -44,22 +45,23 @@
     "package:companion": "npm run check && node scripts/package-companion.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/client": "2.0.0",
-    "acorn": "8.15.0"
+    "@modelcontextprotocol/client": "2.4.0",
+    "acorn": "8.15.0",
+    "zod": "4.6.7"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.0.x",
-    "@deepseek-ai/schemastery": "3.18.x",
     "@deepseek-ai/dsh-home-paths": "^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0",
     "@deepseek-ai/dsh-mcp-client": "^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0",
-    "@deepseek-ai/dsh-skill": "^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0"
+    "@deepseek-ai/dsh-skill": "^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0",
+    "@deepseek-ai/schemastery": "3.18.x"
   },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
   },
-  "icon": "./assets/icon.svg",
+  "icon": "./assets/icon.png",
   "author": "Duoasa",
   "homepage": "https://github.com/Duoasa/DSH-to-Figma#readme",
   "repository": {
@@ -78,17 +80,18 @@
   ],
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.5",
-    "@deepseek-ai/schemastery": "3.18.5",
+    "@deepseek-ai/dsh-agent": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-agent-loop": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-attachment-local": "0.2.1-rc.5",
     "@deepseek-ai/dsh-home-paths": "0.2.1-rc.5",
-    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.5",
-    "@deepseek-ai/dsh-skill": "0.2.1-rc.5",
     "@deepseek-ai/dsh-llm": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.5",
     "@deepseek-ai/dsh-session": "0.2.1-rc.5",
     "@deepseek-ai/dsh-session-projection": "0.2.1-rc.5",
+    "@deepseek-ai/dsh-skill": "0.2.1-rc.5",
     "@deepseek-ai/dsh-system-prompt": "0.2.1-rc.5",
     "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
-    "@deepseek-ai/dsh-agent": "0.2.1-rc.5",
-    "@deepseek-ai/dsh-attachment-local": "0.2.1-rc.5",
-    "@deepseek-ai/dsh-agent-loop": "0.2.1-rc.5"
+    "@deepseek-ai/schemastery": "3.18.5",
+    "semver": "7.8.5"
   }
 }

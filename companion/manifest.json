@@ -10,6 +10,7 @@
     "slides"
   ],
   "documentAccess": "dynamic-page",
+  "enablePrivatePluginApi": true,
   "networkAccess": {
     "allowedDomains": [
       "none"

@@ -1,0 +1,16 @@
+const page=await figma.getNodeByIdAsync('48:710');await figma.setCurrentPageAsync(page);
+const square=await figma.getNodeByIdAsync('48:725'),caption=await figma.getNodeByIdAsync('48:738'),heading=await figma.getNodeByIdAsync('48:724');
+for(const node of [caption,heading])for(const s of node.getStyledTextSegments(['fontName']))await figma.loadFontAsync(s.fontName);
+const track=square.manualKeyframeTracks.TRANSLATION_X,oldTrackId=track.id,oldKeyIds=track.keyframes.map(k=>k.id);
+square.applyManualKeyframeTrack({type:'PROPERTY',name:'TRANSLATION_X'},{...track,keyframes:track.keyframes.map((k,i)=>i===1?{...k,value:{type:'FLOAT',value:440}}:k)});
+square.removeManualKeyframeTrack({type:'PROPERTY',name:'ROTATION'});
+const textBefore=caption.characters,oldTextBinding=caption.animationStyles[0];
+const textReplacement=dsh.updateAnimationStyle(caption,oldTextBinding.id,'TextStagger',{duration:1.5,timelineOffset:0,props:{...oldTextBinding.props,textDelayGrouping:'WORD',presetStaggerOverlap:30}});
+const custom=(await figma.getLocalCustomAnimationStylesAsync()).find(s=>s.name==='DSH 0.4.0/Gentle entrance');
+if(!custom||custom.animationEntries.length!==1)throw Error('Expected one test custom entry');
+const entryReplacement=await dsh.updateAnimationEntry(custom,custom.animationEntries[0].id,'Opacity',{duration:0.6,easing:{type:'EASE_OUT'}});
+const oldCustomBinding=heading.animationStyles.find(s=>s.type==='CUSTOM'&&s.styleId===custom.id);
+const customReplacement=dsh.updateAnimationStyle(heading,oldCustomBinding.id,custom.id,{type:'CUSTOM',timelineOffset:0.1});
+const after=square.manualKeyframeTracks;
+const checks={trackIdPreserved:after.TRANSLATION_X.id===oldTrackId,keyIdsPreserved:JSON.stringify(after.TRANSLATION_X.keyframes.map(k=>k.id))===JSON.stringify(oldKeyIds),translationChanged:after.TRANSLATION_X.keyframes[1].value.value===440,rotationRemoved:!after.ROTATION,indexedTracksPreserved:!!after.fills?.[0]&&!!after.effects?.[0]?.RADIUS,textPreserved:caption.characters===textBefore,textBindingNotStacked:caption.animationStyles.length===1,textGroupingChanged:caption.animationStyles[0].props.textDelayGrouping==='WORD',customEntryNotStacked:custom.animationEntries.length===1,customBindingNotStacked:heading.animationStyles.length===1};
+return {mutatedNodeIds:[square.id,caption.id,heading.id],mutatedStyleIds:[custom.id],checks,textReplacement,entryReplacement,customReplacement};

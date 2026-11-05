@@ -1,0 +1,124 @@
+{
+  "observedAt": "2026-11-04",
+  "route": "production local bridge + paired Figma desktop companion (isolated DSH home)",
+  "fileKey": "REDACTED",
+  "pageId": "48:710",
+  "staticRepeatChecks": {
+    "pageId": true,
+    "collectionId": true,
+    "variableIds": true,
+    "componentSetId": true,
+    "componentIds": true,
+    "instanceId": true
+  },
+  "static": {
+    "modeCount": 2,
+    "variableIds": [
+      "VariableID:48:712",
+      "VariableID:48:713",
+      "VariableID:48:714"
+    ],
+    "componentSetId": "48:719",
+    "componentIds": [
+      "48:715",
+      "48:717"
+    ],
+    "instanceId": "48:721",
+    "aliasTypes": [
+      "VARIABLE_ALIAS",
+      "VARIABLE_ALIAS"
+    ],
+    "variantCount": 2
+  },
+  "motionEdits": {
+    "mutatedNodeIds": [
+      "48:725",
+      "48:738",
+      "48:724"
+    ],
+    "mutatedStyleIds": [
+      "S:a24a9865693a6f452e69bccdb35bbc59c83e8d1f,"
+    ],
+    "checks": {
+      "trackIdPreserved": true,
+      "keyIdsPreserved": true,
+      "translationChanged": true,
+      "rotationRemoved": true,
+      "indexedTracksPreserved": true,
+      "textPreserved": true,
+      "textBindingNotStacked": true,
+      "textGroupingChanged": true,
+      "customEntryNotStacked": true,
+      "customBindingNotStacked": true
+    },
+    "textReplacement": {
+      "id": "AnimationPresetId:49:764",
+      "replacedId": "AnimationPresetId:48:740",
+      "nodeId": "48:738"
+    },
+    "entryReplacement": {
+      "id": "AnimationPresetId:49:765",
+      "replacedId": "AnimationPresetId:48:743",
+      "styleId": "S:a24a9865693a6f452e69bccdb35bbc59c83e8d1f,"
+    },
+    "customReplacement": {
+      "id": "49:767",
+      "replacedId": "48:744",
+      "nodeId": "48:724"
+    }
+  },
+  "nativeCapabilitySnapshot": {
+    "schemaVersion": 1,
+    "features": {
+      "manualKeyframes": {
+        "state": "available",
+        "reason": "manualKeyframeTracks read successfully"
+      },
+      "animationStyles": {
+        "state": "available",
+        "reason": "animationStyles read successfully"
+      },
+      "timelines": {
+        "state": "available",
+        "reason": "timelines read successfully"
+      },
+      "animationDefinitions": {
+        "state": "available",
+        "reason": "Animation definitions read successfully"
+      },
+      "textAnimation": {
+        "state": "available",
+        "reason": "TextStagger discovered"
+      },
+      "customAnimationStyles": {
+        "state": "available",
+        "reason": "Local custom animation styles read successfully"
+      },
+      "specs": {
+        "state": "unavailable",
+        "reason": "figma.spec read/edit API is not exposed"
+      },
+      "specCreation": {
+        "state": "unavailable",
+        "reason": "Canvas spec constructor is not exposed"
+      },
+      "specComments": {
+        "state": "unavailable",
+        "reason": "Spec comment API is not exposed"
+      }
+    },
+    "readOnly": true,
+    "writesVerified": false,
+    "checkedAt": "2026-11-04T01:55:57.259Z",
+    "pageId": "48:710",
+    "sampledNodeId": "48:724",
+    "scope": "Snapshot of current editor/file API exposure and read probes; not proof of successful writes. Refresh with get_capabilities after account, file or editor changes."
+  },
+  "visualObservations": [
+    "Resting-state preview displays native button variants and a dark-mode instance without clipped labels.",
+    "Motion timeline shows 3 manual tracks / 6 keyframes, a 1.5-second TextStagger application and a custom entrance style.",
+    "Observed Play/Pause and changing current-time values; playback shows horizontal translation, blue-to-purple fill, blur and word-by-word text appearance.",
+    "Timing observation is a smoke check, not user visual acceptance or exported-video validation."
+  ],
+  "publicCopyNote": "Private Figma file key and links removed. Recorded hashes refer to the original test artifacts."
+}

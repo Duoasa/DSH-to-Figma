@@ -73,7 +73,9 @@
       const runtime = this, figma = this.figma, cache = new WeakMap(), raws = new WeakMap()
       const components = new WeakMap(), placeholders = new Map()
       const {compileSelector, propertyValues} = scope.DshFigmaHelpers
-      const isNode = value => value && typeof value.id === 'string' && typeof value.type === 'string'
+      // Animation bindings also have id/type. Treating them as nodes hides their
+      // enumerable fields, losing application IDs during {...style} edits.
+      const isNode = value => value && typeof value.id === 'string' && typeof value.type === 'string' && typeof value.getPluginData === 'function' && !['FIGMA','CUSTOM','CUSTOM_ANIMATION'].includes(value.type)
       const progress = () => { try { runtime.onProgress([...placeholders.values()].map(n=>({id:n.id,name:n.name}))) } catch {} }
       // Dynamic-page Figma forbids the synchronous instance.mainComponent getter.
       // Prime the synchronous query helper from the public async API, scoped to loaded targets.
@@ -185,6 +187,7 @@
           },
           set(_target, key, next) {
             if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
+            if(isNode(value)&&['animationStyles','manualKeyframeTracks','timelines','animations'].includes(key))throw new Error('Native motion collections are read-only. Use applyManualKeyframeTrack/removeManualKeyframeTrack, setTimelineDuration, or dsh.updateAnimationStyle; inspect the motion guide. This script has already started.')
             if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
             value[key] = unwrap(next); return true
           }
@@ -192,6 +195,36 @@
         cache.set(value, proxy); raws.set(proxy, value); return proxy
       }
       runtime.clearPlaceholders=()=>{placeholders.clear();progress()}
+      runtime.motionHelpers={
+        // Native collections are read-only. Replacement is explicit and reports
+        // the new binding ID; only the final application can keep its ordering.
+        updateAnimationStyle(node, applicationId, definitionId, configuration) {
+          const target=unwrap(node),styles=target.animationStyles
+          const index=styles.findIndex(style=>style.id===applicationId)
+          if(index<0)throw new Error('Animation application does not exist; inspect animationStyles')
+          if(index!==styles.length-1)throw new Error('Only the final animation application can be replaced without reordering others; plan an ordered rebuild explicitly')
+          const old=styles[index]
+          if(old.type==='CUSTOM'){
+            if(definitionId!==old.styleId||configuration?.type!=='CUSTOM')throw new Error('Custom replacement must use its original styleId and CUSTOM configuration')
+          }else{
+            const definitions=figma.motion.figmaAnimationStyles()
+            if(!definitions.some(def=>def.styleId===definitionId)||configuration?.type==='CUSTOM')throw new Error('Pass a discovered first-party definitionId for this FIGMA application')
+          }
+          const id=target.applyAnimationStyle(definitionId,unwrap(configuration))
+          target.removeAnimationStyle(applicationId)
+          return {id,replacedId:applicationId,nodeId:target.id}
+        },
+        async updateAnimationEntry(style, entryId, definitionId, props) {
+          const target=unwrap(style),entries=target.animationEntries
+          const index=entries.findIndex(entry=>entry.id===entryId)
+          if(index<0)throw new Error('Animation entry does not exist')
+          if(index!==entries.length-1)throw new Error('Only the final animation entry can be replaced without reordering others; plan an ordered rebuild explicitly')
+          if(!figma.motion.figmaAnimationStyles().some(def=>def.styleId===definitionId))throw new Error('Pass a discovered first-party definitionId, not an entry backing styleId')
+          const entry=await target.addAnimationEntryAsync(definitionId,props)
+          target.removeAnimationEntry(entryId)
+          return {id:entry.id,replacedId:entryId,styleId:target.id}
+        }
+      }
       return wrap(figma)
     }
     async run(method, args = {}) {
@@ -249,7 +282,7 @@
           assets=[]
           const facade=await this.facade(images,assets)
           this.scriptEntered=true
-          value = await run(facade, { color(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex); if (!m) throw new Error('Use a six-digit hex color'); const n = parseInt(m[1],16); return { r: ((n>>16)&255)/255, g: ((n>>8)&255)/255, b: (n&255)/255 } } })
+          value = await run(facade, { ...this.motionHelpers, color(hex) { const m = /^#?([0-9a-f]{6})$/i.exec(hex); if (!m) throw new Error('Use a six-digit hex color'); const n = parseInt(m[1],16); return { r: ((n>>16)&255)/255, g: ((n>>8)&255)/255, b: (n&255)/255 } } })
           f.commitUndo(); break
         }
         case 'get_selection': value = { page: this.snapshot(f.currentPage, 0), selection: f.currentPage.selection.map(n => this.snapshot(n, 0)) }; break
@@ -326,7 +359,8 @@
           if (!Array.isArray(args.links) || args.links.length > 100) throw new Error('Expected at most 100 component links')
           const n=await this.node(args.nodeId); n.setPluginData('dsh-code-links',JSON.stringify(args.links)); value={id:n.id,links:args.links,scope:'DSH plugin data; not published Figma Code Connect'}; f.commitUndo(); break
         }
-        case 'get_motion_context': { const n=await this.node(args.nodeId); value={id:n.id,reactions:jsonValue(n.reactions) || [], motion:jsonValue(n.motion) ?? null,scope:'Public Plugin API only; cloud timeline conversion is not emulated'}; break }
+        case 'get_capabilities': value=await scope.DshFigmaCapabilities.probe(f,args.nodeId?await this.node(args.nodeId):undefined); break
+        case 'get_motion_context': { const n=await this.node(args.nodeId); value=scope.DshFigmaCapabilities.motionContext(n,args); break }
         case 'download_assets': {
           const ids = args.nodeIds || (args.nodeId ? [args.nodeId] : f.currentPage.selection.map(n=>n.id))
           if (!Array.isArray(ids) || !ids.length || ids.length > 20) throw new Error('Select or specify 1–20 nodes')

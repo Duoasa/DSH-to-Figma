@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-11-04",
+  "route": "real Figma companion file picker / production DSH tools / native Save dialog",
+  "input": "ui-design-spec-test.md",
+  "sourceSha256": "23835c505e5cfb57b0324632d71d4023bf86e670dd4e72996b44db66b94a0e09",
+  "exportSha256": "1390213615523765eb35eea7699e89f50893cd78be4eede9eec70d1d965b0b40",
+  "checks": {
+    "uiImport": true,
+    "mcpRead": true,
+    "mcpExactEdit": true,
+    "uiExport": true,
+    "byteExactExport": true,
+    "sourceUnchanged": true,
+    "unrelatedRulesPreserved": true
+  }
+}
