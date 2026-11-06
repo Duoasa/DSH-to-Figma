@@ -1,5 +1,7 @@
 # DSH to Figma · UI 设计规范（测试）
 
+> Historical development record. For current capabilities and tested compatibility, see [0.3.5 verification](0.3.5-verification.md).
+
 本规范描述测试页面中的按钮、主题和动效示例，用于验证设计规范的读取与精确修改。数值依据现有画布；动效条目描述本次编辑的目标效果。
 
 ## UI 设计规则

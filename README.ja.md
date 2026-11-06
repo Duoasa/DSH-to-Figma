@@ -2,7 +2,7 @@
 
 ![DSH to Figma](assets/readme-hero.gif)
 
-<sub>タイトルデザインとアニメーションは DSH to Figma 0.4.0 開発版（未公開）で制作。</sub>
+<sub>DSH to Figma 0.3.5 · タイトルデザインとネイティブアニメーション</sub>
 
 # DSH to Figma
 
@@ -22,20 +22,21 @@ DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデ�
 
 **ローカルモードでは公式 Figma MCP の呼び出し枠を消費しません。** DSH がこの PC 用のペアリング済み Figma プラグインを生成します。初回にインポートすれば、以後は起動するだけで接続できます。
 
-## 0.4.0 の新機能（公開準備中）
+## 0.3.5 の新機能
 
 | 新機能 | できること |
 | --- | --- |
 | ネイティブアニメーション | キーフレーム、文字の入場、アニメーションスタイルを作成・編集し、Figma のタイムラインで調整 |
-| ローカルデザイン規範 | Markdown を読み込み、DSH でコピーを参照・編集・書き出し |
-| デフォルト規範 | 一度設定すれば以降のデザインで自動参照。再起動後も切り替え・解除まで保持 |
+| 再接続 | ネイティブのファイル識別情報で再接続候補を確認し、対象を選び直して操作を再開 |
 | 機能の検出 | 操作前に現在のエディターが対応する機能を確認 |
 | 組み込みガイド | 接続方法、使い方、エラーについて DSH に直接質問 |
-| UI と互換性 | アイコンと規範パネルを更新。単一の RC に固定しない幅広い互換範囲を維持 |
+| UI と互換性 | アイコンとコンパクトな UI を更新。単一の RC に固定しない幅広い互換範囲を維持 |
 
-アニメーションはエディターが公開する API に依存します。ローカル Markdown はクラウド Specs とは別で、元ファイルを自動上書きしません。デフォルト規範は最新版の読み取りを確認しますが、仕上がりの確認は必要です。
+アニメーションはエディターが公開する API に依存します。切断後は対象ファイルを再確認してください。中断された操作は自動で再実行されません。
 
-**更新方法：** DSH パッケージと Figma 連携プラグインの両方を更新し、`figma_setup` を実行して Local を開き直してください。0.4.0 は未公開のため、以下のインストール手順は現行リリースを使用します。
+DSH Desktop 0.2.1-rc.5 と 0.2.2-rc.1 で互換性を検証済みです。
+
+**更新方法：** DSH パッケージと Figma 連携プラグインの両方を更新し、`figma_setup` を実行して Local を開き直してください。`figma_status` で DSH 側と連携プラグインの両方が 0.3.5 であることを確認してください。
 
 ## プロンプトでインストール
 
@@ -86,7 +87,7 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 ## 実際の操作例
 
-**この README 冒頭のタイトルデザインとアニメーションも、DSH to Figma で制作しました。** **DSH to Figma 0.4.0 開発版（未公開）** で参考画像を編集可能なレイヤーとして再現し、続けてアニメーションを追加した例です。モデル：GPT-6-Astra High、2026 年 11 月 4 日。
+**DSH to Figma 0.3.5 は、以下のデモで紹介する制作フロー全体に対応しています。** 参考画像を編集可能なレイヤーとして再現し、続けてネイティブアニメーションを追加します。冒頭の GIF が完成例です。モデル：GPT-6-Astra High、2026 年 11 月 4 日。
 
 ### 1. 参考画像を送り、続けてアニメーションを依頼
 
@@ -139,18 +140,18 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
+  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.5.tgz"
 ```
 
 **その他の DSH ホスト：**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.2-hotfix.1.tgz"
+dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.5.tgz"
 ```
 
 パスと profile は実際の値に変更してください。デスクトップ版ではアプリ付属の CLI を使います。プラグイン画面で **DSH to Figma → 実行中** を確認し、`figma_setup` を呼び出してください。
 
-通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.2.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
+通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.5.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
 
 ## 接続と設定
 

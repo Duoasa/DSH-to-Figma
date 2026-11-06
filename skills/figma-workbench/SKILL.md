@@ -1,13 +1,13 @@
 ---
 name: figma-workbench
-description: Answer DSH to Figma usage, setup, upgrade, Markdown/default-spec and troubleshooting questions from bundled user help; inspect, create, edit and implement Figma designs with native layers, components, variables, screenshots and workspace assets. Use the connected backend's actual tools for Design, FigJam, Slides or official services.
+description: Answer DSH to Figma usage, setup, upgrade, troubleshooting questions from bundled user help; inspect, create, edit and implement Figma designs with native layers, components, variables, screenshots and workspace assets. Use the connected backend's actual tools for Design, FigJam, Slides or official services.
 ---
 
 # Figma workbench
 
 ## User help
 
-When asked how this plugin works, how to install/update/connect it, what a UI control does, how to manage/default Markdown specs, what capabilities are supported, or how to resolve an error: call `figma_read_guide({topic:"user-guide"})`, then the relevant `help-connection`, `help-design`, `help-specs`, `help-motion` or `help-troubleshooting` chapter. Give clear user-facing steps and an example request. Help is bundled and available without a connected canvas or Work session. Do not mutate canvas/settings for an informational question. For state-dependent diagnosis use live status; never present documentation as proof of the current installation. Continue with technical guides only when performing the requested operation.
+When asked how this plugin works, how to install/update/connect it, what a UI control does, what capabilities are supported, or how to resolve an error: call `figma_read_guide({topic:"user-guide"})`, then the relevant `help-connection`, `help-design`, `help-motion` or `help-troubleshooting` chapter. Give clear user-facing steps and an example request. Help is bundled and available without a connected canvas or Work session. Do not mutate canvas/settings for an informational question. For state-dependent diagnosis use live status; never present documentation as proof of the current installation. Continue with technical guides only when performing the requested operation.
 
 ## Design execution
 
@@ -52,5 +52,3 @@ Keep calls on one document sequential. Poll existing asynchronous runs using ret
 ## Delivery
 
 Return the destination, changes and relevant exported files. Distinguish structural checks, real-editor evidence and user visual acceptance. Local component links are not published Code Connect. Publish external deliverables only when requested.
-
-For local UI specifications, users can import Markdown and explicitly set a persistent default in the companion. On every new design task, check figma_status for localSpecs.defaultSpec and automatically read the active default completely (all pages) before canvas writes; follow its UI rules unless the current user requests otherwise. Do not ask for the filename when a default is active. Switching, clearing, or editing a default takes precedence over old defaults in chat history. Use list_local_specs/read_local_spec/edit_local_spec with an explicit specId and revision. Read the specs guide; these are private copies, not native Specs and not automatic edits to original source files.

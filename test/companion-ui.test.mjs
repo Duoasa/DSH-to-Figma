@@ -50,11 +50,11 @@ test('companion endpoint uses localhost and matches the manifest development all
   assert.deepEqual(manifest.networkAccess.allowedDomains, ['none'])
 })
 
-async function uiHarness(fetcher,specsFetcher=async()=>ok({specs:[],defaultSpec:{state:'none',spec:null}})){
+async function uiHarness(fetcher){
  const html=await readFile(new URL('../companion/ui.html',import.meta.url),'utf8'),elements=new Map(),timers=[],messages=[]
  const element=()=>({value:'',textContent:'',dataset:{},children:[],setAttribute(){},getBoundingClientRect(){return {height:400}},replaceChildren(){this.children=[];this.value=''},appendChild(child){this.children.push(child);if(!this.value)this.value=child.value}})
  const parent={postMessage(message){messages.push(message)}},window={},document={body:{dataset:{}},createElement:element,querySelector(selector){if(!elements.has(selector))elements.set(selector,element());return elements.get(selector)}}
- const ctx=vm.createContext({window,parent,top:{},document,crypto:{getRandomValues:values=>crypto.getRandomValues(values)},URL,AbortSignal,fetch:(url,options)=>url.includes('/specs/')?specsFetcher(url,options):fetcher(url,options),setInterval(){},setTimeout(fn){timers.push(fn);return timers.length},clearTimeout(){}})
+ const ctx=vm.createContext({window,parent,top:{},document,crypto:{getRandomValues:values=>crypto.getRandomValues(values)},URL,AbortSignal,fetch:fetcher,setInterval(){},setTimeout(fn){timers.push(fn);return timers.length},clearTimeout(){}})
  vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],ctx)
  const send=message=>window.onmessage({source:parent,origin:'null',data:{pluginMessage:message}})
  const flush=async()=>{for(let i=0;i<6;i++)await new Promise(resolve=>setImmediate(resolve))}
@@ -121,36 +121,15 @@ test('companion never reconnects or replays after losing an operation result',as
  assert.match(h.elements.get('#status').textContent,/不会重放/)
 })
 
-test('default UI requires explicit selection, reflects switches and clears without deleting imported copies',async()=>{
- const specs=[{specId:'one',name:'One.md'},{specId:'two',name:'Two.md'}];let current=null;const changes=[]
- const h=await uiHarness(async url=>url.endsWith('/connect')?ok({connectionId:'connected'}):new Promise(()=>{}),async(url,options)=>{
-  if(url.endsWith('/set-default')){current=JSON.parse(options.body).specId;changes.push(current);return ok({})}
-  return ok({specs,defaultSpec:current?{state:'active',spec:specs.find(s=>s.specId===current)}:{state:'none',spec:null}})
- })
- h.boot();await h.flush();assert.deepEqual(changes,[])
- const e=id=>h.elements.get('#'+id)
- assert.equal(e('spec-set-default').disabled,false);assert.equal(e('spec-clear-default').disabled,true)
- await e('spec-set-default').onclick();await h.flush();assert.equal(current,'one');assert.equal(e('spec-default-name').textContent,'One.md');assert.equal(e('spec-set-default').disabled,true)
- e('spec-select').value='two';e('spec-select').onchange();assert.equal(current,'one','dropdown alone does not switch default')
- await e('spec-set-default').onclick();await h.flush();assert.equal(current,'two');assert.equal(e('spec-default-name').textContent,'Two.md')
- await e('spec-clear-default').onclick();await h.flush();assert.equal(current,null);assert.equal(e('spec-clear-default').disabled,true);assert.equal(e('spec-select').children.length,2)
- assert.deepEqual(changes,['one','two',null])
-})
 
-test('corrupt default leaves healthy copies visible and can be cleared from the companion',async()=>{
- let cleared=false
- const h=await uiHarness(async url=>url.endsWith('/connect')?ok({connectionId:'connected'}):new Promise(()=>{}),async(url,options)=>{
-  if(url.endsWith('/set-default')){assert.equal(JSON.parse(options.body).specId,null);cleared=true;return ok({})}
-  return ok({specs:[{specId:'healthy',name:'Healthy.md'}],unreadableSpecs:[{specId:'broken',error:'Unreadable'}],defaultSpec:{state:cleared?'none':'unavailable',spec:null}})
- })
+
+test('companion connects without a spec panel or legacy storage requests',async()=>{
+ const requests=[]
+ const h=await uiHarness(async url=>{requests.push(url);return url.endsWith('/connect')?ok({connectionId:'connected'}):new Promise(()=>{})})
  h.boot();await h.flush()
- const e=id=>h.elements.get('#'+id)
- assert.equal(e('spec-select').children.length,1)
- assert.equal(e('spec-select').children[0].value,'healthy')
- assert.equal(e('spec-clear-default').disabled,false)
- assert.match(e('spec-message').textContent,/1 份副本不可读取/)
- await e('spec-clear-default').onclick();await h.flush()
- assert.equal(cleared,true)
- assert.equal(e('spec-clear-default').disabled,true)
- assert.equal(e('spec-select').children.length,1)
+ assert.equal(vm.runInContext('active',h.ctx),true)
+ assert.ok(requests.some(url=>url.endsWith('/poll')))
+ assert.ok(requests.every(url=>!url.includes('/specs/')))
+ const html=await readFile(new URL('../companion/ui.html',import.meta.url),'utf8')
+ assert.doesNotMatch(html,/local-specs|spec-import|spec-set-default|spec-export|本地设计规范/)
 })
