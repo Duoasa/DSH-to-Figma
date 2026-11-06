@@ -1,5 +1,7 @@
 # 0.4.0 local verification — 2026-11-04
 
+> Historical development record. For current capabilities and tested compatibility, see [0.3.5 verification](0.3.5-verification.md).
+
 This build is **unreleased**. Work is on `codex/figma-use-17-040`, based on 0.3.2 hotfix.1. No Release, version tag or registry publication was performed. Earlier user-authorized installation/reload placed a development build in the desktop profile; the final pre-release recheck below used an isolated installation and did not replace that running profile.
 
 ## Automated and native host checks

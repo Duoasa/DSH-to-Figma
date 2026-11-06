@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp,rm } from 'node:fs/promises'
+import { mkdtemp,rm,mkdir,writeFile,readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { applyWithDependencies } from '../index.mjs'
@@ -256,11 +256,47 @@ test('bundled help remains readable without a backend or Work session and reject
   t.after(()=>handle.close())
   assert.equal(handle.available,false)
   const guide=definitions.get('figma_read_guide')
-  for(const topic of ['user-guide','help-connection','help-design','help-specs','help-motion','help-troubleshooting']){
+  for(const topic of ['user-guide','help-connection','help-design','help-motion','help-troubleshooting']){
     const output=await guide.execute({topic})
     assert.match(output.content[0].text,/^# /)
     assert.ok(output.content[0].text.length>500)
   }
   for(const topic of ['../SKILL','../../../../package','missing'])await assert.rejects(guide.execute({topic}),/Unknown Figma guide/)
   assert.equal(connections,1,'reading help must not reconnect or call a canvas')
+})
+
+
+test('0.3.5 ignores legacy default specs without injection, write blocking or data deletion',async t=>{
+  const {LocalBridge}=await import('../lib/bridge.mjs')
+  const {connect}=await import('./fixtures.mjs')
+  const home=await mkdtemp(join(tmpdir(),'figma-no-specs-'));t.after(()=>rm(home,{recursive:true,force:true}))
+  const directory=join(home,'figma','specs'),specId='11111111-1111-4111-8111-111111111111'
+  await mkdir(directory,{recursive:true})
+  const saved=JSON.stringify({specId,name:'Legacy.md',markdown:'# LEGACY_SPEC_SENTINEL',updatedAt:'2026-11-04T00:00:00.000Z'})
+  const selected=JSON.stringify({specId,selectionRevision:'22222222-2222-4222-8222-222222222222'})
+  await writeFile(join(directory,specId+'.json'),saved)
+  const selectionPath=join(home,'figma','specs-default.json');await writeFile(selectionPath,selected)
+  const {ctx,definitions}=context(),sections=[],calls=[]
+  ctx.systemPrompt.section=section=>sections.push(section)
+  const bridge=new LocalBridge({token:'a'.repeat(64),port:0})
+  bridge.call=async(id,method,args)=>{calls.push({method,args});return {value:{ok:true},images:[]}}
+  const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
+  const id=await connect(bridge,'No specs',4)
+  const exec={agent:{session:{id:'legacy',header:{cwd:home}}},signal:new AbortController().signal}
+  assert.equal(handle.toolCount,19)
+  for(const name of ['list_local_specs','read_local_spec','edit_local_spec'])assert.equal(definitions.has('mcp__figma__'+name),false)
+  assert.equal(sections.some(s=>s.name==='mcp:figma-default-spec'),false)
+  assert.doesNotMatch(sections.map(s=>s.text()).join(' '),/LEGACY_SPEC_SENTINEL|read_local_spec|default.spec/i)
+  assert.equal((await definitions.get('figma_status').execute({},exec)).structuredContent.localSpecs,undefined)
+  const write=()=>definitions.get('mcp__figma__use_figma').execute({code:'return figma.createFrame().id'},exec)
+  await write()
+  await writeFile(selectionPath,'broken legacy default')
+  await write()
+  assert.equal(calls.length,2,'neither a selected nor corrupt legacy default blocks dispatch')
+  for(const route of ['list','import','export','set-default']){
+    const response=await fetch(`http://127.0.0.1:${bridge.port}/specs/${route}`,{method:'POST',headers:{authorization:'Bearer '+bridge.token,'content-type':'application/json'},body:JSON.stringify({connectionId:id,specId:null})})
+    assert.equal(response.status,404)
+  }
+  assert.equal(await readFile(join(directory,specId+'.json'),'utf8'),saved)
+  assert.equal(await readFile(selectionPath,'utf8'),'broken legacy default')
 })

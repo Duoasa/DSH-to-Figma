@@ -2,7 +2,7 @@
 
 ![DSH to Figma](assets/readme-hero.gif)
 
-<sub>标题设计与动画均使用 DSH to Figma 0.4.0 开发版（尚未发布）制作。</sub>
+<sub>DSH to Figma 0.3.5 · 标题设计与原生动画</sub>
 
 # DSH to Figma
 
@@ -23,20 +23,21 @@
 
 **本地模式不消耗官方 Figma MCP 调用额度。** DSH 会自动生成本机已配对的 Figma 插件，首次导入一次，之后运行即可连接。
 
-## 0.4.0 新功能（发布准备中）
+## 0.3.5 更新
 
 | 新功能 | 你可以做什么 |
 | --- | --- |
 | 原生动效 | 创建和调整关键帧、文字入场与动画样式，继续在 Figma 时间线中编辑 |
-| 本地设计规范 | 导入 Markdown，让 DSH 读取、修改并导出规范副本 |
-| 默认规范 | 选择一份设为默认，后续设计自动读取；重启后保留，直到切换或清除 |
+| 断线重连 | 根据原生文件身份识别重连目标，确认后恢复操作，避免误操作其他文件 |
 | 能力检测 | 操作前确认当前编辑器支持什么，明确提示不可用的功能 |
 | 内置使用指南 | 直接问 DSH 如何连接、使用或排错，自动查阅对应章节 |
-| 界面与兼容性 | 更新插件图标和规范面板，延续宽松的宿主兼容范围，不锁定单个 RC |
+| 界面与兼容性 | 更新插件图标和紧凑界面，延续宽松的宿主兼容范围，不锁定单个 RC |
 
-动效以当前编辑器开放的 API 为准。本地 Markdown 不等于云端 Specs，修改副本不会自动覆盖原文件；默认规范保证读取当前版本，设计效果仍需检查。
+动效功能以当前编辑器开放的 API 为准。断线后需要重新确认目标文件，未完成的操作不会自动重放。
 
-**升级要点：** 同步更新 DSH 包与 Figma 配套插件，运行 `figma_setup` 后关闭并重新打开 Local 插件。0.4.0 尚未发布，下面的安装说明仍使用当前正式版。
+已通过 DSH Desktop 0.2.1-rc.5 与 0.2.2-rc.1 的兼容性验证。
+
+**升级要点：** 同步更新 DSH 包与 Figma 配套插件，运行 `figma_setup` 后关闭并重新打开 Local 插件。通过 `figma_status` 确认 DSH 端与配套插件均为 0.3.5。
 
 ## 安装：把下面这段话发给 DSH
 
@@ -87,7 +88,7 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ## 实机演示
 
-**这份 README 顶部的标题设计与动画，就是用 DSH to Figma 制作的。** 以下是 DSH to Figma **0.4.0 开发版（尚未发布）** 的实际使用过程：从参考图重建可编辑画板，再用一句话添加动画。模型：GPT-6-Astra High，2026 年 11 月 4 日。
+**DSH to Figma 0.3.5 支持下方演示的完整制作流程。** 从参考图重建可编辑画板，再用一句话添加原生动画；顶部动图展示了最终效果。模型：GPT-6-Astra High，2026 年 11 月 4 日。
 
 ### 1. 发图描述需求，再继续做动画
 
@@ -140,18 +141,18 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
+  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.5.tgz"
 ```
 
 **其他 DSH 宿主：**
 
 ```sh
-dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.2-hotfix.1.tgz"
+dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.5.tgz"
 ```
 
 把路径和 profile 替换为实际值。桌面版使用应用自带 CLI；其他宿主按实际 profile 安装。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
 
-DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.2.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
+DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.5.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
 
 ## 连接与配置
 

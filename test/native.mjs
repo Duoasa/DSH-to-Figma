@@ -28,10 +28,10 @@ try{
   const bridge=new LocalBridge({token:'b'.repeat(64),port:0,timeoutMs:1000})
   let handle
   const fiber=await ctx.plugin({name:'figma-native-smoke',Config,inject,async apply(c,config){handle=await applyWithDependencies(c,config,{home,bridge});handles.push(handle)}},{backend:'local',bridgePort:3055})
-  assert.equal(handle.available,true);assert.equal(handle.toolCount,22)
+  assert.equal(handle.available,true);assert.equal(handle.toolCount,19)
   const skill=await ctx.skills.get('figma-workbench');assert.match(skill.content,/get_metadata/)
   const a=await agent('a'),b=await agent('b'),text=await agent('text','text'),chat=await agent('chat','vision',null)
-  for(const topic of ['user-guide','help-specs']){
+  for(const topic of ['user-guide','help-design']){
     const help=await call(chat,'figma_read_guide',{topic})
     assert.equal(help.isError,false,JSON.stringify(help))
     assert.match(help.value.content[0].text,/^# /)
@@ -41,30 +41,16 @@ try{
   assert.match(skill.content,/## User help/)
   assert.equal(bridge.list().length,0,'help works before a canvas is connected')
   const status=await call(a,'figma_status');assert.equal(status.isError,false,JSON.stringify(status));assert.equal(status.value.structuredContent.backend,'local')
-  const importedSpec=await bridge.localSpecs.import({name:'native-ui.md',markdown:'# UI\nButton radius: 12px.\nKeep spacing.'})
-  const specList=await call(a,'mcp__figma__list_local_specs');assert.equal(specList.isError,false);assert.equal(specList.value.structuredContent.specs.length,1)
-  const specBefore=await call(a,'mcp__figma__read_local_spec',{specId:importedSpec.specId});assert.equal(specBefore.isError,false)
-  const specEdit=await call(a,'mcp__figma__edit_local_spec',{specId:importedSpec.specId,expectedRevision:specBefore.value.structuredContent.revision,edits:[{oldText:'12px',newText:'16px'}]})
-  assert.equal(specEdit.isError,false,JSON.stringify(specEdit));assert.equal((await bridge.localSpecs.export(importedSpec)).markdown,'# UI\nButton radius: 16px.\nKeep spacing.')
-  const staleSpec=await call(a,'mcp__figma__edit_local_spec',{specId:importedSpec.specId,expectedRevision:importedSpec.revision,edits:[{oldText:'16px',newText:'20px'}]});assert.equal(staleSpec.isError,true)
-  await bridge.localSpecs.setDefault({specId:importedSpec.specId})
-  const defaultPrompt=async()=> (await ctx.systemPrompt.assemble()).sections.find(s=>s.name==='mcp:figma-default-spec')?.text
-  assert.match(await defaultPrompt(),new RegExp(importedSpec.specId))
-  const defaultHealth=await call(a,'figma_status',{compact:true})
-  assert.equal(defaultHealth.value.structuredContent.localSpecs.defaultSpec.spec.specId,importedSpec.specId)
+  assert.equal(status.value.structuredContent.localSpecs,undefined)
+  assert.equal((await ctx.systemPrompt.assemble()).sections.some(s=>s.name==='mcp:figma-default-spec'),false)
   const id=await connect(bridge,'Canvas',4),fixture=await fixtureRuntime()
   assert.equal((await call(chat,'figma_select_document',{connectionId:id})).isError,true)
-  const unreadWrite=await call(b,'mcp__figma__use_figma',{code:'figma.createFrame()'})
-  assert.equal(unreadWrite.isError,true);assert.match(JSON.stringify(unreadWrite),/Read the current default/)
-  assert.equal(bridge.documents.get(id).queue.length,0,'unread default blocks writes before dispatch')
-  await call(b,'mcp__figma__read_local_spec',{specId:importedSpec.specId})
   const allowedWrite=call(b,'mcp__figma__use_figma',{code:'return 1'});await runJob(bridge,id,fixture.runtime);assert.equal((await allowedWrite).isError,false)
-  await bridge.localSpecs.setDefault({specId:null});assert.match(await defaultPrompt(),/No automatic default/)
   const autoRead=call(b,'mcp__figma__get_metadata');await runJob(bridge,id,fixture.runtime);assert.equal((await autoRead).isError,false)
   const summaryRead=call(b,'mcp__figma__get_metadata',{profile:'summary'});await runJob(bridge,id,fixture.runtime);const summary=await summaryRead
   assert.equal(summary.isError,false,JSON.stringify(summary));assert.doesNotMatch(JSON.stringify(summary.content),/runtimeMs|serializationMs/)
   const health=(await call(b,'figma_status',{compact:true,includeMetrics:true})).value.structuredContent
-  assert.equal(health.tools,undefined);assert.equal(health.performance.completed,4);assert.equal(health.performance.modelUsage,null)
+  assert.equal(health.tools,undefined);assert.equal(health.performance.completed,3);assert.equal(health.performance.modelUsage,null)
   for(const owner of [a,text])assert.equal((await call(owner,'figma_select_document',{connectionId:id})).isError,false)
   const task=await call(a,'mcp__figma__create_session',{fileKey:`local:${id}`,description:'Native contract smoke'})
   assert.equal(task.isError,false,JSON.stringify(task))
@@ -119,5 +105,5 @@ try{
     await production?.dispose()
     if(previousHome===undefined)delete process.env.DSH_HOME;else process.env.DSH_HOME=previousHome
   }
-  console.log(JSON.stringify({result:'PASS',actualDsh:require('@deepseek-ai/dsh-home-paths/package.json').version,productionEntry:true,localMarkdown:true,localTools:22,skill:true,explicitDocumentBinding:true,reconnectHints:true,workScope:true,realHttpBridge:true,companionRuntime:true,durableVisionAttachment:true,textModelFallback:true,workspaceExport:true,closed:true}))
+  console.log(JSON.stringify({result:'PASS',actualDsh:require('@deepseek-ai/dsh-home-paths/package.json').version,productionEntry:true,localTools:19,skill:true,explicitDocumentBinding:true,reconnectHints:true,workScope:true,realHttpBridge:true,companionRuntime:true,durableVisionAttachment:true,textModelFallback:true,workspaceExport:true,closed:true}))
 }finally{for(const handle of handles)await handle.close();await ctx.fiber.dispose();await rm(home,{recursive:true,force:true})}

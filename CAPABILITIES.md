@@ -1,6 +1,6 @@
 # Capability coverage
 
-Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 22 local tools (19 canvas/task/capability and 3 Markdown-spec tools) plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
+Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 19 local canvas/task/capability tools plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
 
 | Capability | Local implementation | Official MCP mode |
 | --- | --- | --- |
@@ -19,16 +19,15 @@ Baseline: 48 Codex Figma connector tools exposed in this development session on 
 | Image generation / Weave | Not emulated by the local bridge | Advertised generation, workflow, model, upload, status and cancel tools |
 | Gallery/site publication | Not implemented locally | Only when offered and explicitly requested by user |
 | Host embedded Figma panel | No Codex panel copied; use the actual Figma app | Host-specific panel is not an MCP capability guaranteed to DSH |
-| Resources/prompts | Seventeen bundled topics: six user-help chapters and eleven technical guides | MCP resource list/templates/read and prompt list/get |
+| Resources/prompts | Sixteen bundled topics: five user-help chapters and eleven technical guides | MCP resource list/templates/read and prompt list/get |
 | OAuth | Local editor pairing requires no Figma OAuth | Independent Figma PKCE login, private storage, refresh, logout |
 
-0.4.0 is an **unreleased local build**, based on 0.3.2 hotfix.1. The current use_figma reference is Codex Figma **17.0.0**, observed 2026-11-04. [Baseline hashes](docs/figma-use-17-baseline.json), [alignment](docs/figma-use-17-alignment.md), [verification](docs/figma-use-17-verification.md).
+Version 0.3.5 adds native motion workflows, capability discovery, bundled help and document-aware reconnect recovery. The current use_figma reference is Codex Figma **17.0.0**, observed 2026-11-04. [Baseline hashes](docs/figma-use-17-baseline.json), [alignment](docs/figma-use-17-alignment.md), [0.3.5 verification](docs/0.3.5-verification.md).
 
 | Added workflow | Local behavior |
 | --- | --- |
 | Capability discovery | Non-mutating probe, available/unavailable/unknown per feature. `readOnly:true` describes the probe, not the whole plugin. Successful reads are not proof of writes. |
 | Native Specs | Pass through only when the local Plugin API exposes `figma.spec`. It was absent in the tested desktop environment; official cloud Spec tests do not prove local support. |
-| Local Markdown UI specs | Companion file picker imports a private UTF-8 Markdown copy; list/read/exact edit tools, revision conflicts, pagination, persistence and UI download. Does not overwrite source, sync to cloud, or supply native comments. |
 
 ## Default local backend and optional desktop mode
 
