@@ -1,8 +1,8 @@
-const pageName='DSH 0.4.0 Acceptance 20261104';
+const pageName='DSH Acceptance 20261104';
 let page=figma.root.children.find(p=>p.name===pageName);
 if(!page){page=figma.createPage();page.name=pageName}
 await figma.setCurrentPageAsync(page);
-const collectionName='DSH 0.4.0 Acceptance 20261104';
+const collectionName='DSH Acceptance 20261104';
 let collection=(await figma.variables.getLocalVariableCollectionsAsync()).find(c=>c.name===collectionName);
 if(!collection){collection=figma.variables.createVariableCollection(collectionName);collection.renameMode(collection.defaultModeId,'Light');collection.addMode('Dark')}
 const existing=await figma.variables.getLocalVariablesAsync();
@@ -12,7 +12,7 @@ primitive.scopes=['ALL_FILLS'];semantic.scopes=['ALL_FILLS'];gap.scopes=['GAP'];
 for(const mode of collection.modes){primitive.setValueForMode(mode.modeId,mode.name==='Dark'?{r:0.5,g:0.4,b:1}:{r:0.3,g:0.2,b:0.8});semantic.setValueForMode(mode.modeId,figma.variables.createVariableAlias(primitive));gap.setValueForMode(mode.modeId,12)}
 semantic.setVariableCodeSyntax('WEB','var(--contract-primary)');
 await figma.loadFontAsync({family:'Inter',style:'Regular'});
-let set=page.query('COMPONENT_SET[name="DSH 0.4.0 Button"]').first();
+let set=page.query('COMPONENT_SET[name="DSH Button"]').first();
 if(!set){
  const variants=[];
  for(const state of ['Default','Hover']){
@@ -26,7 +26,7 @@ if(!set){
   label.componentPropertyReferences={characters:labelProperty};
   variants.push(component)
  }
- set=figma.combineAsVariants(variants,page);set.name='DSH 0.4.0 Button';set.set({x:80,y:80,layoutMode:'VERTICAL',itemSpacing:16,paddingTop:24,paddingBottom:24,paddingLeft:24,paddingRight:24,primaryAxisSizingMode:'AUTO',counterAxisSizingMode:'AUTO'});
+ set=figma.combineAsVariants(variants,page);set.name='DSH Button';set.set({x:80,y:80,layoutMode:'VERTICAL',itemSpacing:16,paddingTop:24,paddingBottom:24,paddingLeft:24,paddingRight:24,primaryAxisSizingMode:'AUTO',counterAxisSizingMode:'AUTO'});
 }
 let preview=page.query('FRAME[name="Contract preview"]').first();
 if(!preview){preview=figma.createAutoLayout('VERTICAL',{name:'Contract preview',x:450,y:80,paddingTop:24,paddingBottom:24,paddingLeft:24,paddingRight:24,itemSpacing:16});page.appendChild(preview)}
@@ -34,7 +34,7 @@ preview.placeholder=true;
 let instance=preview.query('INSTANCE').first();
 if(!instance){instance=set.children[0].createInstance();preview.appendChild(instance)}
 const labelKey=Object.keys(instance.componentProperties).find(key=>key.startsWith('Label#'));
-instance.setProperties({[labelKey]:'DSH 0.4.0 ready'});
+instance.setProperties({[labelKey]:'DSH ready'});
 await instance.getMainComponentAsync();
 instance.setExplicitVariableModeForCollection(collection,collection.modes.find(m=>m.name==='Dark').modeId);
 preview.placeholder=false;

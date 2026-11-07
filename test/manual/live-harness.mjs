@@ -6,17 +6,17 @@ import {mkdir,readFile,writeFile,readdir} from 'node:fs/promises'
 import {resolve,join} from 'node:path'
 import {createInterface} from 'node:readline'
 import {applyWithDependencies} from '../../index.mjs'
-const home=resolve(process.argv[2]??'.figma/040-live-home'),port=Number(process.argv[3]??13055)
+const home=resolve(process.argv[2]??'.figma/live-test-home'),port=Number(process.argv[3]??13055)
 await mkdir(home,{recursive:true,mode:0o700})
 const definitions=new Map(),ctx={tools:{register(def){definitions.set(def.name,def);return()=>definitions.delete(def.name)}},skills:{registerProvider(){}},systemPrompt:{section(){},getSectionOrder(){return 1}},logger:{warn(message){console.error(message)}},effect(){},on(){},get(){return undefined}}
 const handle=await applyWithDependencies(ctx,{backend:'local',bridgePort:port},{home})
-const exec={agent:{session:{id:'live-040',header:{cwd:process.cwd()}}},signal:new AbortController().signal}
+const exec={agent:{session:{id:'live-test',header:{cwd:process.cwd()}}},signal:new AbortController().signal}
 let sequence=0
 const evidence=join(home,'evidence');await mkdir(evidence,{recursive:true,mode:0o700});sequence=Math.max(0,...(await readdir(evidence)).filter(n=>/^\d+\.json$/.test(n)).map(n=>Number(n.split('.')[0])))
 const status=await definitions.get('figma_status').execute({},exec)
 if(!status.structuredContent.available)throw Error('Isolated bridge failed to start')
 const manifest=status.structuredContent.companion.manifest
-const data=JSON.parse(await readFile(manifest,'utf8'));data.name='DSH to Figma · 0.4.0 Test';await writeFile(manifest,JSON.stringify(data,null,2),{mode:0o600})
+const data=JSON.parse(await readFile(manifest,'utf8'));data.name='DSH to Figma · Local Test';await writeFile(manifest,JSON.stringify(data,null,2),{mode:0o600})
 console.log(JSON.stringify({ready:true,manifest,port,evidence}))
 try {
   for await(const line of createInterface({input:process.stdin,crlfDelay:Infinity})) {

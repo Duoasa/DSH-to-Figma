@@ -96,19 +96,16 @@ https://github.com/Duoasa/DSH-to-Figma
 >
 > 用这个画板做个 figma 动画。
 
-![DSH 中从参考图复刻到添加动画的完整对话](assets/examples/v040-hero-conversation.png)
 
 ### 2. 得到可继续编辑的 Figma 图层
 
 2172 × 724 的画板中，文字、Logo、图形和连线分别保留为可编辑图层。
 
-![Figma 中的原生图层与已连接的 DSH to Figma 插件](assets/examples/v040-hero-editable.png)
 
 ### 3. 在时间线中继续调整动画
 
 8 秒循环、32 条动画轨道：标题依次入场，图块轻微悬浮，结尾淡出。顶部 GIF 由 Figma 导出。
 
-![Figma 中的标题动画与原生关键帧时间线](assets/examples/v040-hero-motion.png)
 
 ## 进阶案例：更强模型，复刻复杂界面
 

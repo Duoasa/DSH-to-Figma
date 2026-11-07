@@ -95,19 +95,16 @@ The plugin connects the model to the canvas and tools. Continue refining the res
 >
 > Make a Figma animation using this artboard.
 
-![DSH conversation from reference recreation to animation](assets/examples/v040-hero-conversation.png)
 
 ### 2. Keep editing native Figma layers
 
 The 2172 × 724 artboard keeps text, logos, shapes and connectors as separate editable layers.
 
-![Editable layers in Figma with the DSH to Figma companion connected](assets/examples/v040-hero-editable.png)
 
 ### 3. Refine motion in the timeline
 
 An 8-second loop with 32 tracks: staggered title entrances, floating tiles and a fade-out. The header GIF was exported from Figma.
 
-![Hero animation and native keyframe timeline in Figma](assets/examples/v040-hero-motion.png)
 
 ## Advanced example: a stronger model for a complex UI
 
