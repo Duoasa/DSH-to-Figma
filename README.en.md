@@ -87,6 +87,8 @@ The plugin connects the model to the canvas and tools. Continue refining the res
 
 ## In action
 
+The screenshots below were captured using a development build to demonstrate the workflow. Development version numbers shown in the screenshots do not represent released version numbers; refer to the feature descriptions in this README for the public release.
+
 **DSH to Figma 0.3.5 supports the complete workflow demonstrated below.** Recreate a reference as editable layers, then add native animation with a follow-up request. The header GIF shows the result. Model: GPT-6-Astra High, November 4, 2026.
 
 ### 1. Share a reference, then ask for motion
@@ -95,16 +97,19 @@ The plugin connects the model to the canvas and tools. Continue refining the res
 >
 > Make a Figma animation using this artboard.
 
+![DSH conversation from reference recreation to animation](assets/examples/v040-hero-conversation.png)
 
 ### 2. Keep editing native Figma layers
 
 The 2172 × 724 artboard keeps text, logos, shapes and connectors as separate editable layers.
 
+![Editable layers in Figma with the DSH to Figma companion connected](assets/examples/v040-hero-editable.png)
 
 ### 3. Refine motion in the timeline
 
 An 8-second loop with 32 tracks: staggered title entrances, floating tiles and a fade-out. The header GIF was exported from Figma.
 
+![Hero animation and native keyframe timeline in Figma](assets/examples/v040-hero-motion.png)
 
 ## Advanced example: a stronger model for a complex UI
 
