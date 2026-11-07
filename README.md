@@ -88,6 +88,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ## 实机演示
 
+以下使用开发版的实机截图展示制作流程。截图中的开发版本号不代表实际发布版本号；正式版功能以本文功能说明为准。
+
 **DSH to Figma 0.3.5 支持下方演示的完整制作流程。** 从参考图重建可编辑画板，再用一句话添加原生动画；顶部动图展示了最终效果。模型：GPT-6-Astra High，2026 年 11 月 4 日。
 
 ### 1. 发图描述需求，再继续做动画
@@ -96,16 +98,19 @@ https://github.com/Duoasa/DSH-to-Figma
 >
 > 用这个画板做个 figma 动画。
 
+![DSH 中从参考图复刻到添加动画的完整对话](assets/examples/v040-hero-conversation.png)
 
 ### 2. 得到可继续编辑的 Figma 图层
 
 2172 × 724 的画板中，文字、Logo、图形和连线分别保留为可编辑图层。
 
+![Figma 中的原生图层与已连接的 DSH to Figma 插件](assets/examples/v040-hero-editable.png)
 
 ### 3. 在时间线中继续调整动画
 
 8 秒循环、32 条动画轨道：标题依次入场，图块轻微悬浮，结尾淡出。顶部 GIF 由 Figma 导出。
 
+![Figma 中的标题动画与原生关键帧时间线](assets/examples/v040-hero-motion.png)
 
 ## 进阶案例：更强模型，复刻复杂界面
 
