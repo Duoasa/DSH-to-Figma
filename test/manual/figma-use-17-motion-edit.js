@@ -6,7 +6,7 @@ square.applyManualKeyframeTrack({type:'PROPERTY',name:'TRANSLATION_X'},{...track
 square.removeManualKeyframeTrack({type:'PROPERTY',name:'ROTATION'});
 const textBefore=caption.characters,oldTextBinding=caption.animationStyles[0];
 const textReplacement=dsh.updateAnimationStyle(caption,oldTextBinding.id,'TextStagger',{duration:1.5,timelineOffset:0,props:{...oldTextBinding.props,textDelayGrouping:'WORD',presetStaggerOverlap:30}});
-const custom=(await figma.getLocalCustomAnimationStylesAsync()).find(s=>s.name==='DSH 0.4.0/Gentle entrance');
+const custom=(await figma.getLocalCustomAnimationStylesAsync()).find(s=>s.name==='DSH/Gentle entrance');
 if(!custom||custom.animationEntries.length!==1)throw Error('Expected one test custom entry');
 const entryReplacement=await dsh.updateAnimationEntry(custom,custom.animationEntries[0].id,'Opacity',{duration:0.6,easing:{type:'EASE_OUT'}});
 const oldCustomBinding=heading.animationStyles.find(s=>s.type==='CUSTOM'&&s.styleId===custom.id);
