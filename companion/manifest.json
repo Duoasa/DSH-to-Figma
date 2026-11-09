@@ -19,5 +19,8 @@
       "http://localhost:3055"
     ],
     "reasoning": "Connect only to the user's paired local DSH Figma bridge."
-  }
+  },
+  "permissions": [
+    "teamlibrary"
+  ]
 }

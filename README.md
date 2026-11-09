@@ -1,5 +1,7 @@
 <div align="center">
 
+> Code Layers：本地对已有 `CODE_INSTANCE` 只读取暴露的外部属性，不能读写内部代码；当前原生 API 无创建入口时不能创建。截图/导出取决于节点能力，DOM 导入不是可运行代码层。详见 [能力说明](CAPABILITIES.md)。
+
 ![DSH to Figma](assets/readme-hero.gif)
 
 <sub>DSH to Figma 0.3.5 · 标题设计与原生动画</sub>

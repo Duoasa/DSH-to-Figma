@@ -4,6 +4,52 @@ import { readFile } from 'node:fs/promises'
 import { preflightScript, ScriptPreflightError } from '../lib/script-preflight.mjs'
 import { fixtureRuntime } from './fixtures.mjs'
 
+test('legacy cleanup lookups execute once through the async API without a canvas scan',async()=>{
+  const f=await fixtureRuntime(),a=f.figma.createFrame(),b=f.figma.createFrame()
+  a.name='Reference Notice A';b.name='Reference Notice B'
+  const removed=[],lookups=[]
+  for(const n of [a,b])n.remove=()=>{removed.push(n.id);f.nodes.delete(n.id)}
+  f.figma.getNodeById=()=>{throw Error('dynamic-page sync lookup forbidden')}
+  const get=f.figma.getNodeByIdAsync
+  f.figma.getNodeByIdAsync=async id=>{lookups.push(id);return get(id)}
+  const code=`const expected=${JSON.stringify({[a.id]:a.name,[b.id]:b.name})};
+    const results=[];
+    for(const id of Object.keys(expected)){
+      const node=figma.getNodeById(id);
+      if(node&&node.name===expected[id]){node.remove();results.push(id)}
+    }
+    return results;`
+  const output=await f.runtime.run('use_figma',{code:preflightScript(code)})
+  assert.deepEqual([...output.value],[a.id,b.id]);assert.deepEqual(removed,[a.id,b.id])
+  assert.deepEqual(lookups,[a.id,b.id]);assert.equal(f.undo,1);assert.equal(f.figma.currentPage,f.page)
+})
+
+test('legacy lookups preserve nesting, aliases, optional access, awaited calls and null results',async()=>{
+  const f=await fixtureRuntime(),n=f.figma.createFrame()
+  const code=`const api=figma; async function read(id){return api['getNodeById'](id)?.id??null;}
+    const nested=figma.getNodeById(figma.getNodeById(${JSON.stringify(n.id)}).id);
+    return [nested.id,await read('missing'),(await figma.getNodeById(${JSON.stringify(n.id)})).id,
+      await (async()=>figma?.getNodeById(${JSON.stringify(n.id)})?.id)()];`
+  const prepared=preflightScript(code)
+  assert.equal(preflightScript(prepared),prepared)
+  const output=await f.runtime.run('use_figma',{code:prepared})
+  assert.deepEqual([...output.value],[n.id,null,n.id,n.id])
+})
+
+test('legacy compatibility leaves synchronous callbacks, strings, shadowed APIs and valid scripts unchanged',()=>{
+  for(const code of [
+    'return await figma.getNodeByIdAsync("1:2");',
+    'return ids.map(id=>figma.getNodeById(id));',
+    'function lookup(){return figma.getNodeById("1:2")} return lookup();',
+    'async function lookup(n=figma.getNodeById("1:2")){return n} return lookup();',
+    'class A { value=figma.getNodeById("1:2"); static { figma.getNodeById("1:2"); }}',
+    'const figma={getNodeById(x){return x}};return figma.getNodeById(1);',
+    'async function read(figma){return figma.getNodeById(1)}',
+    'let api=figma;api={getNodeById(x){return x}};return api.getNodeById(1);',
+    '// figma.getNodeById("1:2")\nreturn "figma.getNodeById(1)";',
+  ])assert.equal(preflightScript(code),code)
+})
+
 test('syntax is located in the submitted script without evaluating it', () => {
   globalThis.preflightExecuted = false
   const code = 'globalThis.preflightExecuted = true;\nconst checks = [1].map(x { return x; });'
