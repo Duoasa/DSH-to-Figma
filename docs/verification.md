@@ -29,7 +29,7 @@ On 2026-10-18, installed DSH Desktop 0.2.1-rc.2 and Figma Desktop 126.9.13 compl
 | Export / 导出 | download_assets wrote a 960×560 PNG, 14,375 bytes; inspected local image / 实际导出 PNG 并查看图片 |
 | Existing content / 已有内容 | New frame placed right of the two existing top-level frames; no edits to those nodes / 新画板位于已有内容右侧，未修改原节点 |
 
-![Actual local Figma export / 本地模式实际导出](../assets/examples/local-mcp-acceptance.png)
+![Actual local Figma export / 本地模式实际导出](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/local-mcp-acceptance.png)
 
 [Sanitized evidence / 脱敏记录](evidence/local-mcp-2026-10-18.json). This is one Design-file workflow, not acceptance of every Plugin API, FigJam/Slides, multi-file UI routing or long-running stability. Figma had reported a sync interruption; cloud persistence was not independently verified. / 本次覆盖一个 Design 文件流程，不代表所有 API、其他编辑器、多文件界面路由或长期稳定性通过；Figma 曾提示同步连接中断，未独立验证云端持久化。
 
@@ -82,7 +82,7 @@ Automated Figma tests use a simulated Plugin API. A successful fixture screensho
 | Actual conversation / 实际对话 | Tool details inspected; screenshot displayed in installed DSH. Its attachment hash matched the separate native-service run / 已核对工具详情并显示图片，附件哈希与独立原生服务验证一致 |
 | Canvas writes / 画布写入 | None performed. Official desktop MCP does not provide general canvas writing / 本次未写入，官方桌面 MCP 不提供通用画布写入 |
 
-[Actual returned image / 实际返回截图](../assets/examples/desktop-mcp-screenshot.webp) · [Sanitized evidence / 脱敏验证记录](evidence/desktop-mcp-2026-10-18.json)
+[Actual returned image / 实际返回截图](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/desktop-mcp-screenshot.webp) · [Sanitized evidence / 脱敏验证记录](evidence/desktop-mcp-2026-10-18.json)
 
 Reproduce with the intended file open: enable desktop MCP, configure/reload the DSH desktop backend, then in a Work conversation call `figma_status`, `mcp__figma__get_metadata` and `mcp__figma__get_screenshot` using that file’s frame node ID. Inspect the actual tool results and image attachment. IDs are file-scoped; do not reuse this example’s ID in a different file. Tool discovery alone does not verify the other eight tools, other plans, FigJam/Slides, reconnect stability or long-running use.
 
@@ -96,9 +96,9 @@ On 2026-10-18, OAuth discovery succeeded, but POST to `https://api.figma.com/v1/
 
 ## Real example: screenshot to editable UI / 实机案例：从截图到可编辑 UI
 
-On 2026-10-18 the maintainer supplied a [DSH request screenshot](../assets/examples/screenshot-to-ui-prompt.png) and a [Figma result screenshot](../assets/examples/screenshot-to-ui-figma.png). The request asks to recreate only the reference app UI on the selected frame. The Figma result shows a 1440 × 900 desktop UI with separate text, frame and vector layers, including the sidebar, conversation and message composer.
+On 2026-10-18 the maintainer supplied a [DSH request screenshot](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/screenshot-to-ui-prompt.png) and a [Figma result screenshot](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/screenshot-to-ui-figma.png). The request asks to recreate only the reference app UI on the selected frame. The Figma result shows a 1440 × 900 desktop UI with separate text, frame and vector layers, including the sidebar, conversation and message composer.
 
-2026-10-18，维护者提供了 [DSH 请求截图](../assets/examples/screenshot-to-ui-prompt.png)和 [Figma 结果截图](../assets/examples/screenshot-to-ui-figma.png)。请求要求在选中画板上仅绘制参考应用 UI；结果展示了 1440 × 900 桌面界面，包含独立文字、Frame、矢量图层，以及侧边栏、对话和输入区。
+2026-10-18，维护者提供了 [DSH 请求截图](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/screenshot-to-ui-prompt.png)和 [Figma 结果截图](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/screenshot-to-ui-figma.png)。请求要求在选中画板上仅绘制参考应用 UI；结果展示了 1440 × 900 桌面界面，包含独立文字、Frame、矢量图层，以及侧边栏、对话和输入区。
 
 The request screenshot shows a stopped conversation, not a completed tool trace. The result is visual evidence of this case, not proof of every intermediate tool call, pixel-perfect fidelity, screenshot export, or reconnect behavior.
 

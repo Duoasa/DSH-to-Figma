@@ -2,7 +2,7 @@
 
 > Code Layers：本地对已有 `CODE_INSTANCE` 只读取暴露的外部属性，不能读写内部代码；当前原生 API 无创建入口时不能创建。截图/导出取决于节点能力，DOM 导入不是可运行代码层。详见 [能力说明](CAPABILITIES.md)。
 
-![DSH to Figma](assets/readme-hero.gif)
+![DSH to Figma](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/readme-hero.gif)
 
 <sub>DSH to Figma 0.3.5 · 标题设计与原生动画</sub>
 
@@ -100,19 +100,19 @@ https://github.com/Duoasa/DSH-to-Figma
 >
 > 用这个画板做个 figma 动画。
 
-![DSH 中从参考图复刻到添加动画的完整对话](assets/examples/v040-hero-conversation.png)
+![DSH 中从参考图复刻到添加动画的完整对话](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-conversation.png)
 
 ### 2. 得到可继续编辑的 Figma 图层
 
 2172 × 724 的画板中，文字、Logo、图形和连线分别保留为可编辑图层。
 
-![Figma 中的原生图层与已连接的 DSH to Figma 插件](assets/examples/v040-hero-editable.png)
+![Figma 中的原生图层与已连接的 DSH to Figma 插件](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-editable.png)
 
 ### 3. 在时间线中继续调整动画
 
 8 秒循环、32 条动画轨道：标题依次入场，图块轻微悬浮，结尾淡出。顶部 GIF 由 Figma 导出。
 
-![Figma 中的标题动画与原生关键帧时间线](assets/examples/v040-hero-motion.png)
+![Figma 中的标题动画与原生关键帧时间线](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-motion.png)
 
 ## 进阶案例：更强模型，复刻复杂界面
 
@@ -124,12 +124,12 @@ https://github.com/Duoasa/DSH-to-Figma
 
 结果在 Figma 中呈现为 **2264 × 1308** 的画板，包含主题编辑区、股票图表、交易卡片、活动列表和聊天面板。左侧图层面板可见独立的文字与分组；DSH 返回说明中记录，主体 UI 的文字、图标和图表均可继续编辑。
 
-![DSH 接入 GPT-6-Astra Max 后复刻的 tweakcn 界面与 Figma 图层](assets/examples/advanced-model-ui-figma.png)
+![DSH 接入 GPT-6-Astra Max 后复刻的 tweakcn 界面与 Figma 图层](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-figma.png)
 
 <details>
 <summary>查看 DSH 中的参考图、指令与返回结果</summary>
 
-![DSH 中使用 GPT-6-Astra Max 复刻复杂界面的对话](assets/examples/advanced-model-ui-conversation.png)
+![DSH 中使用 GPT-6-Astra Max 复刻复杂界面的对话](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-conversation.png)
 
 </details>
 

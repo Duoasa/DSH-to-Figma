@@ -1,6 +1,7 @@
 {
   "meta": {
     "title": "DSH to Figma",
+    "detail": "docs/plugin-detail.en.md",
     "description": "Native DSH canvas editing, components, variables, assets and screenshots, with official desktop and remote MCP support."
   }
 }

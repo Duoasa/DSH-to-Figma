@@ -1,6 +1,6 @@
 <div align="center">
 
-![DSH to Figma](assets/readme-hero.gif)
+![DSH to Figma](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/readme-hero.gif)
 
 <sub>DSH to Figma 0.3.5 · タイトルデザインとネイティブアニメーション</sub>
 
@@ -97,19 +97,19 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 >
 > このアートボードで Figma アニメーションを作って。
 
-![参考画像の再現からアニメーション追加までの DSH の会話](assets/examples/v040-hero-conversation.png)
+![参考画像の再現からアニメーション追加までの DSH の会話](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-conversation.png)
 
 ### 2. Figma のレイヤーとして編集を続ける
 
 2172 × 724 のアートボードに、文字、Logo、図形、接続線を個別の編集可能なレイヤーとして保持。
 
-![Figma の編集可能なレイヤーと接続中の DSH to Figma プラグイン](assets/examples/v040-hero-editable.png)
+![Figma の編集可能なレイヤーと接続中の DSH to Figma プラグイン](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-editable.png)
 
 ### 3. タイムラインで動きを調整
 
 8 秒のループ、32 本のトラック。タイトルが順に現れ、タイルが浮遊し、最後にフェードアウトします。冒頭の GIF は Figma から書き出しました。
 
-![Figma のタイトルアニメーションとキーフレームのタイムライン](assets/examples/v040-hero-motion.png)
+![Figma のタイトルアニメーションとキーフレームのタイムライン](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-motion.png)
 
 ## 応用例：より高性能なモデルで複雑な UI を再現
 
@@ -121,12 +121,12 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 結果は **2264 × 1308** の Figma フレームで、テーマ編集エリア、株価チャート、取引カード、アクティビティ一覧、チャットパネルを含みます。レイヤーパネルには独立した文字レイヤーやグループが見え、DSH の返答では主要 UI の文字・アイコン・チャートを引き続き編集できると報告されています。
 
-![DSH の GPT-6-Astra Max で再現した tweakcn UI と Figma のレイヤー](assets/examples/advanced-model-ui-figma.png)
+![DSH の GPT-6-Astra Max で再現した tweakcn UI と Figma のレイヤー](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-figma.png)
 
 <details>
 <summary>DSH の参考画像・指示・返答を見る</summary>
 
-![GPT-6-Astra Max で複雑な UI を再現する DSH の会話](assets/examples/advanced-model-ui-conversation.png)
+![GPT-6-Astra Max で複雑な UI を再現する DSH の会話](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-conversation.png)
 
 </details>
 

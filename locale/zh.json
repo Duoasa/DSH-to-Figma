@@ -1,6 +1,7 @@
 {
   "meta": {
     "title": "DSH to Figma",
+    "detail": "docs/plugin-detail.zh.md",
     "description": "原生 DSH 画布读写、组件与变量、素材和截图；支持官方桌面与远程 MCP。"
   }
 }

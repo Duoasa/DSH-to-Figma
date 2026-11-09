@@ -1,6 +1,6 @@
 <div align="center">
 
-![DSH to Figma](assets/readme-hero.gif)
+![DSH to Figma](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/readme-hero.gif)
 
 <sub>DSH to Figma 0.3.5 · Title design and native animation</sub>
 
@@ -97,19 +97,19 @@ The screenshots below were captured using a development build to demonstrate the
 >
 > Make a Figma animation using this artboard.
 
-![DSH conversation from reference recreation to animation](assets/examples/v040-hero-conversation.png)
+![DSH conversation from reference recreation to animation](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-conversation.png)
 
 ### 2. Keep editing native Figma layers
 
 The 2172 × 724 artboard keeps text, logos, shapes and connectors as separate editable layers.
 
-![Editable layers in Figma with the DSH to Figma companion connected](assets/examples/v040-hero-editable.png)
+![Editable layers in Figma with the DSH to Figma companion connected](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-editable.png)
 
 ### 3. Refine motion in the timeline
 
 An 8-second loop with 32 tracks: staggered title entrances, floating tiles and a fade-out. The header GIF was exported from Figma.
 
-![Hero animation and native keyframe timeline in Figma](assets/examples/v040-hero-motion.png)
+![Hero animation and native keyframe timeline in Figma](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-motion.png)
 
 ## Advanced example: a stronger model for a complex UI
 
@@ -121,12 +121,12 @@ These screenshots come from actual use on November 3, 2026, with **GPT-6-Astra M
 
 The result is a **2264 × 1308** Figma frame containing a theme editor, stock chart, transaction cards, activity feed and chat panel. Separate text layers and groups are visible in the Layers panel; the DSH response reports that the main UI's text, icons and charts remain editable.
 
-![tweakcn UI recreated with GPT-6-Astra Max in DSH, with layers visible in Figma](assets/examples/advanced-model-ui-figma.png)
+![tweakcn UI recreated with GPT-6-Astra Max in DSH, with layers visible in Figma](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-figma.png)
 
 <details>
 <summary>See the reference, instruction and response in DSH</summary>
 
-![DSH conversation recreating a complex UI with GPT-6-Astra Max](assets/examples/advanced-model-ui-conversation.png)
+![DSH conversation recreating a complex UI with GPT-6-Astra Max](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-conversation.png)
 
 </details>
 
