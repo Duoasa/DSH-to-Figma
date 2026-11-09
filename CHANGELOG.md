@@ -2,6 +2,27 @@
 
 Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions in that span are listed in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) as v0.2.1, v0.2.2, v0.2.3, and v0.3.0. This file continues from 0.3.1.
 
+## 0.4.1 (unreleased) — comprehensive upgrade of 0.3.5
+
+- Adapt proven Figma `getNodeById` calls in await-capable script scopes to `await getNodeByIdAsync` during the existing local parse. No additional canvas reads, prompt text, retries or parsing pass; synchronous callbacks and unproven receivers are left unchanged.
+
+- Add a collapsed Design Reference section to the existing companion UI: file-owned frame/name references, on-demand thumbnail, manual unbind, and shared DSH get/set/clear tools. No canvas scans or automatic spec injection.
+- Synchronize reference changes in both directions and provide a compact, deduplicated reference notice before the next model request. Keep full UI/spec content on demand; use outline icons with a right-aligned disclosure chevron.
+
+- Address #19: full/default metadata use the same uncertainty recovery rules; inspect actual returned subtree completeness, report recovery only while protected, and include actionable errors without additional native reads. Summary/paged/truncated responses never unlock blindly.
+- Address #13: document local Code Layer boundaries, label CODE_INSTANCE reads/tree as opaque, and reject known unsupported constructor calls during existing preflight. No cloud dependency or routine extra tool calls.
+
+- Upgrade 0.3.5 to the unreleased 0.4.1 development version. Keep the local companion as the default route and retain official desktop/remote MCP discovery, schemas and pass-through. This section does not announce publication of a release.
+- Add opt-in semantic Design/component/FigJam context, target variable usage and alias resolution, explicit cross-page search and coverage/section plans. Shared styles and optional component deduplication reduce repeated data without disguising omitted fields as complete reads.
+- Add persistent `design_diff` baselines with file/node provenance, collection-policy checks, explicit create/update and optimistic revisions. Add a bounded workspace component/token/SVG index, evidence-based matching, explicit local mappings and an inert script recipe library.
+- Extend image replacement, export-settings handling, subtree SVG extraction and screenshot sizing. Add native MP4/GIF/WebM export with bounded chunked transfer, workspace output and container checks; actual encoder availability remains editor-dependent.
+- Add recursive motion context and limited CSS conversion with unsupported cases reported. Add editable FigJam graph/limited Mermaid generation, basic Slides layouts, existing native shader discovery/application, and installed-browser DOM capture/import with explicit fidelity limits.
+- Add controlled batch edits with preflight and verified best-effort field recovery, plus Work/document-scoped operation status. Arbitrary scripts remain nontransactional; uncertain writes are never automatically replayed.
+- Verify native Design/FigJam/Slides authoring and MP4 encoding in isolated draft files; fix native paint-default/float normalization and text auto-height reset discovered during these checks. See the [upgrade and acceptance record](docs/0.4.1-upgrade.md) for unverified cases.
+- Keep DSH package, generic/paired companion, Figma window title and runtime status on the same 0.4.1 version source.
+- Preserve the user's current page, selection and viewport for local scripts unless the script explicitly changes them. Clarify current-file variable-mode limits and the inspection required before retrying an uncertain write.
+- Require companion featureVersion 5 for the new canvas workflows while retaining legacy routes. Add regression fixtures and bundled [local workflow guidance](skills/figma-workbench/references/local-workflows.md); fixture success does not claim real-editor visual, shader or video acceptance.
+
 ## 0.3.5 — 2026-11-06
 
 - Enable Figma's documented private-plugin API flag for the local development companion, exposing native file keys for reliable reconnect identity. Native keys take precedence over manual file links; preserve explicit target selection and operation non-replay.
@@ -71,3 +92,7 @@ Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions i
 - Add pinned standalone development dependencies and CI for protocol and native DSH integration tests.
 - Preserve the production-entry lifecycle fix and compatibility with DSH 0.2.0-rc.2 / 0.2.1-rc.2 from local development version 0.1.2.
 - Real Figma canvas acceptance and remote OAuth/account access remain pending.
+
+### Recovery and continuous authoring follow-up
+
+0.4.1 adds automatic local task sessions, structured error actions and document candidates, retained-result reconciliation, opt-in persistent idempotency, bounded write journals, observed variable quota diagnostics, explicit token aliases and checkpointed explicit step tasks. Normal calls do not gain mandatory recovery queries. Local is primary; official desktop/remote catalogs remain unchanged. See local-workflows for limits and recovery semantics.

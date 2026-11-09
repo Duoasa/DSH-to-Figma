@@ -18,6 +18,47 @@
       return {capability: available(key + ' read successfully'), value: JSON.parse(JSON.stringify(value))}
     } catch (error) { return {capability: failure(error)} }
   }
+  // New read probes deliberately never return resource names, IDs, source, or raw API errors.
+  // API errors can contain private library metadata; a static classification is enough here.
+  function nativeFailure(error, label) {
+    const text = message(error)
+    if (/permission|not authorized|unauthorized|access denied|forbidden|teamlibrary.*manifest/i.test(text)) return unavailable(label + ' read denied by current permissions; no import or write was attempted')
+    if (/not (?:a )?supported|not available|not enabled|no such property/i.test(text)) return unavailable(label + ' API is unavailable in this editor or file')
+    return unknown(label + ' read could not be verified; retry after checking editor and file access')
+  }
+  async function listProbe(object, method, label) {
+    try {
+      if (typeof object?.[method] !== 'function') return unavailable(label + ' list API is not exposed')
+      // One native read, no item iteration, import, or recursive discovery.
+      const value = await object[method]()
+      return Array.isArray(value) ? available(label + ' list read succeeded with current permissions; resource metadata omitted, imports and writes unverified') : unknown(label + ' returned an unexpected list response')
+    } catch (error) { return nativeFailure(error,label) }
+  }
+  function constructors(figma, editor, methods) {
+    try {
+      if (figma.editorType !== editor) return unavailable('Requires the ' + editor + ' editor; constructors were not invoked')
+      if (figma.mode && figma.mode !== 'default') return unavailable('Constructors require the normal editor plugin mode')
+      return methods.every(key => typeof figma[key] === 'function')
+        ? available(editor + ' constructors exposed; creation and write permission are unverified')
+        : unavailable('Required ' + editor + ' constructors are not all exposed')
+    } catch (error) { return nativeFailure(error,editor + ' constructors') }
+  }
+  function nativeVideo(figma, requestedNode) {
+    try {
+      if (figma.editorType !== 'figma' || (figma.mode && figma.mode !== 'default')) return unavailable('Native video export requires the normal Figma Design editor')
+      let frame, node = requestedNode
+      // Parent walking is bounded and never loads another page.
+      for (let i=0; node && i<100; i++,node=node.parent) {
+        if (node.type === 'FRAME' && node.parent?.type === 'PAGE') {frame=node;break}
+        if (node.type === 'PAGE') break
+      }
+      if (!frame && !requestedNode) frame = (figma.currentPage?.children || []).slice(0,100).find(item => item.type === 'FRAME' && item.parent?.type === 'PAGE')
+      if (!frame) return unknown('No eligible top-level frame in the bounded current-page probe; native encoding was not attempted')
+      if (typeof frame.exportAsync !== 'function') return unavailable('Frame exportAsync is not exposed on this target')
+      // Image export uses the same method, so mere exposure cannot establish video support.
+      return unknown('Generic frame exportAsync is exposed; MP4/GIF/WEBM support and animation encoding remain unverified until export_video succeeds')
+    } catch (error) { return nativeFailure(error,'Native video export') }
+  }
   async function probe(figma, requestedNode) {
     const features = {}, sampleTypes = new Set(['TEXT','RECTANGLE','ELLIPSE','VECTOR','FRAME','COMPONENT','INSTANCE','GROUP','POLYGON','STAR','LINE'])
     // Read only a bounded portion of the loaded page. Never create a probe node or switch pages.
@@ -65,6 +106,19 @@
     } catch (error) {
       for (const key of ['specs','specCreation','specComments']) features[key] = failure(error)
     }
+    features.variableCreation=typeof figma.variables?.createVariable==='function'?available('Variable constructor exposed; collection permission and mode quota unknown'):unavailable('Variable constructor not exposed')
+    try { features.codeLayerCreation=typeof figma.createCodeLayer==='function'?available('Code Layer constructor exposed; signature and writes unverified'):unavailable('Local Code Layer constructor is not exposed') } catch { features.codeLayerCreation=unknown('Code Layer constructor exposure could not be checked') }
+    features.nativeVideoExport = nativeVideo(figma,requestedNode)
+    features.shaderCatalog = await listProbe(figma,'listAvailableShaders','Shader catalog')
+    try {
+      features.shaderImport = typeof figma.importShaderById === 'function'
+        ? available('Shader import API exposed; no shader was imported and write permission is unverified')
+        : unavailable('Shader import API is not exposed')
+    } catch (error) { features.shaderImport = nativeFailure(error,'Shader import') }
+    try { features.teamLibraryRead = await listProbe(figma.teamLibrary,'getAvailableLibraryVariableCollectionsAsync','Team library') }
+    catch (error) { features.teamLibraryRead = nativeFailure(error,'Team library') }
+    features.figjamConstructors = constructors(figma,'figjam',['createSticky','createShapeWithText','createConnector'])
+    features.slidesConstructors = constructors(figma,'slides',['createSlide','createSlideRow','createText'])
     return {schemaVersion:1, editorType:figma.editorType, pageId:figma.currentPage?.id ?? null,
       sampledNodeId:sample?.id ?? null, checkedAt:new Date().toISOString(), readOnly:true, writesVerified:false,
       features, scope:'Current editor/file API exposure and read probes; not a guarantee of write permission or visual correctness'}

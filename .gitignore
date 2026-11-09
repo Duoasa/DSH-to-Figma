@@ -9,3 +9,5 @@ dist/
 *.tgz
 *.log
 coverage/
+output/
+tmp/

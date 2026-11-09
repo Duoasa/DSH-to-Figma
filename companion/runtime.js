@@ -14,10 +14,20 @@
   const jsonValue = value => value === undefined || typeof value === 'symbol' ? undefined : JSON.parse(JSON.stringify(value))
   class Runtime {
     constructor(figma, {onProgress = () => {}} = {}) { this.figma = figma; this.metrics = null; this.readOptions = {}; this.onProgress = onProgress }
+    collectionCapability(collection){
+      const entry=this.modeLimits?.get(collection.id),valid=entry&&entry.expiresAt>Date.now()&&entry.count===collection.modes.length
+      if(entry&&!valid)this.modeLimits.delete(collection.id)
+      return {modesAllowed:valid?entry.limit:null,canCreateVariable:collection.remote?'unavailable':'unknown',modeLimitSource:valid?'observed-native-error':'unknown',...(valid?{modeLimitExpiresAt:entry.expiresAt}:{})}
+    }
+    recordWrite(entry){if(!this.writeJournal)return;if(this.writeJournal.entries.length<1000)this.writeJournal.entries.push(entry);else this.writeJournal.truncated=true}
     async node(id) {
       const node = id ? await this.figma.getNodeByIdAsync(id.replace(/^(\d+)-(\d+)$/, '$1:$2')) : this.figma.currentPage.selection[0]
       if (!node) throw new Error('Select a node in Figma or provide an existing nodeId')
       return node
+    }
+    codeLayerInfo(node) {
+      if(node.type!=='CODE_INSTANCE')return null
+      return {opaque:true,codeLayer:{source:'unavailable',children:'unavailable',export:typeof node.exportAsync==='function'?'exposed-unverified':'unavailable'}}
     }
     snapshot(node, depth, budget, root = true) {
       const options=this.readOptions
@@ -35,6 +45,7 @@
       for(const key of options.profile==='summary'?summaryFields:fields){try{add(key,node[key])}catch{}}
       // IDs are necessary to recover a bounded read even if a large name/property exhausted its budget.
       result.id=node.id;result.type=node.type
+      const codeLayer=this.codeLayerInfo(node);if(codeLayer){for(const [key,value]of Object.entries(codeLayer))add(key,value);return result}
       if(options.profile!=='summary'&&node.type==='TEXT'&&typeof node.getStyledTextSegments==='function'){
         try{const segments=node.getStyledTextSegments(['fontName','fontSize','fills','textDecoration','textCase','lineHeight','letterSpacing']);add('textSegments',segments.slice(0,2000));if(segments.length>2000){result.truncated=true;result.reason='textSegments';result.continuation={nodeId:node.id,hint:'Read text ranges with use_figma'}}}catch{}
       }
@@ -61,9 +72,10 @@
     async screenshot(node, args = {}, inline = false) {
       if(typeof node.exportAsync!=='function')throw new Error('This node cannot be exported; choose a frame or scene node')
       if(args.quality!==undefined&&!['overview','detail'].includes(args.quality))throw new Error('quality must be overview or detail')
-      const edge=args.quality==='overview'?800:1600
-      const scale=args.scale??(inline&&args.quality===undefined?Math.min(0.5,1024/Math.max(node.width||1,node.height||1)):Math.min(1,edge/Math.max(node.width||1,node.height||1)))
+      const edge=args.maxDimension===undefined?(args.quality==='overview'?800:1600):integer(args.maxDimension,1600,1,8192,'maxDimension')
+      let scale=args.scale??(inline&&args.quality===undefined?Math.min(0.5,1024/Math.max(node.width||1,node.height||1)):Math.min(1,edge/Math.max(node.width||1,node.height||1)))
       if(!Number.isFinite(scale)||scale<=0||scale>4)throw new Error('Screenshot scale must be positive and at most 4')
+      if(args.maxDimension!==undefined)scale=Math.min(scale,edge/Math.max(node.width||1,node.height||1))
       const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false})
       if(this.metrics){this.metrics.exportMs+=now()-started;const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3];this.metrics.images.push({...(bytes.length>=24&&bytes[0]===137&&bytes[1]===80?{width:dimension(16),height:dimension(20)}:{}),bytes:bytes.length})}
       if(bytes.length>8*1024*1024)throw new Error('Screenshot exceeds 8 MiB; select a smaller node or scale')
@@ -80,7 +92,7 @@
       // Dynamic-page Figma forbids the synchronous instance.mainComponent getter.
       // Prime the synchronous query helper from the public async API, scoped to loaded targets.
       async function hydrate(target) {
-        if (!isNode(target) || target.type==='DOCUMENT') return
+        if (!isNode(target) || ['DOCUMENT','CODE_INSTANCE'].includes(target.type)) return
         const instances = [target, ...(target.findAll && target.findAllWithCriteria ? target.findAllWithCriteria({types:['INSTANCE']}) : [])].filter(node=>node.type==='INSTANCE')
         for (const instance of instances) if (typeof instance.getMainComponentAsync === 'function') components.set(instance, await instance.getMainComponentAsync())
       }
@@ -120,8 +132,9 @@
         function visit(current,level){
           if(++count>MAX_NODES)return
           const data=Object.fromEntries(keys.map(key=>{const values=propertyValues(current,key,mainComponent);return[key,key.includes('*')?values:values[0]]}))
+          Object.assign(data,runtime.codeLayerInfo(current)||{})
           lines.push('  '.repeat(level)+JSON.stringify(data,(key,value)=>key&&isNode(value)?{id:value.id,type:value.type}:value))
-          if(level<depth&&'children' in current){for(const child of current.children.slice(0,children))visit(child,level+1);if(current.children.length>children)lines.push('  '.repeat(level+1)+'… '+(current.children.length-children)+' more children')}
+          if(current.type!=='CODE_INSTANCE'&&level<depth&&'children' in current){for(const child of current.children.slice(0,children))visit(child,level+1);if(current.children.length>children)lines.push('  '.repeat(level+1)+'… '+(current.children.length-children)+' more children')}
         }
         visit(node,0);if(count>MAX_NODES)lines.push('… node limit reached');return lines.join('\n')
       }
@@ -160,6 +173,7 @@
             }
             if (target === figma && key === 'io') return io
             if (target === figma && key === 'setCurrentPageAsync') return async page => {
+              if(runtime.taskPageId&&unwrap(page).id!==runtime.taskPageId)throw new Error('Explicit step tasks cannot switch away from their original page')
               if(runtime.pageSwitches>=1)throw new Error('Switch pages at most once per use_figma call')
               runtime.pageSwitches++;const raw=unwrap(page);await figma.setCurrentPageAsync(raw);await hydrate(raw)
             }
@@ -173,7 +187,7 @@
             }
             const v = target[key]
             return typeof v === 'function' ? (...args) => {
-              const out=v.apply(target,args.map(unwrap))
+              const out=v.apply(target,args.map(unwrap));if(runtime.writeJournal){if(String(key).startsWith('create')&&isNode(out))runtime.recordWrite({created:[out.id],api:String(key)});else if(isNode(target)&&/^(set|append|insert|resize|remove|swap|apply)/.test(String(key)))runtime.recordWrite({updated:{nodeId:target.id,api:String(key)}})}
               if(out&&typeof out.then==='function')return out.then(async resolved=>{if(key==='getMainComponentAsync')components.set(target,resolved);await hydrate(key==='loadAsync'?target:resolved);return wrap(resolved)})
               if(key==='createInstance'&&target.type==='COMPONENT')components.set(out,target)
               if(key==='swapComponent')components.set(target,unwrap(args[0]))
@@ -189,7 +203,7 @@
             if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
             if(isNode(value)&&['animationStyles','manualKeyframeTracks','timelines','animations'].includes(key))throw new Error('Native motion collections are read-only. Use applyManualKeyframeTrack/removeManualKeyframeTrack, setTimelineDuration, or dsh.updateAnimationStyle; inspect the motion guide. This script has already started.')
             if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
-            value[key] = unwrap(next); return true
+            value[key] = unwrap(next); if(isNode(value))runtime.recordWrite({updated:{nodeId:value.id,prop:String(key)}});return true
           }
         })
         cache.set(value, proxy); raws.set(proxy, value); return proxy
@@ -230,10 +244,11 @@
     async run(method, args = {}) {
       if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Arguments must be an object')
       const started=now()
-      this.scriptEntered=false;this.pageSwitches=0;this.clearPlaceholders=null
+      this.writeJournal=args.journal===true?{coverage:'observed-node-proxy-writes-only; excludes variables, indirect effects and native helper internals',complete:false,entries:[]}:null;this.taskPageId=args.taskPageId;this.scriptEntered=false;this.mutationEntered=false;this.pageSwitches=0;this.clearPlaceholders=null
       this.metrics={runtimeMs:0,exportMs:0,serializationMs:0,nodeCount:0,imageCount:0,images:[],valueBytes:0}
       this.readOptions={};this.snapshotBudget=null
       try{
+        if(this.taskPageId&&this.figma.currentPage.id!==this.taskPageId)throw Error('Task page changed before step execution')
         if(['get_metadata','get_selection','get_component_context','get_design_context','get_figjam','search_design_system'].includes(method)){
           if(args.profile!==undefined&&!['summary','full'].includes(args.profile))throw new Error('profile must be summary or full')
           this.readOptions={profile:args.profile??'full',maxNodes:integer(args.maxNodes,MAX_NODES,1,MAX_NODES,'maxNodes'),maxBytes:args.maxBytes===undefined?Infinity:integer(args.maxBytes,65536,1024,2097152,'maxBytes')}
@@ -261,24 +276,34 @@
         this.metrics.serializationMs+=now()-serializeStart
         this.metrics.imageCount=result.images.length
         this.metrics.runtimeMs=now()-started
+        if(this.writeJournal)result.journal=this.writeJournal
         result.metrics=this.metrics
         return result
       }catch(cause){
         // Never trust an exception property supplied by user code. Only pre-execution failures are retry-safe.
-        const error=new Error(String(cause&&cause.message||cause))
-        error.safeToRetryWithoutCanvasRead=method==='use_figma'&&!this.scriptEntered
+        const nativeMessage=String(cause&&cause.message||cause)
+        const error=new Error(/createCodeLayer.*(?:not a function|undefined)/.test(nativeMessage)&&typeof this.figma.createCodeLayer!=='function'?'FIGMA_CODE_LAYER_UNAVAILABLE: This editor does not expose local Code Layer creation. '+nativeMessage:nativeMessage)
+        error.safeToRetryWithoutCanvasRead=method==='use_figma'?!this.scriptEntered:['batch_edit','generate_diagram','generate_deck','apply_shader','import_dom_snapshot','create_variables','add_variable_modes','set_design_reference','clear_design_reference'].includes(method)&&!this.mutationEntered
+        if(this.writeJournal)error.journal={...this.writeJournal,failedAt:{stack:String(cause.stack??'').split('\n').slice(0,3).join('\n')}}
+        for(const key of ['journal','affected','failureClass'])if(cause?.[key]&&method!=='use_figma')error[key]=cause[key]
+        if(cause?.batchResult)error.batchResult=cause.batchResult
+        if(cause?.createdNodeIds)error.createdNodeIds=cause.createdNodeIds
         throw error
       }finally{this.clearPlaceholders?.();this.clearPlaceholders=null;this.metrics=null;this.readOptions={};this.snapshotBudget=null}
     }
     async execute(method, args = {}) {
-      const f = this.figma, images = [], depth = integer(args.depth,3,0,10,'depth')
+      const f = this.figma, images = []
       let value, assets
+      for(const extension of [scope.DshFigmaContext,scope.DshFigmaMedia,scope.DshFigmaAuthoring,scope.DshFigmaOperations,scope.DshFigmaReference]){
+        const result=await extension?.execute(this,method,args);if(result)return result
+      }
+      const depth = integer(args.depth,3,0,10,'depth')
       switch (method) {
         case 'use_figma': {
           if (typeof args.code !== 'string' || !args.code.trim() || args.code.length > 150000) throw new Error('Provide a script of 1–150000 characters')
           const run = new Function('figma', 'dsh', '"use strict"; return (async () => {\n' + args.code + '\n})()')
-          const first=f.root.children[0]
-          if(first&&f.currentPage!==first)await f.setCurrentPageAsync(first)
+          // The local plugin shares the user's editor. Preserve its page and
+          // selection; only an explicit script request may switch pages.
           assets=[]
           const facade=await this.facade(images,assets)
           this.scriptEntered=true
@@ -298,7 +323,7 @@
           else value={pages:f.root.children.map(p=>({id:p.id,name:p.name,type:p.type})),currentPage:this.snapshot(f.currentPage,depth)}
           break
         }
-        case 'get_screenshot': { const node = await this.node(args.nodeId); images.push(await this.screenshot(node,args)); value = { id: node.id, name: node.name }; break }
+        case 'get_screenshot': { const node = await this.node(args.nodeId); images.push(await this.screenshot(node,args)); value = { id: node.id, name: node.name, originalWidth:node.width,originalHeight:node.height,...this.metrics.images.at(-1) }; break }
         case 'get_design_context':
         case 'get_figjam': {
           const node = await this.node(args.nodeId); value = { node: this.snapshot(node, depth), source: 'local-plugin-api', codeGeneration: 'Adapt structure and CSS to the project; no cloud code generation was called.' }
@@ -311,6 +336,7 @@
           if(args.profile!==undefined&&!['summary','full'].includes(args.profile))throw new Error('profile must be summary or full')
           if(args.type!==undefined&&!['COLOR','FLOAT','BOOLEAN','STRING'].includes(args.type))throw new Error('Unsupported variable type')
           if(args.collectionsOnly!==undefined&&typeof args.collectionsOnly!=='boolean')throw new Error('collectionsOnly must be a boolean')
+          if(args.allVariables&&(args.collectionsOnly||args.offset!==undefined||args.limit!==undefined))throw Error('allVariables requires variable values without pagination')
           if(args.collectionsOnly&&(args.ids!==undefined||args.type!==undefined))throw new Error('collectionsOnly does not accept variable ids or type filters')
           const collectionIds=idFilter(args.collectionIds,'collectionIds'),ids=idFilter(args.ids,'ids'),modeIds=idFilter(args.modeIds,'modeIds'),q=textFilter(args.query,'query')
           if(args.collectionsOnly){
@@ -318,16 +344,16 @@
             const filtered=collections.filter(c=>(!collectionIds||collectionIds.has(c.id))&&(!q||c.name.toLowerCase().includes(q)))
             if(modeIds){const available=new Set(filtered.flatMap(c=>c.modes.map(mode=>mode.modeId)));if([...modeIds].some(id=>!available.has(id)))throw new Error('modeIds contains an unknown mode for the selected collections')}
             const page=pageOf(filtered,args)
-            value={collections:page.items.map(c=>({id:c.id,name:c.name,modes:modeIds?c.modes.filter(mode=>modeIds.has(mode.modeId)):c.modes,defaultModeId:c.defaultModeId,variableCount:c.variableIds.length})),variables:[],pagination:page.pagination,
+            value={collections:page.items.map(c=>({id:c.id,name:c.name,...this.collectionCapability(c),modes:modeIds?c.modes.filter(mode=>modeIds.has(mode.modeId)):c.modes,defaultModeId:c.defaultModeId,variableCount:c.variableIds.length})),variables:[],pagination:page.pagination,
               coverage:{source:'local-file',collections:'filtered-collection-page-including-empty',variables:'not-read',localCollectionCount:collections.length,emptyLocalCollectionCount:collections.filter(c=>c.variableIds.length===0).length,collectionInventoryComplete:!collectionIds&&!q&&page.pagination.offset===0&&!page.pagination.hasMore,libraryCollectionsIncluded:false}}
             break
           }
           const [collections,variables]=await Promise.all([f.variables.getLocalVariableCollectionsAsync(),f.variables.getLocalVariablesAsync(args.type)])
           const filtered=variables.filter(v=>(!collectionIds||collectionIds.has(v.variableCollectionId))&&(!ids||ids.has(v.id))&&(!args.type||v.resolvedType===args.type)&&(!q||v.name.toLowerCase().includes(q)))
-          const active=opted(args,['collectionIds','ids','modeIds','query','type','profile','offset','limit','collectionsOnly']),page=active?pageOf(filtered,args):{items:filtered}
+          const active=opted(args,['collectionIds','ids','modeIds','query','type','profile','offset','limit','collectionsOnly']),page=active&&!args.allVariables?pageOf(filtered,args):{items:filtered}
           const relevant=new Set(page.items.map(v=>v.variableCollectionId))
           if(modeIds){const available=new Set(collections.filter(c=>!collectionIds||collectionIds.has(c.id)).flatMap(c=>c.modes.map(mode=>mode.modeId)));if([...modeIds].some(id=>!available.has(id)))throw new Error('modeIds contains an unknown mode')}
-          value={collections:collections.filter(c=>!active||relevant.has(c.id)||collectionIds?.has(c.id)).map(c=>({id:c.id,name:c.name,modes:modeIds?c.modes.filter(mode=>modeIds.has(mode.modeId)):c.modes,defaultModeId:c.defaultModeId,...(args.profile==='summary'?{}:{variableIds:active?page.items.filter(v=>v.variableCollectionId===c.id).map(v=>v.id):c.variableIds,...(active?{variableIdsScope:'returned-page'}:{})})})),variables:page.items.map(v=>args.profile==='summary'?{id:v.id,name:v.name,resolvedType:v.resolvedType,variableCollectionId:v.variableCollectionId}:{id:v.id,key:v.key,name:v.name,resolvedType:v.resolvedType,valuesByMode:modeIds?Object.fromEntries(Object.entries(v.valuesByMode).filter(([id])=>modeIds.has(id))):v.valuesByMode,scopes:v.scopes,description:v.description,variableCollectionId:v.variableCollectionId}),...(active?{pagination:page.pagination,coverage:{source:'local-file',collections:'returned-variable-page-and-requested-collections',variables:'filtered-variable-page',localCollectionCount:collections.length,emptyLocalCollectionCount:collections.filter(c=>c.variableIds.length===0).length,collectionInventoryComplete:false,libraryCollectionsIncluded:false}}:{})};break
+          value={collections:collections.filter(c=>!active||relevant.has(c.id)||collectionIds?.has(c.id)).map(c=>({id:c.id,name:c.name,...this.collectionCapability(c),modes:modeIds?c.modes.filter(mode=>modeIds.has(mode.modeId)):c.modes,defaultModeId:c.defaultModeId,...(args.profile==='summary'?{}:{variableIds:active?page.items.filter(v=>v.variableCollectionId===c.id).map(v=>v.id):c.variableIds,...(active?{variableIdsScope:'returned-page'}:{})})})),variables:page.items.map(v=>args.profile==='summary'?{id:v.id,name:v.name,resolvedType:v.resolvedType,variableCollectionId:v.variableCollectionId}:{id:v.id,key:v.key,name:v.name,resolvedType:v.resolvedType,valuesByMode:modeIds?Object.fromEntries(Object.entries(v.valuesByMode).filter(([id])=>modeIds.has(id))):v.valuesByMode,scopes:v.scopes,description:v.description,variableCollectionId:v.variableCollectionId}),...(active?{pagination:page.pagination,coverage:{source:'local-file',collections:'returned-variable-page-and-requested-collections',variables:'filtered-variable-page',localCollectionCount:collections.length,emptyLocalCollectionCount:collections.filter(c=>c.variableIds.length===0).length,collectionInventoryComplete:false,libraryCollectionsIncluded:false}}:{})};break
         }
         case 'get_libraries': value = { variableCollections: await f.teamLibrary.getAvailableLibraryVariableCollectionsAsync(), scope: 'Libraries exposed to this plugin; component discovery is local-page only.' }; break
         case 'search_design_system': {
@@ -400,12 +426,13 @@
           f.commitUndo(); value={nodeIds:ids}; break
         }
         case 'import_scene': {
+          this.writeJournal={coverage:'scene-created-nodes',complete:true,entries:[]}
           let count=0; const ids=[]
           const create=async (spec,parent) => {
             if(++count>500) throw new Error('Scene exceeds 500 nodes')
             const constructors={FRAME:'createFrame',TEXT:'createText',RECTANGLE:'createRectangle',ELLIPSE:'createEllipse',COMPONENT:'createComponent',SECTION:'createSection',STICKY:'createSticky',SHAPE_WITH_TEXT:'createShapeWithText'}
             const method=constructors[spec.type]; if(!method||typeof f[method]!=='function') throw new Error('Unsupported scene node type: '+spec.type)
-            const n=f[method](); parent.appendChild(n); ids.push(n.id)
+            const n=f[method]();ids.push(n.id);this.recordWrite({created:[n.id],api:method});parent.appendChild(n)
             const props=spec.props||{}
             if(n.type==='TEXT') { const font=props.fontName||{family:'Inter',style:'Regular'}; await f.loadFontAsync(font); n.fontName=font }
             if('width'in props||'height'in props) n.resize(props.width??n.width,props.height??n.height)

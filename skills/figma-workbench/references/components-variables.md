@@ -12,6 +12,8 @@ When shared libraries are relevant, inspect get_libraries first. Local search su
 
 Discover components and styles with filtered, paged `search_design_system` calls. Use `profile:"summary"` for discovery and detailed `get_component_context` for the selected component. Limit `get_variable_defs` to the relevant collections, IDs, type and modes; summary data intentionally omits values. Follow pagination before treating an inventory as complete. Local component discovery is page-scoped, not a search of every subscribed cloud library.
 
+FeatureVersion 5 adds explicit `pageIds` searches with coverage and an opt-in semantic component projection. For variables used by a target, use `get_variable_defs({nodeId,...})` separately from inventory filters; it follows alias dependencies and reports per-node mode resolutions and missing/error cases. `project_index`, `project_match` and `project_mappings` support workspace reuse with explicit mappings ahead of heuristic suggestions. See [local workflows](local-workflows.md); local mappings never publish official Code Connect.
+
 For a known component or variable ID, read it directly instead of repeating discovery. To discover collections, call `get_variable_defs({collectionsOnly:true,query:"...",limit:50})`; query matches collection names and includes empty collections without fetching variable values. Normal variable-page responses include only related collections, so `collections:[]` does not establish that none exist. Use coverage and pagination to distinguish a complete local collection inventory from filtered or partial results. Check available libraries when the task calls for shared tokens. Reuse intended collections and their mode IDs rather than creating duplicates.
 
 Create components with `figma.createComponent`, variants using `figma.combineAsVariants`, and instances with `component.createInstance`. Set instance overrides through `setProperties`. Inspect the parent component set's property definitions before choosing property names and variant values. Avoid detachInstance unless the user explicitly needs independent geometry. Use `importComponentByKeyAsync` or `importComponentSetByKeyAsync` for a known published key; do not invent one.
@@ -20,12 +22,52 @@ Create variable collections with `figma.variables.createVariableCollection`. Use
 
 Keep typography, effects and grid styles as real local styles when reusable. Use asynchronous style APIs and node setters where required by dynamic-page access. Return variable IDs, mode IDs, component IDs and instance counts from the write. Verify a representative instance and theme state visually, then fix only the faulty component or binding.
 
-Batch related variable/component edits and structural readback in one script, retaining actual IDs. Do not replace an existing variable or component solely because its name matches. After an uncertain write, reconcile the affected variable values, aliases and bindings or component properties in addition to a `get_metadata` read without summary, pagination or custom budgets; a node snapshot alone does not establish variable state. Partial metadata reads do not clear the bridge's write barrier.
+Batch related variable/component edits and structural readback in one script, retaining actual IDs. Do not replace an existing variable or component solely because its name matches. After an uncertain write, reconcile the affected variable values, aliases and bindings or component properties in addition to a `get_metadata` read with full/default profile and no pagination; check `recovery.cleared` and follow any depth/budget omissions; a node snapshot alone does not establish variable state. Partial metadata reads do not clear the bridge's write barrier.
+
+## Variable mode limits and a single-mode fallback
+
+An existing collection with several modes is not evidence that the current file/account can add another mode, or that a new collection can have the same number. `collection.modes` describes existing modes, not an entitlement or a writable capacity. The current editor can reject `collection.addMode('Dark')` with `Limited to 1 modes`. Do not infer a plan limit from another collection, and do not keep retrying the same rejected addition.
+
+Read the intended collection's ID, `defaultModeId`, modes and relevant variables first. Reuse the requested mode's actual ID when it already exists; resolve ambiguous names before writing. If a requested mode is missing, isolate its creation in a small `use_figma` call **before** dependent variable, component or node edits. For a new collection, retain its returned ID/default mode first, then handle the optional additional mode separately. Do not put a risky `addMode` after a large creation batch.
+
+For an already resolved collection, this preparation call reuses Dark or attempts just that mode addition. It catches only the known native mode-limit message and returns an explicit result. Other errors propagate; do not turn every `addMode` exception into a fallback success.
+
+```js
+const collection = await figma.variables.getVariableCollectionByIdAsync('COLLECTION_ID_FROM_READ');
+if (!collection) throw new Error('Target variable collection no longer exists');
+const requestedMode = 'Dark';
+const matches = collection.modes.filter(mode => mode.name === requestedMode);
+if (matches.length > 1) throw new Error('Ambiguous Dark mode; resolve its ID first');
+if (matches.length === 1) {
+  return {status:'reused', collectionId:collection.id, modeId:matches[0].modeId};
+}
+try {
+  const modeId = collection.addMode(requestedMode);
+  return {status:'created', collectionId:collection.id, modeId};
+} catch (error) {
+  const nativeMessage = String(error?.message ?? error);
+  const limited = /^(?:in addMode: )?Limited to ([1-9]\d*) modes only$/.exec(nativeMessage);
+  if (!limited) throw error;
+  return {status:'mode-limit', collectionId:collection.id, requestedMode,
+    maximumModes:Number(limited[1]), defaultModeId:collection.defaultModeId,
+    modes:collection.modes.map(mode => ({modeId:mode.modeId, name:mode.name})),
+    error:nativeMessage, fallbackRequired:true};
+}
+```
+
+Report `mode-limit` as a constraint, not as a created Dark mode. Re-read the collection and relevant variables before choosing the next write. A caught error is not proof of rollback, and an uncaught tool error is not automatically safe to replay. If `safeToRetryWithoutCanvasRead` is false or absent, first reconcile variable values, aliases, modes and affected node bindings; also perform the required `get_metadata` read of the affected target with full/default profile and no pagination; check `recovery.cleared` and follow any depth/budget omissions. `get_variable_defs` alone does not clear the bridge's uncertainty guard, and metadata alone does not verify variables. Then continue only the missing work.
+
+When the requested visual result can use independent theme tokens, a single-mode fallback may be appropriate:
+
+1. Reuse a previously recorded fallback collection by ID, or create a clearly named independent collection such as `Theme — Dark fallback`. Use its real `defaultModeId`; rename only this new collection's default mode to Dark if useful. Do not call `addMode` again for this fallback.
+2. Create the required Dark variables in that collection. Track the original-to-fallback variable ID mapping, rebuild the needed semantic aliases against the intended fallback primitives, and set values only under the fallback mode ID. Preserve existing Light values, modes, aliases and variable identities.
+3. Rebind the intended Dark nodes' fields and paints to those fallback variable IDs; use `setBoundVariableForPaint` and reassign the returned paints. Creating a collection or setting its explicit mode does not redirect existing bindings from the Light collection. If shared component bindings cannot be overridden on the intended target, use a dedicated fallback component/variant rather than changing the shared Light component.
+4. Read back fallback values, alias targets and node bindings, verify the Light values are unchanged, and inspect both appearances. Report that this is a separate single-mode theme with explicit bindings, **not** native Light/Dark switching in the original collection. If native switching itself is required, explain the editor restriction instead of claiming this fallback satisfies it.
 
 ## Creation, modification and validation sequence
 
 1. Resolve the target page, inventory relevant existing collections/components, and load the exact fonts before mutation. Do not reuse a name match from a different collection or component family.
-2. Reuse/create the collection, rename its actual defaultModeId, and add only missing requested modes. Retrieve existing variables by stable IDs; check resolvedType before editing. Prefer collection objects in createVariable. Use explicit scopes such as ALL_FILLS or GAP instead of leaving ALL_SCOPES indiscriminately.
+2. Reuse/create the collection and resolve its actual mode IDs. Rename a default mode only when that change is intended; preserve existing Light modes. Isolate any missing requested mode addition before dependent edits and follow the mode-limit procedure above if it is rejected. Retrieve existing variables by stable IDs; check resolvedType before editing. Prefer collection objects in createVariable. Use explicit scopes such as ALL_FILLS or GAP instead of leaving ALL_SCOPES indiscriminately.
 3. Set each requested mode value with its real modeId. For semantic variables, set createVariableAlias(target), preserving alias types instead of flattening everything into literal colors. Validate target type and avoid alias cycles. Preserve untouched modes. Apply setVariableCodeSyntax only when requested/useful.
 4. Create native components and editable text; configure auto layout, dimensions, padding and variable bindings. Use setBoundVariableForPaint's returned paint and reassign fills. Bind spacing/dimensions through setBoundVariable. In incremental loading, use `node.setExplicitVariableModeForCollection(collectionObject, modeId)`, NOT a collection ID string.
 5. For variants, establish valid axis/value combinations, name each variant consistently, then combineAsVariants. Arrange the resulting set with auto layout or an explicit readable grid. Read componentPropertyDefinitions from the set when it owns them. Add supported TEXT/BOOLEAN/INSTANCE_SWAP properties and wire componentPropertyReferences to the relevant child fields.

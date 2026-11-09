@@ -8,7 +8,7 @@ import {createInterface} from 'node:readline'
 import {applyWithDependencies} from '../../index.mjs'
 const home=resolve(process.argv[2]??'.figma/live-test-home'),port=Number(process.argv[3]??13055)
 await mkdir(home,{recursive:true,mode:0o700})
-const definitions=new Map(),ctx={tools:{register(def){definitions.set(def.name,def);return()=>definitions.delete(def.name)}},skills:{registerProvider(){}},systemPrompt:{section(){},getSectionOrder(){return 1}},logger:{warn(message){console.error(message)}},effect(){},on(){},get(){return undefined}}
+const definitions=new Map(),promptContexts=new Map(),ctx={tools:{register(def){definitions.set(def.name,def);return()=>definitions.delete(def.name)}},skills:{registerProvider(){}},systemPrompt:{context(def){promptContexts.set(def.name,def);return()=>promptContexts.delete(def.name)},section(){},getSectionOrder(){return 1}},logger:{warn(message){console.error(message)}},effect(){},on(){},get(){return undefined}}
 const handle=await applyWithDependencies(ctx,{backend:'local',bridgePort:port},{home})
 const exec={agent:{session:{id:'live-test',header:{cwd:process.cwd()}}},signal:new AbortController().signal}
 let sequence=0
@@ -23,6 +23,10 @@ try {
     if(!line.trim())continue
     try {
       const request=JSON.parse(line);if(request.stop)break
+      if(request.notice){
+        const out={sequence:++sequence,referenceNotice:promptContexts.get('mcp:figma-design-reference')?.text({agent:exec.agent})??''}
+        await writeFile(join(evidence,`${sequence}.json`),JSON.stringify(out,null,2));console.log(JSON.stringify(out));continue
+      }
       if (request.script) {
         const script=resolve('test/manual',request.script)
         if (!script.startsWith(resolve('test/manual')+'/') || !script.endsWith('.js')) throw Error('Use a test/manual JavaScript file')

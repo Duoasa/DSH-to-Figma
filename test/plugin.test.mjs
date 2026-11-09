@@ -1,3 +1,4 @@
+import {LOCAL_TOOLS} from '../lib/catalog.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtemp,rm,mkdir,writeFile,readFile } from 'node:fs/promises'
@@ -35,6 +36,10 @@ test('local preflight returns repair details without dispatch and accepts correc
   }
   await invoke('const c=figma.createComponent();const instance=c.createInstance();return (await instance.getMainComponentAsync())?.id;')
   assert.equal(calls.length,1)
+  await invoke('const node=figma.getNodeById("1:2");return node?.id;')
+  assert.equal(calls.length,2)
+  assert.equal(calls[1].code,'const node=(await figma.getNodeByIdAsync("1:2"));return node?.id;')
+  assert.equal(bridge.list().find(doc=>doc.connectionId===id).needsInspection,false)
 })
 test('official catalog, raw contracts, isolated sessions, resources/prompts and failed-call non-replay',async t=>{
   const home=await mkdtemp(join(tmpdir(),'figma-plugin-test-'));t.after(()=>rm(home,{recursive:true,force:true}))
@@ -283,7 +288,7 @@ test('0.3.5 ignores legacy default specs without injection, write blocking or da
   const handle=await applyWithDependencies(ctx,{}, {home,bridge});t.after(()=>handle.close())
   const id=await connect(bridge,'No specs',4)
   const exec={agent:{session:{id:'legacy',header:{cwd:home}}},signal:new AbortController().signal}
-  assert.equal(handle.toolCount,19)
+  assert.equal(handle.toolCount,LOCAL_TOOLS.length)
   for(const name of ['list_local_specs','read_local_spec','edit_local_spec'])assert.equal(definitions.has('mcp__figma__'+name),false)
   assert.equal(sections.some(s=>s.name==='mcp:figma-default-spec'),false)
   assert.doesNotMatch(sections.map(s=>s.text()).join(' '),/LEGACY_SPEC_SENTINEL|read_local_spec|default.spec/i)

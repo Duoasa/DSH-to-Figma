@@ -1,48 +1,47 @@
-# Capability coverage
+# Capability coverage — 0.4.1 (unreleased)
 
-Baseline: 48 Codex Figma connector tools exposed in this development session on 2026-10-18. The [per-tool inventory](codex-tool-baseline.json) records local counterparts and limitations for every observed name. Availability is not inferred from matching names. The local bundle registers 19 local canvas/task/capability tools plus five setup/guidance tools. Official backends expose their actual dynamic catalog, not hardcoded placeholders.
+**0.4.1 is an unreleased comprehensive upgrade of 0.3.5.** It registers **34 local tools** (19 existing plus 15 workflow tools), including four workspace-only tools, plus five setup/guidance tools. Local Plugin API execution remains the default. Official desktop/remote MCP backends retain dynamic tool discovery and their original schemas; this upgrade does not depend on remote approval.
 
-| Capability | Local implementation | Official MCP mode |
+The 2026-11-09 comparison observed 44 Codex Figma tools. The earlier [48-tool inventory](codex-tool-baseline.json) is a historical 2026-10-18 snapshot, not the current catalog or a percentage of equivalent functionality. A shared tool name does not establish equivalent behavior. See the [local workflow reference](skills/figma-workbench/references/local-workflows.md) for parameters, examples and limits.
+
+| Capability | Local implementation and boundary | Official MCP mode |
 | --- | --- | --- |
-| Inspect and mutate canvas (`use_figma`) | Public Plugin API executed in the paired Figma editor; native layers, styles, layout, components and variables | Pass through when advertised |
-| Metadata, screenshot, variables, FigJam | Bounded native data and actual PNGs; durable DSH attachments | Original schemas/results |
-| Design-to-code | Native structure, CSS, assets and focused implementation guide; host model writes project code | Official `get_design_context` |
-| Design system search / libraries | Current-page components, local-file styles/variables, available variable libraries | Cloud search and library tools when offered |
-| Code Connect | Explicit local component/code links in plugin data; **not** published Code Connect | Mapping, suggestions and context tools when offered |
-| Editable Design / FigJam / Slides creation inside a file | `use_figma`, public constructors, plus scene import | `use_figma`, diagram/deck tools when offered |
-| Create a new cloud file | Not supplied by public local Plugin API; open/create a file in Figma | `create_new_file` when offered |
-| Asset upload/download | Workspace images, editable SVG, PNG/JPG/SVG/PDF export and original fill bytes | Original upload/download contracts |
-| Webpage → canvas | Host can inspect DOM then import a scene; no automatic HTML/browser capture implementation | `generate_figma_design` / `html_to_figma` when offered |
-| Figma Code / Make | Not emulated | Threads, code import, prompts and generation polling when offered |
-| Prototype/motion | Bounded native tracks/styles/timelines; native write methods and explicit final-binding/entry replacement helpers, TextStagger and custom styles when exposed; no cloud rendering/code conversion | `get_motion_context` and `export_video` when offered |
-| Shaders and generative plugins | Public API can use capabilities actually exposed by the editor; no cloud source-library authoring service | List/read/create/update tools when offered |
-| Image generation / Weave | Not emulated by the local bridge | Advertised generation, workflow, model, upload, status and cancel tools |
-| Gallery/site publication | Not implemented locally | Only when offered and explicitly requested by user |
-| Host embedded Figma panel | No Codex panel copied; use the actual Figma app | Host-specific panel is not an MCP capability guaranteed to DSH |
-| Resources/prompts | Sixteen bundled topics: five user-help chapters and eleven technical guides | MCP resource list/templates/read and prompt list/get |
-| OAuth | Local editor pairing requires no Figma OAuth | Independent Figma PKCE login, private storage, refresh, logout |
+| Canvas scripting | `use_figma`: native nodes, styles, layout, components and variables; scoped local task context | Original advertised tool |
+| Design/component/FigJam context | Opt-in semantic projection: descendant layout, style references, text, component provenance, variable modes and FigJam-specific fields; bounded coverage and section plans | Original schemas/results |
+| Variable usage and design-system search | Target subtree variable dependencies/aliases/modes; explicitly selected page search; local-file styles/variables and available variable libraries | Advertised cloud/library search |
+| Design-to-code | Semantic context, CSS on request, asset mappings and workspace reuse; the host implements and verifies application code | Advertised design context and code services |
+| Persistent design comparison | `design_diff`: file/node-bound baselines, explicit create/update, revision checks and capture-policy compatibility; incomplete captures rejected | Only when advertised |
+| Project reuse | Bounded component/token/SVG index and evidence-based candidates; explicit mappings take precedence; stale sources are reported | Advertised Code Connect services |
+| Local mappings | Workspace `.figma/mappings/` records and existing node plugin-data links are separate local stores; neither publishes Code Connect | Original mapping/suggestion contracts |
+| Local recipes | Save/list/read/remove JavaScript source in `.figma/recipes/`; syntax/preflight validation, no host execution | No assumption of a matching service |
+| Assets and screenshots | Raster/SVG import, targeted image-fill replacement, export settings, bounded subtree SVG/original-image extraction and node/file mappings; screenshot size controls | Original upload/download/screenshot contracts |
+| Motion and video | Recursive native reads; limited CSS conversion with unsupported cases reported; MP4/GIF/WebM export through the editor's native encoder and chunked workspace transfer | Advertised motion/export tools |
+| FigJam diagrams | Structured graphs or a limited Mermaid flowchart subset become editable shapes and bound connectors in an open FigJam file | Advertised diagram service |
+| Slides | Title/body/notes/theme layouts in an open Slides file, with overflow warnings and returned node IDs | Advertised deck/file services |
+| Webpage → canvas | Isolated installed-browser capture and computed DOM import; fixed editable boxes/text, explicit unsupported-style/media warnings | Advertised capture/import services |
+| Shaders | Discover native definitions, locate file usage, import/apply an existing shader with validated parameters when APIs are exposed | Advertised source-library create/read/update services |
+| Controlled batch edits | Preflight, limited property/text/fill operations and best-effort field restoration; not a document transaction | Original advertised behavior |
+| Operation recovery | Work/document-scoped status and optional retained small results; no automatic replay | Original run/status contracts |
+| Code Layers | Existing `CODE_INSTANCE` nodes are opaque: exposed identity/geometry/visibility only; no internal source or child access. Screenshot/export only when the node exposes a working export API. Local creation is unavailable when the native constructor is absent. Code Blocks and editable DOM imports are different features. | `send_code_to_figma` only if actually advertised and authorized; no cloud dependency added |
+| New cloud files, Code/Make, generative plugins, image generation, Weave and publication | These cloud resources/services are not implemented by the local upgrade | Dynamic pass-through when actually advertised and authorized |
+| Resources, prompts and help | Bundled user-help and technical guides, including the new local workflow reference | MCP resources/templates/read and prompts/list/get |
 
-Version 0.3.5 adds native motion workflows, capability discovery, bundled help and document-aware reconnect recovery. The current use_figma reference is Codex Figma **17.0.0**, observed 2026-11-04. [Baseline hashes](docs/figma-use-17-baseline.json), [alignment](docs/figma-use-17-alignment.md), [0.3.5 verification](docs/0.3.5-verification.md).
+## Availability and verification
 
-| Added workflow | Local behavior |
-| --- | --- |
-| Capability discovery | Non-mutating probe, available/unavailable/unknown per feature. `readOnly:true` describes the probe, not the whole plugin. Successful reads are not proof of writes. |
-| Native Specs | Pass through only when the local Plugin API exposes `figma.spec`. It was absent in the tested desktop environment; official cloud Spec tests do not prove local support. |
+Canvas workflow additions and new read options require companion **featureVersion 5**. The four workspace-only tools (`project_index`, `project_match`, `project_mappings`, `local_recipes`) need a current Work workspace but no connected canvas. Core legacy scripts retain their earlier compatibility. Use `figma_setup`, then close and rerun the paired companion when the feature version is old.
 
-## Default local backend and optional desktop mode
+Check `figma_status` and refresh `get_capabilities` for gated work. The selected editor, its exposed API, fonts and account access determine what succeeds. A read-only probe does not establish successful writes, native video encoding, playback or rendered shader output. The companion cannot unlock unavailable APIs. Native Specs still require an exposed `figma.spec` surface; the earlier tested desktop environment did not expose it.
 
-Version 0.2.0 defaults to local canvas editing with a private, automatically paired companion. One connected document is selected on first use; multiple files and disconnected bindings require explicit selection. Official desktop MCP was the 0.1.5 default and remains an optional read/screenshot route. On 2026-10-18, DSH Desktop 0.2.1-rc.2 discovered 10 tools and successfully called `get_metadata` and `get_screenshot` against a real frame with no companion running. Canvas writing (`use_figma`), new-file creation and UI-to-canvas generation require another supported backend; the desktop mode does not provide them. Remote client registration returned 403 before user authorization, so remote canvas capabilities remain unverified. See [real evidence](docs/verification.md).
+The [0.4.1 upgrade record](docs/0.4.1-upgrade.md) separates 208 automated tests, DSH-kernel integration, installed-browser capture and native Design/FigJam/Slides/MP4 smoke acceptance. Automated fixtures establish contracts, boundedness, failure handling and selected API interactions. They are not real Figma rendering or playback acceptance. Earlier [0.3.5 verification](docs/0.3.5-verification.md) and [desktop/local verification](docs/verification.md) remain historical evidence for their recorded scenarios; they do not certify every newly added workflow. New Design/FigJam/Slides composition, fonts, shader output and video playback require real-editor checks.
 
-The “Official MCP mode” column above describes combined potential across desktop and remote catalogs, not a guarantee that every capability is available in desktop mode.
+## Operational boundaries
 
-## Local behavior limits that affect equivalence
+- One document binds automatically only when it is the sole connection. Multiple documents, a disconnected binding or a workspace change require explicit selection. Reconnect hints never switch targets or replay operations.
+- Local `use_figma` follows the [Codex Figma 17 contract alignment](docs/figma-use-17-alignment.md), with local environment differences. Calls preserve the current editor page and selection; explicitly switch only when the intended target requires it. Operations on one document remain sequential.
+- Scripts and authoring operations can partially mutate the document. After an uncertain result, inspect affected IDs. `batch_edit` only restores its captured field subset and never invokes global undo.
+- Semantic `coverage.complete` describes the documented field projection, not every possible Plugin API property. Exported CSS and project matches are candidates requiring application/rendered verification.
+- Workspace baselines, mappings and recipes reject symlinked stores and silent overwrite. They remain local files, not official Figma cloud resources.
+- Official MCP access is preserved, not asserted. Use its actual discovered catalog and account errors. Task-based server execution, sampling, embedded host panels and interactive elicitation are not silently emulated.
+- “Local” describes the Plugin API/host route, not a promise that Figma, library access or host model inference works offline. No cloud Figma service was added to implement these workflows.
 
-- Public Plugin API functionality and fonts depend on the actual Figma editor/version. The companion cannot unlock private APIs.
-- Local `use_figma` accepts code, description, fileKey, sessionId and skillNames after explicit/automatic binding. create_session supplies a local Work task UUID. Legacy code-only calls remain accepted; see the [17.0.0 alignment contract](docs/figma-use-17-alignment.md).
-- Helpers include selector queries/QueryResult, matches, layout-ordered setters, auto layout, inline screenshots, tree, placement and io.write. Placeholder progress is shown in the companion, not a canvas shimmer. Pages reset to the first page per call; local writes are serial and nontransactional.
-- Public editor scripting is powerful and nontransactional. Unknown write outcomes require inspection. No process on the host evaluates Figma scripts.
-- Server tools requiring MCP task-based execution are surfaced with the native DSH bridge's explicit unsupported-task behavior, not silently run through a different protocol. Sampling, host panels and interactive server elicitation are not advertised as supported capabilities.
-- Remote screenshot base64 is requested if the advertised schema supports it. Ordinary resource URLs stay URLs; they are not fetched through an unrestricted network bridge.
-- Automated fixtures prove implementation/protocol behavior. Real local create/read/update/screenshot/export and official desktop metadata/screenshot acceptance passed for one Design file; broader editor, font, layout and long-running acceptance remain pending.
-
-Official sources: [Plugin API](https://developers.figma.com/docs/plugins/api/figma/), [manifest](https://developers.figma.com/docs/plugins/manifest/), [MCP tools](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/), [remote installation and approved-client restriction](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/).
+Official reference points: [Plugin API](https://developers.figma.com/docs/plugins/api/figma/), [manifest](https://developers.figma.com/docs/plugins/manifest/), [MCP tools](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/), [remote installation](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/).

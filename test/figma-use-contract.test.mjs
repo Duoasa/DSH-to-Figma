@@ -70,10 +70,28 @@ test('instance descendant IDs with semicolons are selectable without CSS escapin
   const {value}=await f.runtime.run('use_figma',{code:"return {hash:figma.currentPage.query('#I30:61;30:58').values(['id']),bare:figma.currentPage.query('I30:61;30:58').first().id}"})
   assert.deepEqual(plain(value.hash),[{id:child.id}]);assert.equal(value.bare,child.id)
 })
-test('page reset happens each call; one async switch allowed and synchronous switching is rejected',async()=>{
-  const f=await fixtureRuntime(),second=f.figma.createPage();f.figma.currentPage=second
-  assert.equal((await f.runtime.run('use_figma',{code:'return figma.currentPage.id'})).value,f.page.id)
+test('local scripts preserve the selected page, reference selection and viewport across reads and edits',async()=>{
+  const f=await fixtureRuntime(),second=f.figma.createPage(),reference=f.figma.createFrame(),switches=[]
+  second.appendChild(reference);second.selection=[reference];f.figma.currentPage=second
+  const viewport=JSON.stringify(f.figma.viewport)
+  const switchPage=f.figma.setCurrentPageAsync
+  f.figma.setCurrentPageAsync=async page=>{switches.push(page.id);await switchPage(page)}
+  const selection=await f.runtime.run('get_selection')
+  assert.equal(selection.value.page.id,second.id)
+  const read=await f.runtime.run('use_figma',{code:'return {pageId:figma.currentPage.id,selected:figma.currentPage.selection.map(n=>n.id)}'})
+  assert.deepEqual(plain(read.value),{pageId:second.id,selected:[reference.id]})
+  await f.runtime.run('use_figma',{code:"const ref=figma.currentPage.selection[0];ref.name='Updated reference';const sibling=figma.createFrame();figma.currentPage.appendChild(sibling);return sibling.id"})
+  assert.equal(reference.name,'Updated reference');assert.equal(second.children.length,2);assert.equal(f.page.children.length,0)
+  await assert.rejects(f.runtime.run('use_figma',{code:'throw Error("stopped before edit")'}),/stopped before edit/)
+  await assert.rejects(f.runtime.run('use_figma',{code:'const = invalid'}),/Unexpected/)
+  assert.equal(f.figma.currentPage,second);assert.deepEqual(second.selection,[reference]);assert.deepEqual(switches,[])
+  assert.equal(JSON.stringify(f.figma.viewport),viewport)
+})
+test('explicit page changes persist; human page changes are respected on the next script',async()=>{
+  const f=await fixtureRuntime(),second=f.figma.createPage()
   assert.equal((await f.runtime.run('use_figma',{code:`await figma.setCurrentPageAsync(await figma.getNodeByIdAsync('${second.id}'));return figma.currentPage.id`})).value,second.id)
+  assert.equal((await f.runtime.run('use_figma',{code:'return figma.currentPage.id'})).value,second.id)
+  f.figma.currentPage=f.page
   assert.equal((await f.runtime.run('use_figma',{code:'return figma.currentPage.id'})).value,f.page.id)
   await assert.rejects(f.runtime.run('use_figma',{code:'figma.currentPage=figma.currentPage'}),/not supported/)
   await assert.rejects(f.runtime.run('use_figma',{code:'await figma.setCurrentPageAsync(figma.currentPage);await figma.setCurrentPageAsync(figma.currentPage)'}),/at most once/)
@@ -120,7 +138,7 @@ test('task records reject wrong document/workspace/owner and allow explicit cros
   assert.throws(()=>tasks.context('other','/workspace',doc,{sessionId:task.sessionId}),/Unknown/)
   assert.throws(()=>tasks.context('owner','/elsewhere',doc,{sessionId:task.sessionId}),/Unknown/)
   assert.equal(tasks.context('owner','/workspace',{connectionId:'two'},{sessionId:task.sessionId,fileKey:'local:two'}).fileKey,'local:two')
-  tasks.close('owner');assert.throws(()=>tasks.context('owner','/workspace',doc,{sessionId:task.sessionId}),/Unknown/)
+  tasks.close('owner');assert.notEqual(tasks.context('owner','/workspace',doc,{sessionId:task.sessionId}).sessionId,task.sessionId)
 })
 test('design system search accepts ordered batches and never silently searches an unsupported library',async()=>{
   const f=await fixtureRuntime(),component=f.figma.createComponent();component.name='Button';f.page.appendChild(component)

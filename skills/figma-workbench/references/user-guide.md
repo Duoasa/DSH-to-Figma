@@ -1,6 +1,6 @@
-# DSH to Figma 用户指南 · 0.3.5
+# DSH to Figma 用户指南 · 0.4.1（未发布）
 
-这份指南随插件安装，可以离线读取。用户可以直接问 DSH，不必打开项目文件或记工具名称。本文对应 0.3.5；实际安装版本、连接模式和编辑器能力以 `figma_status` 为准，不能仅凭本文声称某项功能当前可用。
+这份指南随插件安装，可以离线读取。用户可以直接问 DSH，不必打开项目文件或记工具名称。本文对应从 0.3.5 全面升级的 0.4.1 开发版，尚未发布；实际安装版本、连接模式和编辑器能力以 `figma_status` 为准，不能仅凭本文声称某项功能当前可用。
 
 ## 给 DSH 的回答规则
 
@@ -17,7 +17,8 @@
 | --- | --- | --- |
 | 安装、升级、第一次连接、暂停、多个文件、三种模式、版本兼容 | `help-connection` | `official-services` |
 | 创建界面、修改选中图层、组件/变量/字体、图像素材、导出、设计转代码 | `help-design` | `workflow`、`plugin-api`、`components-variables`、`assets-scenes`、`design-to-code` |
-| 原型、关键帧、文字动画、自定义动画、FigJam、Slides、视频限制 | `help-motion` | `motion`、`text-motion`、`custom-animation-styles`、`figjam-slides` |
+| 原型、关键帧、文字动画、自定义动画、FigJam、Slides、视频导出 | `help-motion` | `motion`、`text-motion`、`custom-animation-styles`、`figjam-slides`、`local-workflows` |
+| 设计基线、项目复用、显式映射、脚本库、网页导入、Shader、受控批量修改 | `help-design` | `local-workflows` |
 | 无法连接、工具不见、版本旧、报错、超时、字体、功能只读 | `help-troubleshooting` | 与错误对应的技术章节 |
 
 首次使用可问：“教我从安装到完成第一张可编辑卡片。”
@@ -50,7 +51,9 @@
 
 可编辑图层不等于完整应用代码；导入 SVG 不等于自动把截图拆成准确组件；本地组件代码链接不等于发布 Code Connect；静态截图不等于动画播放验收；界面显示已连接不等于官方云端服务已获准。
 
-本地桥接不提供独立云端文件创建、Figma Make/Code 云端任务、官方网页自动捕获、云端图片生成、Weave 工作流、视频渲染或站点发布的替代实现。DSH 的其他已安装工具可能提供部分能力，但需单独确认。公开发布、上传和授权按用户实际要求执行，不能把“本地生成成功”称为“已发布”。
+本地新增工作流包括设计基线对比、工作区组件/token/SVG 索引与显式映射、可复用脚本、有限 DOM 网页导入、可编辑图表和基础 Slides、已有原生 Shader 应用，以及编辑器支持时的视频导出。新画布功能需要配套插件 featureVersion 5；应按 `local-workflows` 的范围与诊断使用，并在真实编辑器检查结果。
+
+独立云端文件创建、Figma Make/Code 云端任务、Shader 源码服务、云端图片生成、Weave 和站点发布仍走实际可用的官方服务或其他已安装工具。公开发布、上传和授权按用户实际要求执行，不能把“本地生成成功”称为“已发布”。
 
 ## 隐私和费用的准确说法
 

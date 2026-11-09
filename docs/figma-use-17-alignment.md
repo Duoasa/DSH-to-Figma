@@ -2,6 +2,8 @@
 
 > Public release contract. For tested compatibility, see [0.3.5 verification](0.3.5-verification.md).
 
+> 0.4.1 local update: scripts preserve the current editor page and selection instead of resetting to the first page. Explicit script page changes still apply. See [the 0.4.1 upgrade record](0.4.1-upgrade.md); the release behavior documented below is historical.
+
 Status: 0.3.5 public release. The plugin retains the MCP bridge and native DSH tool lifecycle. This is functional alignment of the available local workflows, not binary equivalence with Figma's private cloud executor.
 
 The installed official plugin version is 17.0.0. `figma-use-17-baseline.json` records SHA-256 hashes of the consulted skill/API sources. The earlier 16.0.0 record contains hashes, not a full source checkout: do not claim that each capability described here first appeared in 17.0.0. Official skill text is not redistributed.

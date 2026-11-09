@@ -40,7 +40,7 @@ test('queued cancellation never dispatches and active cancellation never replays
   const poll=request(b,'/poll',{connectionId:id})
   await assert.rejects(blocked,/uncertain/)
   const read=b.call(id,'get_metadata',{},{inspect:true}),readJob=await (await poll).json()
-  await request(b,'/result',{connectionId:id,id:readJob.id,ok:true,result:{value:{},images:[]}});await read
+  await request(b,'/result',{connectionId:id,id:readJob.id,ok:true,result:{value:{currentPage:{id:'1:2',type:'PAGE',childCount:0}},images:[]}});await read
   assert.equal(b.list()[0].needsInspection,false)
 })
 test('partial error gates writes; metadata reconciles; duplicate result is rejected',async t=>{

@@ -133,3 +133,28 @@ test('companion connects without a spec panel or legacy storage requests',async(
  const html=await readFile(new URL('../companion/ui.html',import.meta.url),'utf8')
  assert.doesNotMatch(html,/local-specs|spec-import|spec-set-default|spec-export|本地设计规范/)
 })
+test('unpaired companion displays its own version before a manual pairing is available',async()=>{
+ const h=await uiHarness(async()=>{throw Error('No network expected before pairing')})
+ h.send({type:'document',name:'Version fixture',editorType:'figma',companionVersion:'0.4.1',connection:null})
+ assert.equal(h.elements.get('#version').textContent,'0.4.1')
+ assert.equal(vm.runInContext('active',h.ctx),false)
+})
+
+test('reference accordion is collapsed, exports only on demand and shares bind/unbind state with DSH',async()=>{
+ const h=await uiHarness(async url=>url.endsWith('/connect')?ok({connectionId:'connected'}):new Promise(()=>{}))
+ h.boot({designReference:{kind:'frame',nodeId:'1:5',name:'<unsafe name>',state:'bound'}});await h.flush()
+ assert.equal(h.messages.filter(m=>m.pluginMessage.type==='reference').length,0)
+ assert.equal(h.elements.get('#reference-name').textContent,'<unsafe name>')
+ const panel=h.elements.get('#design-reference');panel.open=true;panel.ontoggle()
+ const first=h.messages.at(-2)?.pluginMessage.type==='reference'?h.messages.at(-2).pluginMessage:h.messages.find(m=>m.pluginMessage.type==='reference').pluginMessage
+ assert.equal(first.action,'get');assert.equal(first.includePreview,true)
+ h.send({type:'reference-result',id:first.id,ok:true,result:{value:{reference:{kind:'frame',nodeId:'1:5',name:'新名称',state:'bound'}},images:[{mimeType:'image/png',data:'YWJj'}]}})
+ assert.equal(h.elements.get('#reference-image').hidden,false)
+ h.elements.get('#reference-clear').onclick()
+ const clear=h.messages.filter(m=>m.pluginMessage.type==='reference').at(-1).pluginMessage;assert.equal(clear.action,'clear')
+ h.send({type:'reference-result',id:clear.id,ok:true,result:{value:{reference:null},images:[]}})
+ assert.equal(h.elements.get('#reference-bind').hidden,false);assert.equal(h.elements.get('#reference-image').src,'')
+ h.send({type:'reference-changed',reference:{kind:'spec',name:'品牌规范',state:'bound'}})
+ assert.equal(h.elements.get('#reference-name').textContent,'品牌规范');assert.equal(h.elements.get('#reference-image').hidden,true)
+ panel.open=false;panel.ontoggle();assert.equal(h.elements.get('#reference-image').src,'')
+})
