@@ -18,6 +18,16 @@
   }
   return {resolved,missing,glyphCoverage:'unverified',cacheExpiresAt:runtime.fontCache.expires}
  }
+ const layoutFields=['id','type','name','x','y','width','height','locked','layoutMode','layoutPositioning','layoutSizingHorizontal','layoutSizingVertical','constraints','minWidth','maxWidth','minHeight','maxHeight','primaryAxisSizingMode','counterAxisSizingMode','primaryAxisAlignItems','counterAxisAlignItems','layoutWrap','itemSpacing','counterAxisSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft','clipsContent','textAutoResize']
+ function layoutContext(node){
+  const values={},omittedFields=[]
+  for(const key of layoutFields){try{const raw=node[key];if(raw!==undefined){if(typeof raw==='symbol')values[key]='mixed';else values[key]=JSON.parse(JSON.stringify(raw))}}catch{omittedFields.push(key)}}
+  return {node:values,parent:node.parent?{id:node.parent.id,layoutMode:node.parent.layoutMode??'NONE'}:null,...(omittedFields.length?{omittedFields}:{})}
+ }
+ function readLayout(node){
+  const children=node.type==='CODE_INSTANCE'?[]:(node.children??[]),nodes=[node,...children.slice(0,19)].map(layoutContext)
+  return {state:'observed',nodes,coverage:{scope:'target-and-direct-children',returned:nodes.length,total:1+children.length,truncated:children.length>19,opaque:node.type==='CODE_INSTANCE'},behaviorValidation:'not-tested',layoutAcceptance:'not-established',interpretation:'Evaluate against intended fixed/content-responsive/container-responsive behavior. Locks prevent accidental edits; no Auto Layout score or automatic resizing.'}
+ }
  async function compare(runtime,args){
   const node=await runtime.node(args.nodeId),bounds=node.absoluteBoundingBox
   if(!bounds||node.rotation)throw Error('Compare requires an unrotated scene node with absolute bounds')
@@ -27,12 +37,12 @@
    while(parent&&parent.id!==node.id)parent=parent.parent
    if(!parent||!child.absoluteBoundingBox)throw Error('Comparison regions must map to descendants of the target')
    const b=child.absoluteBoundingBox
-   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE'})
+   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE',layoutContext:layoutContext(child)})
   }
   const image=await runtime.screenshot(node,{maxDimension:args.maxDimension??1200,contentsOnly:true})
   return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings},images:[image]}
  }
- scope.DshFigmaQuality={resolveFonts,async execute(runtime,method,args){
+ scope.DshFigmaQuality={resolveFonts,layoutContext,readLayout,async execute(runtime,method,args){
   if(method==='resolve_fonts')return {value:await resolveFonts(runtime,args),images:[]}
   if(method==='compare')return compare(runtime,args)
   if(method==='rollback')return {value:await scope.DshFigmaRecovery.rollback(runtime,args.operationId),images:[]}

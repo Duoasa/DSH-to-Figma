@@ -4,6 +4,7 @@ Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions i
 
 ## 0.4.1 (unreleased) — comprehensive upgrade of 0.3.5
 
+- Preserve intended layout/editing behavior across all fidelity tiers. Combine flow, fixed positioning, constraints and locks by use; add opt-in bounded `verify.layout` observations and positioning-aware comparison advice without technique scores, recursive scans or automatic restructuring.
 - Establish the project-wide principle: UI quality first, easier verification, cheaper recovery, and lightweight routine operations. Clarify replication fidelity once when unclear using fast draft / balanced reproduction / fine reproduction; all tiers require visual verification.
 - Add protocol-6 local `compare`, optional `use_figma.verify` (including IDs from script results), bounded `resolve_fonts`, and 27 licensed Feather icons. Comparison and image-returned states do not claim visual acceptance; verification failure never asks to replay successful creation.
 - Add interpreted read-only scripts that cannot introduce a new write barrier; preserve previous uncertain writes and distinguish their blocking operation. Add opt-in failed-creation receipts and explicit conservative `rollback`, never automatic Undo or a transaction. Extend native error repair guidance without normal-path probes.

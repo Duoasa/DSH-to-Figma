@@ -41,6 +41,11 @@
   return bitmap
  }
  const png=c=>{const data=c.toDataURL('image/png').split(',')[1];if(data.length>Math.ceil(8*1024*1024/3)*4)throw Error('Comparison image exceeds 8 MiB; reduce maxDimension');return {type:'image',mimeType:'image/png',data}}
+ function layoutAdvice(region){
+  const context=region.layoutContext,node=context?.node??{},parentMode=context?.parent?.layoutMode??region.layoutMode??'NONE'
+  const inFlow=parentMode!=='NONE'&&node.layoutPositioning!=='ABSOLUTE'
+  return {suggestedProperties:inFlow?['layoutSizingHorizontal','layoutSizingVertical','minWidth','maxWidth','minHeight','maxHeight','parent.padding','parent.itemSpacing','width','height']:['constraints','x','y','width','height'],suggestion:inFlow?'Preserve intended flow and sizing; adjust parent spacing/alignment or child sizing as appropriate. Do not replace layout with coordinates just to reduce pixel differences.':'Preserve intended fixed/anchored/overlay behavior; adjust constraints, bounds or position as appropriate. Fixed positioning is valid; Auto Layout is not required.',...(node.locked?{lockNotice:'This layer is locked against accidental editing. A lock is not a sizing constraint; do not unlock automatically.'}:{})}
+ }
  async function finish(args,result){
   let reference,actual
   try{
@@ -57,12 +62,12 @@
    const units=result.value.width/crop.width,deltas=(result.value.regions??[]).map(r=>{
     const expected={x:(r.referenceBounds.x-crop.x)*units,y:(r.referenceBounds.y-crop.y)*units,width:r.referenceBounds.width*units,height:r.referenceBounds.height*units}
     const difference=Object.fromEntries(Object.keys(expected).map(k=>[k,round(r.actualBounds[k]-expected[k])]))
-    return {...r,expectedBounds:expected,deltaFigmaUnits:difference,outsideTolerance:Object.values(difference).some(n=>Math.abs(n)*width/result.value.width>(args.tolerance?.edgePx??1)),confidence:'explicit-region-mapping',suggestedProperties:r.layoutMode==='NONE'?['x','y','width','height']:['width','height','layoutSizingHorizontal','layoutSizingVertical','parent.padding','parent.itemSpacing'],suggestion:'Use this mapped node’s sizing/parent layout to correct the measured bounds; do not blindly write auto-layout x/y.'}
+    return {...r,expectedBounds:expected,deltaFigmaUnits:difference,outsideTolerance:Object.values(difference).some(n=>Math.abs(n)*width/result.value.width>(args.tolerance?.edgePx??1)),confidence:'explicit-region-mapping',...layoutAdvice(r)}
    })
    return {...result,value:{...result.value,comparison:{alignment:'uniform-width; top-left; white alpha background; no stretch or automatic registration',referenceCrop:crop,referenceScale:refScale,actualScale,comparisonSize:{width,height},...metrics,deltas,visualAcceptance:'not-established'}},images:[png(side),png(overlay)]}
   }finally{reference?.close();actual?.close()}
  }
- scope.DshFigmaCompare={measure,lab,finish}
+ scope.DshFigmaCompare={measure,lab,finish,layoutAdvice}
 })(globalThis)
 
 /* END GENERATED COMPARE */

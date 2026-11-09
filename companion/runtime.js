@@ -268,10 +268,12 @@
         if(method==='use_figma'){
           result.verification={state:result.images.length?'image-returned':'not-requested',visualAcceptance:'not-established'}
           if(args.verify){
-            let verifyId=args.verify.nodeId
+            let verifyId=args.verify.nodeId,layoutReport
             try{if(args.verify.resultPath){let resolved=result.value;for(const key of args.verify.resultPath.split('.').filter(k=>k!=='$')){if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid verify resultPath');resolved=resolved?.[key]}if(typeof resolved!=='string'||!resolved)throw Error('verify resultPath did not resolve to a node ID');verifyId=resolved}
-              if(result.images.length>=4)throw Error('Screenshot limit reached; request get_screenshot separately');const target=await this.node(verifyId);result.images.push(await this.screenshot(target,args.verify,true));result.verification={state:'image-returned',nodeId:target.id,visualAcceptance:'not-established'}}
+              const target=await this.node(verifyId);if(args.verify.layout){try{layoutReport=scope.DshFigmaQuality.readLayout(target)}catch(error){layoutReport={state:'failed',error:String(error.message??error),layoutAcceptance:'not-established',suggestedAction:'Read required properties of this target; do not replay drawing.'}}}
+              if(result.images.length>=4)throw Error('Screenshot limit reached; request get_screenshot separately');result.images.push(await this.screenshot(target,args.verify,true));result.verification={state:'image-returned',nodeId:target.id,visualAcceptance:'not-established'}}
             catch(error){result.verification={state:'failed',nodeId:verifyId??null,error:String(error.message??error),writeState:args.readOnly?'read-only':'completed',...(verifyId?{reconcile:{tool:'get_screenshot',args:{nodeId:verifyId,...(args.verify.scale?{scale:args.verify.scale}:{})}}}:{}),suggestedAction:'Retry verification only; do not replay the creation script.'}}
+            if(layoutReport)result.verification.layout=layoutReport
           }
         }
         const serializeStart=now()

@@ -1406,6 +1406,16 @@ const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" widt
   }
   return {resolved,missing,glyphCoverage:'unverified',cacheExpiresAt:runtime.fontCache.expires}
  }
+ const layoutFields=['id','type','name','x','y','width','height','locked','layoutMode','layoutPositioning','layoutSizingHorizontal','layoutSizingVertical','constraints','minWidth','maxWidth','minHeight','maxHeight','primaryAxisSizingMode','counterAxisSizingMode','primaryAxisAlignItems','counterAxisAlignItems','layoutWrap','itemSpacing','counterAxisSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft','clipsContent','textAutoResize']
+ function layoutContext(node){
+  const values={},omittedFields=[]
+  for(const key of layoutFields){try{const raw=node[key];if(raw!==undefined){if(typeof raw==='symbol')values[key]='mixed';else values[key]=JSON.parse(JSON.stringify(raw))}}catch{omittedFields.push(key)}}
+  return {node:values,parent:node.parent?{id:node.parent.id,layoutMode:node.parent.layoutMode??'NONE'}:null,...(omittedFields.length?{omittedFields}:{})}
+ }
+ function readLayout(node){
+  const children=node.type==='CODE_INSTANCE'?[]:(node.children??[]),nodes=[node,...children.slice(0,19)].map(layoutContext)
+  return {state:'observed',nodes,coverage:{scope:'target-and-direct-children',returned:nodes.length,total:1+children.length,truncated:children.length>19,opaque:node.type==='CODE_INSTANCE'},behaviorValidation:'not-tested',layoutAcceptance:'not-established',interpretation:'Evaluate against intended fixed/content-responsive/container-responsive behavior. Locks prevent accidental edits; no Auto Layout score or automatic resizing.'}
+ }
  async function compare(runtime,args){
   const node=await runtime.node(args.nodeId),bounds=node.absoluteBoundingBox
   if(!bounds||node.rotation)throw Error('Compare requires an unrotated scene node with absolute bounds')
@@ -1415,12 +1425,12 @@ const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" widt
    while(parent&&parent.id!==node.id)parent=parent.parent
    if(!parent||!child.absoluteBoundingBox)throw Error('Comparison regions must map to descendants of the target')
    const b=child.absoluteBoundingBox
-   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE'})
+   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE',layoutContext:layoutContext(child)})
   }
   const image=await runtime.screenshot(node,{maxDimension:args.maxDimension??1200,contentsOnly:true})
   return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings},images:[image]}
  }
- scope.DshFigmaQuality={resolveFonts,async execute(runtime,method,args){
+ scope.DshFigmaQuality={resolveFonts,layoutContext,readLayout,async execute(runtime,method,args){
   if(method==='resolve_fonts')return {value:await resolveFonts(runtime,args),images:[]}
   if(method==='compare')return compare(runtime,args)
   if(method==='rollback')return {value:await scope.DshFigmaRecovery.rollback(runtime,args.operationId),images:[]}
@@ -1867,10 +1877,12 @@ const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" widt
         if(method==='use_figma'){
           result.verification={state:result.images.length?'image-returned':'not-requested',visualAcceptance:'not-established'}
           if(args.verify){
-            let verifyId=args.verify.nodeId
+            let verifyId=args.verify.nodeId,layoutReport
             try{if(args.verify.resultPath){let resolved=result.value;for(const key of args.verify.resultPath.split('.').filter(k=>k!=='$')){if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid verify resultPath');resolved=resolved?.[key]}if(typeof resolved!=='string'||!resolved)throw Error('verify resultPath did not resolve to a node ID');verifyId=resolved}
-              if(result.images.length>=4)throw Error('Screenshot limit reached; request get_screenshot separately');const target=await this.node(verifyId);result.images.push(await this.screenshot(target,args.verify,true));result.verification={state:'image-returned',nodeId:target.id,visualAcceptance:'not-established'}}
+              const target=await this.node(verifyId);if(args.verify.layout){try{layoutReport=scope.DshFigmaQuality.readLayout(target)}catch(error){layoutReport={state:'failed',error:String(error.message??error),layoutAcceptance:'not-established',suggestedAction:'Read required properties of this target; do not replay drawing.'}}}
+              if(result.images.length>=4)throw Error('Screenshot limit reached; request get_screenshot separately');result.images.push(await this.screenshot(target,args.verify,true));result.verification={state:'image-returned',nodeId:target.id,visualAcceptance:'not-established'}}
             catch(error){result.verification={state:'failed',nodeId:verifyId??null,error:String(error.message??error),writeState:args.readOnly?'read-only':'completed',...(verifyId?{reconcile:{tool:'get_screenshot',args:{nodeId:verifyId,...(args.verify.scale?{scale:args.verify.scale}:{})}}}:{}),suggestedAction:'Retry verification only; do not replay the creation script.'}}
+            if(layoutReport)result.verification.layout=layoutReport
           }
         }
         const serializeStart=now()

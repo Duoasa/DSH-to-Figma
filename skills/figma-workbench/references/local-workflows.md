@@ -242,7 +242,7 @@ Figma UI 与 DSH 工具的绑定/换绑/解绑共用文件内状态。插件 UI 
 
 ```js
 // A new frame ID need not be known before creation.
-use_figma({code:'const frame=figma.createFrame(); /* ... */ return {frameId:frame.id}',verify:{resultPath:'frameId'}})
+use_figma({code:'const frame=figma.createFrame(); /* ... */ return {frameId:frame.id}',verify:{resultPath:'frameId',layout:true}})
 compare({nodeId:'12:34',reference:{path:'reference.png'},crop:{x:0,y:0,width:1440,height:900},regions:[{name:'panel',nodeId:'12:35',referenceBounds:{x:1200,y:0,width:240,height:900}}]})
 ```
 
@@ -251,3 +251,5 @@ compare({nodeId:'12:34',reference:{path:'reference.png'},crop:{x:0,y:0,width:144
 Opt into `trackCreated:true` for creation batches where failed-subtree cleanup is useful. On failure, `cleanup` reports availability and the operation ID. `rollback({operationId})` only accepts a failed operation owned by the current Work/file. It removes recorded disposable subtrees only after scoped change observation and native JSON snapshot checks. Existing edits, variables, components/dependencies and untracked children are never claimed restored. Later normal scripts invalidate receipts conservatively; intervening edits, lost evidence, page changes or expired receipts cause skips. Receipts are bounded and expire after ten minutes. Cleanup itself does not establish that the original operation’s other changes are reconciled; follow the returned inspection guidance. It is explicit and is never run automatically.
 
 Normal writes do not run image analysis, record cleanup snapshots or scan the whole document. An execution result, an image-returned result, and visual acceptance remain separate.
+
+`verify.layout:true` observes only the verified target plus up to 19 direct children. Coverage is explicit; `behaviorValidation:"not-tested"` and `layoutAcceptance:"not-established"` distinguish property evidence from behavior checks. It reports fixed/flow sizing, constraints, positioning and locks without grading a technique. Layout read failure preserves successful drawing and returned screenshots; screenshot failure can retain layout observations. Comparison-region advice preserves intended fixed/anchored/overlay/flow behavior; it never auto-restructures or unlocks layers.
