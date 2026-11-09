@@ -20,7 +20,16 @@ jobs:
       - name: Bounded query benchmark and discovery equivalence
         run: npm run benchmark -- --runs 3 --output /tmp/dsh-figma-benchmark.json
       - run: npm run package:companion
-      - run: npm pack --ignore-scripts --pack-destination dist
+      - name: Pack runtime without bundled showcase images
+        run: |
+          npm pack --ignore-scripts --pack-destination dist --json > /tmp/dsh-package.json
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs'
+          import assert from 'node:assert/strict'
+          const [pkg] = JSON.parse(readFileSync('/tmp/dsh-package.json', 'utf8'))
+          assert.ok(pkg.size < 2 * 1024 * 1024, 'DSH package exceeds the 2 MiB runtime budget')
+          assert.ok(!pkg.files.some(file => /^assets\/(examples\/|readme-hero\.|social-preview\.)/.test(file.path)), 'Showcase images must stay in the repository, not the runtime package')
+          NODE
       - uses: actions/upload-artifact@v4
         with:
           name: DSH-to-Figma-packages
