@@ -16,7 +16,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run test:all
       - name: Generated companion must be committed
-        run: git diff --exit-code -- companion/code.js
+        run: git diff --exit-code -- companion/code.js companion/ui.html
       - name: Bounded query benchmark and discovery equivalence
         run: npm run benchmark -- --runs 3 --output /tmp/dsh-figma-benchmark.json
       - run: npm run package:companion

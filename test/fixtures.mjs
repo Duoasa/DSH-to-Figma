@@ -28,7 +28,7 @@ export async function fixtureRuntime(){
   vm.runInContext(await readFile(new URL('../companion/helpers.js',import.meta.url),'utf8'),context)
   vm.runInContext(await readFile(new URL('../companion/capabilities.js',import.meta.url),'utf8'),context)
   vm.runInContext(await readFile(new URL('../companion/runtime.js',import.meta.url),'utf8'),context)
-  for(const name of ['context','media','authoring','operations','reference'])vm.runInContext(await readFile(new URL('../companion/'+name+'.js',import.meta.url),'utf8'),context)
+  for(const name of ['context','media','authoring','operations','reference','icons','quality','recovery','readonly'])vm.runInContext(await readFile(new URL('../companion/'+name+'.js',import.meta.url),'utf8'),context)
   const runtime=new context.DshFigmaRuntime(figma)
   return {runtime,figma,page,nodes,fonts,get undo(){return undo}}
 }
@@ -40,7 +40,7 @@ export async function runJob(bridge,id,runtime){
   const response=await request(bridge,'/poll',{connectionId:id}),job=await response.json()
   if(!job.id)throw new Error('No queued job')
   let payload
-  try{payload={ok:true,result:await runtime.run(job.method,job.args)}}catch(e){payload={ok:false,error:e.message,safeToRetryWithoutCanvasRead:e.safeToRetryWithoutCanvasRead===true,batchResult:e.batchResult,createdNodeIds:e.createdNodeIds,journal:e.journal,affected:e.affected,failureClass:e.failureClass}}
+  try{payload={ok:true,result:await runtime.run(job.method,job.args,{operationId:job.id})}}catch(e){payload={ok:false,error:e.message,safeToRetryWithoutCanvasRead:e.safeToRetryWithoutCanvasRead===true,cleanup:e.cleanup,executionState:e.executionState,batchResult:e.batchResult,createdNodeIds:e.createdNodeIds,journal:e.journal,affected:e.affected,failureClass:e.failureClass}}
   const posted=await request(bridge,'/result',{connectionId:id,id:job.id,...payload})
   if(posted.status!==200)throw new Error('Result rejected')
   return job

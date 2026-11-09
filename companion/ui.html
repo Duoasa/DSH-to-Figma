@@ -7,6 +7,70 @@
 <details id="design-reference"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 16l4-5 4 5M8 8h.01"/></svg><span>设计参考</span><svg class="reference-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="reference-body"><div class="reference-row"><div class="reference-text"><div id="reference-name">尚未绑定设计参考</div><button id="reference-bind">绑定当前选区</button><button id="reference-clear" hidden>解绑</button></div><button id="reference-locate" hidden title="定位参考画板" aria-label="定位参考画板"><img id="reference-image" alt="参考画板缩略图" hidden><span>定位</span></button></div><p id="reference-note" role="status" aria-live="polite"></p><small>绑定与解绑均可通过 DSH 操作</small></div></details>
 <footer class="footer"><p class="hint" id="hint">保持窗口打开即可</p><div class="actions"><button id="connect" class="icon-button" title="连接 DSH" aria-label="连接 DSH">连接 DSH</button><button id="settings" class="icon-button" title="设置" aria-label="设置" aria-expanded="false" aria-controls="advanced"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItc2V0dGluZ3MiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiPjwvY2lyY2xlPjxwYXRoIGQ9Ik0xOS40IDE1YTEuNjUgMS42NSAwIDAgMCAuMzMgMS44MmwuMDYuMDZhMiAyIDAgMCAxIDAgMi44MyAyIDIgMCAwIDEtMi44MyAwbC0uMDYtLjA2YTEuNjUgMS42NSAwIDAgMC0xLjgyLS4zMyAxLjY1IDEuNjUgMCAwIDAtMSAxLjUxVjIxYTIgMiAwIDAgMS0yIDIgMiAyIDAgMCAxLTItMnYtLjA5QTEuNjUgMS42NSAwIDAgMCA5IDE5LjRhMS42NSAxLjY1IDAgMCAwLTEuODIuMzNsLS4wNi4wNmEyIDIgMCAwIDEtMi44MyAwIDIgMiAwIDAgMSAwLTIuODNsLjA2LS4wNmExLjY1IDEuNjUgMCAwIDAgLjMzLTEuODIgMS42NSAxLjY1IDAgMCAwLTEuNTEtMUgzYTIgMiAwIDAgMS0yLTIgMiAyIDAgMCAxIDItMmguMDlBMS42NSAxLjY1IDAgMCAwIDQuNiA5YTEuNjUgMS42NSAwIDAgMC0uMzMtMS44MmwtLjA2LS4wNmEyIDIgMCAwIDEgMC0yLjgzIDIgMiAwIDAgMSAyLjgzIDBsLjA2LjA2YTEuNjUgMS42NSAwIDAgMCAxLjgyLjMzSDlhMS42NSAxLjY1IDAgMCAwIDEtMS41MVYzYTIgMiAwIDAgMSAyLTIgMiAyIDAgMCAxIDIgMnYuMDlhMS42NSAxLjY1IDAgMCAwIDEgMS41MSAxLjY1IDEuNjUgMCAwIDAgMS44Mi0uMzNsLjA2LS4wNmEyIDIgMCAwIDEgMi44MyAwIDIgMiAwIDAgMSAwIDIuODNsLS4wNi4wNmExLjY1IDEuNjUgMCAwIDAtLjMzIDEuODJWOWExLjY1IDEuNjUgMCAwIDAgMS41MSAxSDIxYTIgMiAwIDAgMSAyIDIgMiAyIDAgMCAxLTIgMmgtLjA5YTEuNjUgMS42NSAwIDAgMC0xLjUxIDF6Ij48L3BhdGg+PC9zdmc+" alt=""></button></div></footer>
 <details id="advanced"><summary>高级设置</summary><div class="settings-title">高级设置<span id="version"></span></div><label for="token">手动配对密钥</label><input id="token" type="password" autocomplete="off" placeholder="仅通用版需要；推荐调用 figma_setup"><label for="file">文件链接（可选）</label><input id="file" placeholder="https://www.figma.com/design/…"><button id="advanced-connect">使用手动密钥</button><small>仅连接本机。已配对安装包包含本机凭证，请勿分享。</small></details></div><script>
+/* BEGIN GENERATED COMPARE */
+/* MIT — comparison in the existing local companion iframe; no new dependencies. */
+;(function(scope){
+ const round=n=>Math.round(n*100)/100
+ function lab(rgb){
+  const [r,g,b]=rgb.map(v=>{v/=255;return v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4})
+  const f=v=>v>216/24389?Math.cbrt(v):(24389/27*v+16)/116
+  const x=f((.4124564*r+.3575761*g+.1804375*b)/.95047),y=f(.2126729*r+.7151522*g+.072175*b),z=f((.0193339*r+.119192*g+.9503041*b)/1.08883)
+  return [116*y-16,500*(x-y),200*(y-z)]
+ }
+ const delta=(a,b)=>{const aa=lab(a),bb=lab(b);return Math.hypot(aa[0]-bb[0],aa[1]-bb[1],aa[2]-bb[2])}
+ function measure(a,b,width,height,tolerance={}){
+  const step=Math.max(1,Math.ceil(Math.sqrt(width*height/120000))),sumA=[0,0,0],sumB=[0,0,0],exA=new Float64Array(width),exB=new Float64Array(width),eyA=new Float64Array(height),eyB=new Float64Array(height)
+  let count=0,total=0,changed=0,max=0
+  for(let y=0;y<height;y+=step)for(let x=0;x<width;x+=step){
+   const i=(y*width+x)*4,aa=[a[i],a[i+1],a[i+2]],bb=[b[i],b[i+1],b[i+2]],d=delta(aa,bb)
+   count++;total+=d;max=Math.max(max,d);if(d>(tolerance.deltaE??2))changed++
+   for(let c=0;c<3;c++){sumA[c]+=aa[c];sumB[c]+=bb[c]}
+   if(x>=step){for(let c=0;c<3;c++){exA[x]+=Math.abs(a[i+c]-a[i-step*4+c]);exB[x]+=Math.abs(b[i+c]-b[i-step*4+c])}}
+   if(y>=step){for(let c=0;c<3;c++){eyA[y]+=Math.abs(a[i+c]-a[i-width*step*4+c]);eyB[y]+=Math.abs(b[i+c]-b[i-width*step*4+c])}}
+  }
+  const peaks=values=>{const max=Math.max(...values);if(max<40)return [];return [...values].map((value,at)=>({at,value})).filter(p=>p.value>max*.45).sort((a,b)=>b.value-a.value).reduce((list,p)=>list.every(q=>Math.abs(p.at-q.at)>step*3)&&list.length<8?[...list,p]:list,[]).sort((a,b)=>a.at-b.at).map(p=>p.at)}
+  const boundaries={x:{reference:peaks(exA),actual:peaks(exB)},y:{reference:peaks(eyA),actual:peaks(eyB)}}
+  return {sampleCount:count,samplingStridePx:step,meanDeltaE76:round(total/count),maxSampleDeltaE76:round(max),changedSampleRatio:round(changed/count*100)/100,meanColors:{reference:sumA.map(n=>Math.round(n/count)),actual:sumB.map(n=>Math.round(n/count))},boundaries,confidence:'diagnostic-only',limitations:['Pixel differences include font rasterization and anti-aliasing.','Projected edges are candidates, not identified semantic regions.']}
+ }
+ const canvas=(w,h)=>{if(w<1||h<1||w*h>5200000)throw Error('Comparison pixel budget exceeded; use a smaller crop');const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+ async function decode(image){
+  const binary=atob(image.data);if(binary.length>8*1024*1024)throw Error('Comparison input exceeds 8 MiB')
+  const blob=new Blob([Uint8Array.from(binary,c=>c.charCodeAt(0))],{type:image.mimeType})
+  const bitmap=await createImageBitmap(blob)
+  if(bitmap.width*bitmap.height>32000000){bitmap.close();throw Error('Reference exceeds 32 megapixels; crop/resize it first')}
+  return bitmap
+ }
+ const png=c=>{const data=c.toDataURL('image/png').split(',')[1];if(data.length>Math.ceil(8*1024*1024/3)*4)throw Error('Comparison image exceeds 8 MiB; reduce maxDimension');return {type:'image',mimeType:'image/png',data}}
+ function layoutAdvice(region){
+  const context=region.layoutContext,node=context?.node??{},parentMode=context?.parent?.layoutMode??region.layoutMode??'NONE'
+  const inFlow=parentMode!=='NONE'&&node.layoutPositioning!=='ABSOLUTE'
+  return {suggestedProperties:inFlow?['layoutSizingHorizontal','layoutSizingVertical','minWidth','maxWidth','minHeight','maxHeight','parent.padding','parent.itemSpacing','width','height']:['constraints','x','y','width','height'],suggestion:inFlow?'Preserve intended flow and sizing; adjust parent spacing/alignment or child sizing as appropriate. Do not replace layout with coordinates just to reduce pixel differences.':'Preserve intended fixed/anchored/overlay behavior; adjust constraints, bounds or position as appropriate. Fixed positioning is valid; Auto Layout is not required.',...(node.locked?{lockNotice:'This layer is locked against accidental editing. A lock is not a sizing constraint; do not unlock automatically.'}:{})}
+ }
+ async function finish(args,result){
+  let reference,actual
+  try{
+   reference=await decode(args.referenceImage);actual=await decode(result.images[0])
+   const crop=args.crop??{x:0,y:0,width:reference.width,height:reference.height}
+   if(![crop.x,crop.y,crop.width,crop.height].every(Number.isFinite)||crop.x<0||crop.y<0||crop.width<=0||crop.height<=0||crop.x+crop.width>reference.width||crop.y+crop.height>reference.height)throw Error('Reference crop is outside image bounds')
+   const max=Math.min(1600,args.maxDimension??1200),width=Math.max(1,Math.round(Math.min(max,max/(Math.max(crop.height/crop.width,actual.height/actual.width))))),refScale=width/crop.width,actualScale=width/actual.width,height=Math.max(1,Math.ceil(Math.max(crop.height*refScale,actual.height*actualScale)))
+   const a=canvas(width,height),b=canvas(width,height),ac=a.getContext('2d'),bc=b.getContext('2d')
+   for(const ctx of [ac,bc]){ctx.fillStyle='#fff';ctx.fillRect(0,0,width,height)}
+   ac.drawImage(reference,crop.x,crop.y,crop.width,crop.height,0,0,width,crop.height*refScale);bc.drawImage(actual,0,0,width,actual.height*actualScale)
+   const metrics=measure(ac.getImageData(0,0,width,height).data,bc.getImageData(0,0,width,height).data,width,height,args.tolerance)
+   const side=canvas(width*2,height),sc=side.getContext('2d');sc.drawImage(a,0,0);sc.drawImage(b,width,0)
+   const overlay=canvas(width,height),oc=overlay.getContext('2d');oc.drawImage(a,0,0);oc.globalAlpha=.5;oc.drawImage(b,0,0)
+   const units=result.value.width/crop.width,deltas=(result.value.regions??[]).map(r=>{
+    const expected={x:(r.referenceBounds.x-crop.x)*units,y:(r.referenceBounds.y-crop.y)*units,width:r.referenceBounds.width*units,height:r.referenceBounds.height*units}
+    const difference=Object.fromEntries(Object.keys(expected).map(k=>[k,round(r.actualBounds[k]-expected[k])]))
+    return {...r,expectedBounds:expected,deltaFigmaUnits:difference,outsideTolerance:Object.values(difference).some(n=>Math.abs(n)*width/result.value.width>(args.tolerance?.edgePx??1)),confidence:'explicit-region-mapping',...layoutAdvice(r)}
+   })
+   return {...result,value:{...result.value,comparison:{alignment:'uniform-width; top-left; white alpha background; no stretch or automatic registration',referenceCrop:crop,referenceScale:refScale,actualScale,comparisonSize:{width,height},...metrics,deltas,visualAcceptance:'not-established'}},images:[png(side),png(overlay)]}
+  }finally{reference?.close();actual?.close()}
+ }
+ scope.DshFigmaCompare={measure,lab,finish,layoutAdvice}
+})(globalThis)
+
+/* END GENERATED COMPARE */
 const base='http://localhost:3055', button=document.querySelector('#connect'), status=document.querySelector('#status')
 let endpoint=base,token='',connectionId=null,metadata=null,active=false,inFlight=null,desired=true,connecting=false,blocked=false,generation=0,retryTimer=null,retries=0
 // Figma's opaque-origin UI exposes getRandomValues, but not randomUUID.
@@ -53,7 +117,7 @@ async function connect(){if(connecting||active||blocked||!desired||!metadata||!t
   active=true;retries=0;button.textContent='暂停连接 / Pause';show('可以回到 DSH 开始操作。请保持此窗口打开。 / Ready. Return to DSH; keep this window open.','connected');void poll(attempt)
  }catch(error){if(attempt===generation&&desired)fail(error)}finally{connecting=false;if(!blocked)button.disabled=false}
 }
-async function poll(epoch){while(active&&desired&&generation===epoch){try{const job=await request('/poll',{connectionId});if(!active||!desired||generation!==epoch)break;if(job.id){inFlight=job.id;referenceControls();show('正在执行 / Running: '+job.method,'connected');const result=await new Promise(resolve=>{pending.set(job.id,resolve);parent.postMessage({pluginMessage:{type:'execute',...job}},'*')});await request('/result',{connectionId,...result});inFlight=null;referenceControls();if(referenceRefresh&&referencePanel.open){referenceRefresh=false;requestReference()}show(result.ok?'操作完成，等待下一步。 / Done. Ready for the next task.':'操作失败，请让 DSH 检查画布。 / Failed; inspect canvas.','connected')}}catch(error){if(generation===epoch&&desired)fail(error);break}}}
+async function poll(epoch){while(active&&desired&&generation===epoch){try{const job=await request('/poll',{connectionId});if(!active||!desired||generation!==epoch)break;if(job.id){inFlight=job.id;referenceControls();show('正在执行 / Running: '+job.method,'connected');let result=await new Promise(resolve=>{pending.set(job.id,resolve);parent.postMessage({pluginMessage:{type:'execute',...job}},'*')});if(job.method==='compare'&&result.ok){try{result.result=await DshFigmaCompare.finish(job.args,result.result)}catch(error){result={id:job.id,ok:false,error:'Comparison failed: '+error.message,safeToRetryWithoutCanvasRead:true,executionState:'read-only',failureClass:'verification'}}}await request('/result',{connectionId,...result});inFlight=null;referenceControls();if(referenceRefresh&&referencePanel.open){referenceRefresh=false;requestReference()}show(result.ok?'操作完成，等待下一步。 / Done. Ready for the next task.':'操作失败，请让 DSH 检查画布。 / Failed; inspect canvas.','connected')}}catch(error){if(generation===epoch&&desired)fail(error);break}}}
 window.onmessage=event=>{if(event.source!==parent&&!(event.source===top&&['https://www.figma.com','https://figma.com'].includes(event.origin)))return;const message=event.data?.pluginMessage;if(!message)return
  if(message.type==='document'){
   metadata={name:message.name,editorType:message.editorType,fileKey:message.fileKey,featureVersion:message.featureVersion,capabilities:message.capabilities,companionVersion:message.companionVersion??null,designReference:message.designReference??null,referenceSerial:message.referenceSerial};renderReference(message.designReference);document.querySelector('#document').textContent=message.name+' · '+message.editorType

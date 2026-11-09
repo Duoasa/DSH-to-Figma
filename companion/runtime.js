@@ -103,6 +103,7 @@
       await hydrate(figma.currentPage)
       const unwrap = value => raws.get(value) || (Array.isArray(value) ? value.map(unwrap) : value)
       const set = (node, props) => {
+        if(runtime.creationReceipt&&!runtime.creationReceipt.ids.has(node.id))runtime.creationReceipt.unavailable='Script edits existing objects; cleanup ownership/dependencies cannot be established'
         if (!props || typeof props !== 'object' || Array.isArray(props)) throw new Error('set expects a property object')
         if (Object.hasOwn(props,'layoutMode')) node.layoutMode = props.layoutMode
         if ('width' in props || 'height' in props) node.resize(props.width ?? node.width, props.height ?? node.height)
@@ -157,6 +158,7 @@
         const proxy = new Proxy({}, {
           get(_target, key) {
             const target = value
+            if(runtime.creationReceipt&&target===figma&&['variables','teamLibrary'].includes(key))runtime.creationReceipt.unavailable='Script accesses resources outside node-only cleanup'
             if (key === 'mainComponent' && target.type === 'INSTANCE') throw new Error('Synchronous mainComponent access on instance '+target.id+' is not supported. Use const main = await instance.getMainComponentAsync(); then read main?.id or main?.name. This script has started: inspect affected nodes and variables before retrying; do not replay creation.')
             if (key === 'set') return props => set(target, props)
             if (key === 'query' && target.findAll) return selector => query(target, selector)
@@ -171,6 +173,7 @@
               const right=target.children.reduce((edge,node)=>Math.max(edge,(node.absoluteBoundingBox?.x??node.x??0)+(node.absoluteBoundingBox?.width??node.width??0)),0)
               return {x:right+80,y:80,width:size.width,height:size.height}
             }
+            if (target === figma && key === 'icon') return (name,options)=>{const node=scope.DshFigmaIcons.create(figma,name,options);if(runtime.creationReceipt)scope.DshFigmaRecovery.created(runtime,node);return wrap(node)}
             if (target === figma && key === 'io') return io
             if (target === figma && key === 'setCurrentPageAsync') return async page => {
               if(runtime.taskPageId&&unwrap(page).id!==runtime.taskPageId)throw new Error('Explicit step tasks cannot switch away from their original page')
@@ -180,14 +183,15 @@
             if (target === figma && key === 'createAutoLayout') return (direction = 'HORIZONTAL', props = {}) => {
               if (typeof direction === 'object') { props = direction; direction = 'HORIZONTAL' }
               if (!['HORIZONTAL','VERTICAL'].includes(direction)) throw new Error('Invalid auto-layout direction')
-              const frame = figma.createFrame(); frame.layoutMode = direction
+              const frame = figma.createFrame(); if(runtime.creationReceipt)scope.DshFigmaRecovery.created(runtime,frame); frame.layoutMode = direction
               frame.primaryAxisSizingMode = 'AUTO'; frame.counterAxisSizingMode = 'AUTO'
               frame.layoutSizingHorizontal = 'HUG'; frame.layoutSizingVertical = 'HUG'
               return set(frame, props)
             }
             const v = target[key]
             return typeof v === 'function' ? (...args) => {
-              const out=v.apply(target,args.map(unwrap));if(runtime.writeJournal){if(String(key).startsWith('create')&&isNode(out))runtime.recordWrite({created:[out.id],api:String(key)});else if(isNode(target)&&/^(set|append|insert|resize|remove|swap|apply)/.test(String(key)))runtime.recordWrite({updated:{nodeId:target.id,api:String(key)}})}
+              if(runtime.creationReceipt){const receipt=runtime.creationReceipt;if((String(key).startsWith('create')&&!['createFrame','createRectangle','createEllipse','createLine','createPolygon','createStar','createText','createVector','createSection','createComponent','createNodeFromSvg','createInstance'].includes(key))||isNode(target)&&!receipt.ids.has(target.id)&&/^(set|remove|resize|swap|apply|insert)/.test(String(key))||isNode(target)&&key==='appendChild'&&!receipt.ids.has(unwrap(args[0])?.id))receipt.unavailable='Script changes existing/dependent resources outside cleanup coverage'}
+              const out=v.apply(target,args.map(unwrap));if(runtime.creationReceipt&&(String(key).startsWith('create')||key==='clone')){if(out?.then)out.then(node=>scope.DshFigmaRecovery.created(runtime,node),()=>{});else scope.DshFigmaRecovery.created(runtime,out)}if(runtime.writeJournal){if(String(key).startsWith('create')&&isNode(out))runtime.recordWrite({created:[out.id],api:String(key)});else if(isNode(target)&&/^(set|append|insert|resize|remove|swap|apply)/.test(String(key)))runtime.recordWrite({updated:{nodeId:target.id,api:String(key)}})}
               if(out&&typeof out.then==='function')return out.then(async resolved=>{if(key==='getMainComponentAsync')components.set(target,resolved);await hydrate(key==='loadAsync'?target:resolved);return wrap(resolved)})
               if(key==='createInstance'&&target.type==='COMPONENT')components.set(out,target)
               if(key==='swapComponent')components.set(target,unwrap(args[0]))
@@ -200,6 +204,7 @@
             return key in value
           },
           set(_target, key, next) {
+            if(runtime.creationReceipt&&isNode(value)&&!runtime.creationReceipt.ids.has(value.id))runtime.creationReceipt.unavailable='Script edits existing objects; cleanup ownership/dependencies cannot be established'
             if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
             if(isNode(value)&&['animationStyles','manualKeyframeTracks','timelines','animations'].includes(key))throw new Error('Native motion collections are read-only. Use applyManualKeyframeTrack/removeManualKeyframeTrack, setTimelineDuration, or dsh.updateAnimationStyle; inspect the motion guide. This script has already started.')
             if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
@@ -241,13 +246,14 @@
       }
       return wrap(figma)
     }
-    async run(method, args = {}) {
+    async run(method, args = {}, execution = {}) {
       if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Arguments must be an object')
       const started=now()
       this.writeJournal=args.journal===true?{coverage:'observed-node-proxy-writes-only; excludes variables, indirect effects and native helper internals',complete:false,entries:[]}:null;this.taskPageId=args.taskPageId;this.scriptEntered=false;this.mutationEntered=false;this.pageSwitches=0;this.clearPlaceholders=null
       this.metrics={runtimeMs:0,exportMs:0,serializationMs:0,nodeCount:0,imageCount:0,images:[],valueBytes:0}
       this.readOptions={};this.snapshotBudget=null
       try{
+        scope.DshFigmaRecovery?.before(this,method,args,execution.operationId)
         if(this.taskPageId&&this.figma.currentPage.id!==this.taskPageId)throw Error('Task page changed before step execution')
         if(['get_metadata','get_selection','get_component_context','get_design_context','get_figjam','search_design_system'].includes(method)){
           if(args.profile!==undefined&&!['summary','full'].includes(args.profile))throw new Error('profile must be summary or full')
@@ -259,6 +265,17 @@
           }
         }
         const result=await this.execute(method,args)
+        if(method==='use_figma'){
+          result.verification={state:result.images.length?'image-returned':'not-requested',visualAcceptance:'not-established'}
+          if(args.verify){
+            let verifyId=args.verify.nodeId,layoutReport
+            try{if(args.verify.resultPath){let resolved=result.value;for(const key of args.verify.resultPath.split('.').filter(k=>k!=='$')){if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid verify resultPath');resolved=resolved?.[key]}if(typeof resolved!=='string'||!resolved)throw Error('verify resultPath did not resolve to a node ID');verifyId=resolved}
+              const target=await this.node(verifyId);if(args.verify.layout){try{layoutReport=scope.DshFigmaQuality.readLayout(target)}catch(error){layoutReport={state:'failed',error:String(error.message??error),layoutAcceptance:'not-established',suggestedAction:'Read required properties of this target; do not replay drawing.'}}}
+              if(result.images.length>=4)throw Error('Screenshot limit reached; request get_screenshot separately');result.images.push(await this.screenshot(target,args.verify,true));result.verification={state:'image-returned',nodeId:target.id,visualAcceptance:'not-established'}}
+            catch(error){result.verification={state:'failed',nodeId:verifyId??null,error:String(error.message??error),writeState:args.readOnly?'read-only':'completed',...(verifyId?{reconcile:{tool:'get_screenshot',args:{nodeId:verifyId,...(args.verify.scale?{scale:args.verify.scale}:{})}}}:{}),suggestedAction:'Retry verification only; do not replay the creation script.'}}
+            if(layoutReport)result.verification.layout=layoutReport
+          }
+        }
         const serializeStart=now()
         result.value=jsonValue(result.value)??null
         let valueJson=JSON.stringify(result.value)
@@ -278,12 +295,15 @@
         this.metrics.runtimeMs=now()-started
         if(this.writeJournal)result.journal=this.writeJournal
         result.metrics=this.metrics
+        scope.DshFigmaRecovery?.success(this)
         return result
       }catch(cause){
         // Never trust an exception property supplied by user code. Only pre-execution failures are retry-safe.
         const nativeMessage=String(cause&&cause.message||cause)
         const error=new Error(/createCodeLayer.*(?:not a function|undefined)/.test(nativeMessage)&&typeof this.figma.createCodeLayer!=='function'?'FIGMA_CODE_LAYER_UNAVAILABLE: This editor does not expose local Code Layer creation. '+nativeMessage:nativeMessage)
-        error.safeToRetryWithoutCanvasRead=method==='use_figma'?!this.scriptEntered:['batch_edit','generate_diagram','generate_deck','apply_shader','import_dom_snapshot','create_variables','add_variable_modes','set_design_reference','clear_design_reference'].includes(method)&&!this.mutationEntered
+        error.safeToRetryWithoutCanvasRead=method==='use_figma'?args.readOnly===true||!this.scriptEntered:method==='rollback'?!this.mutationEntered:['batch_edit','generate_diagram','generate_deck','apply_shader','import_dom_snapshot','create_variables','add_variable_modes','set_design_reference','clear_design_reference'].includes(method)&&!this.mutationEntered
+        if(method==='use_figma'&&args.readOnly)error.executionState='read-only'
+        if(this.creationReceipt){try{error.cleanup=await scope.DshFigmaRecovery.failed(this)}catch{this.creationReceipt.dispose?.();error.cleanup={available:false,reason:'Cleanup evidence unavailable'}}}
         if(this.writeJournal)error.journal={...this.writeJournal,failedAt:{stack:String(cause.stack??'').split('\n').slice(0,3).join('\n')}}
         for(const key of ['journal','affected','failureClass'])if(cause?.[key]&&method!=='use_figma')error[key]=cause[key]
         if(cause?.batchResult)error.batchResult=cause.batchResult
@@ -294,12 +314,13 @@
     async execute(method, args = {}) {
       const f = this.figma, images = []
       let value, assets
-      for(const extension of [scope.DshFigmaContext,scope.DshFigmaMedia,scope.DshFigmaAuthoring,scope.DshFigmaOperations,scope.DshFigmaReference]){
+      for(const extension of [scope.DshFigmaContext,scope.DshFigmaMedia,scope.DshFigmaAuthoring,scope.DshFigmaOperations,scope.DshFigmaReference,scope.DshFigmaQuality]){
         const result=await extension?.execute(this,method,args);if(result)return result
       }
       const depth = integer(args.depth,3,0,10,'depth')
       switch (method) {
         case 'use_figma': {
+          if(args.readOnly){this.scriptEntered=true;value=await scope.DshFigmaReadonly.execute(f,args.readOnlyProgram);break}
           if (typeof args.code !== 'string' || !args.code.trim() || args.code.length > 150000) throw new Error('Provide a script of 1–150000 characters')
           const run = new Function('figma', 'dsh', '"use strict"; return (async () => {\n' + args.code + '\n})()')
           // The local plugin shares the user's editor. Preserve its page and
