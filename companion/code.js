@@ -1376,6 +1376,227 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
   scope.DshFigmaReference={stored,summary,read,execute,locate}
 })(globalThis)
 
+/* Feather 4.29.2, MIT, Copyright 2013–2023 Cole Bemis. See assets/companion/FEATHER-LICENSE. */
+;(function(scope){
+const paths={"search": "<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line>", "home": "<path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline>", "menu": "<line x1=\"3\" y1=\"12\" x2=\"21\" y2=\"12\"></line><line x1=\"3\" y1=\"6\" x2=\"21\" y2=\"6\"></line><line x1=\"3\" y1=\"18\" x2=\"21\" y2=\"18\"></line>", "x": "<line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line>", "check": "<polyline points=\"20 6 9 17 4 12\"></polyline>", "plus": "<line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"></line><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line>", "minus": "<line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line>", "chevron-up": "<polyline points=\"18 15 12 9 6 15\"></polyline>", "chevron-down": "<polyline points=\"6 9 12 15 18 9\"></polyline>", "chevron-left": "<polyline points=\"15 18 9 12 15 6\"></polyline>", "chevron-right": "<polyline points=\"9 18 15 12 9 6\"></polyline>", "arrow-left": "<line x1=\"19\" y1=\"12\" x2=\"5\" y2=\"12\"></line><polyline points=\"12 19 5 12 12 5\"></polyline>", "arrow-right": "<line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"></line><polyline points=\"12 5 19 12 12 19\"></polyline>", "settings": "<circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path>", "user": "<path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle>", "calendar": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline>", "play": "<polygon points=\"5 3 19 12 5 21 5 3\"></polygon>", "pause": "<rect x=\"6\" y=\"4\" width=\"4\" height=\"16\"></rect><rect x=\"14\" y=\"4\" width=\"4\" height=\"16\"></rect>", "heart": "<path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path>", "bell": "<path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path>", "more-horizontal": "<circle cx=\"12\" cy=\"12\" r=\"1\"></circle><circle cx=\"19\" cy=\"12\" r=\"1\"></circle><circle cx=\"5\" cy=\"12\" r=\"1\"></circle>", "file": "<path d=\"M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z\"></path><polyline points=\"13 2 13 9 20 9\"></polyline>", "folder": "<path d=\"M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z\"></path>", "trash-2": "<polyline points=\"3 6 5 6 21 6\"></polyline><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"></path><line x1=\"10\" y1=\"11\" x2=\"10\" y2=\"17\"></line><line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\"></line>", "copy": "<rect x=\"9\" y=\"9\" width=\"13\" height=\"13\" rx=\"2\" ry=\"2\"></rect><path d=\"M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1\"></path>", "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path><polyline points=\"7 10 12 15 17 10\"></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"></line>"};
+scope.DshFigmaIcons={names:Object.keys(paths),create(figma,name,options={}){
+if(!Object.hasOwn(paths,name))throw Error("Unknown icon. Available: "+Object.keys(paths).join(", "));
+const size=options.size??24,color=options.color??"#000000",stroke=options.strokeWidth??2;
+if(!Number.isFinite(size)||size<1||size>1024||!/^#[0-9a-f]{6}$/i.test(color)||!Number.isFinite(stroke)||stroke<=0||stroke>8)throw Error("Icon requires size 1–1024, six-digit hex color and strokeWidth (0,8]");
+const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round">${paths[name]}</svg>`);node.name="Icon / "+name;return node;
+}}})(globalThis);
+
+/* MIT — local, opt-in authoring verification. */
+;(function(scope){
+ const families={sans:['Inter','Arial','Roboto','Helvetica Neue'],serif:['Georgia','Times New Roman','Noto Serif'],mono:['SF Mono','Cascadia Mono','Menlo','Consolas','Roboto Mono','Courier New'],cjk:['PingFang SC','Microsoft YaHei','Noto Sans SC','Source Han Sans SC']}
+ const aliases={'sf pro':['Inter','Helvetica Neue','Arial'],'sf pro display':['Inter','Helvetica Neue'],'sf pro text':['Inter','Helvetica Neue'],'sf pro rounded':['SF Pro Rounded','Inter'],'sf mono':families.mono}
+ const lower=x=>String(x??'').toLowerCase(),round=x=>Math.round(x*100)/100
+ async function resolveFonts(runtime,args){
+  if(!Array.isArray(args.specs)||!args.specs.length||args.specs.length>50)throw Error('Provide 1–50 font specs')
+  if(args.forceRefresh||!runtime.fontCache||runtime.fontCache.expires<Date.now())runtime.fontCache={fonts:await runtime.figma.listAvailableFontsAsync(),expires:Date.now()+60000}
+  const available=runtime.fontCache.fonts.map(x=>x.fontName),resolved=[],missing=[]
+  for(const want of args.specs){
+   if(!want.family&&!families[want.semantic])throw Error('Each font needs a family or semantic class')
+   const requested=want.style||'Regular',candidates=[want.family,...(args.allowFallback===false?[]:[...(want.fallbacks??[]),...(aliases[lower(want.family)]??[]),...(families[want.semantic]??families.sans)])].filter(Boolean)
+   let got
+   for(const family of candidates){got=available.find(n=>lower(n.family)===lower(family)&&lower(n.style)===lower(requested));if(got)break}
+   if(!got&&args.allowFallback!==false)for(const family of candidates){got=available.find(n=>lower(n.family)===lower(family)&&['regular','normal','book','roman'].includes(lower(n.style)));if(got)break}
+   if(got)resolved.push({want,got,fallback:lower(got.family)!==lower(want.family)||lower(got.style)!==lower(requested),familyFallback:!!want.family&&lower(got.family)!==lower(want.family),styleFallback:lower(got.style)!==lower(requested)})
+   else missing.push({want,reason:'No available matching family/style or allowed fallback'})
+  }
+  return {resolved,missing,glyphCoverage:'unverified',cacheExpiresAt:runtime.fontCache.expires}
+ }
+ async function compare(runtime,args){
+  const node=await runtime.node(args.nodeId),bounds=node.absoluteBoundingBox
+  if(!bounds||node.rotation)throw Error('Compare requires an unrotated scene node with absolute bounds')
+  const mappings=[]
+  for(const region of args.regions??[]){
+   const child=await runtime.node(region.nodeId);let parent=child
+   while(parent&&parent.id!==node.id)parent=parent.parent
+   if(!parent||!child.absoluteBoundingBox)throw Error('Comparison regions must map to descendants of the target')
+   const b=child.absoluteBoundingBox
+   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE'})
+  }
+  const image=await runtime.screenshot(node,{maxDimension:args.maxDimension??1200,contentsOnly:true})
+  return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings},images:[image]}
+ }
+ scope.DshFigmaQuality={resolveFonts,async execute(runtime,method,args){
+  if(method==='resolve_fonts')return {value:await resolveFonts(runtime,args),images:[]}
+  if(method==='compare')return compare(runtime,args)
+  if(method==='rollback')return {value:await scope.DshFigmaRecovery.rollback(runtime,args.operationId),images:[]}
+  return null
+ }}
+})(globalThis)
+
+/* MIT — bounded, explicit cleanup; never a general transaction/Undo. */
+;(function(scope){
+ const disposable=new Set(['FRAME','GROUP','SECTION','TEXT','RECTANGLE','ELLIPSE','LINE','VECTOR','POLYGON','STAR','BOOLEAN_OPERATION'])
+ const reads=new Set(['resolve_fonts','compare','get_selection','list_fonts','get_metadata','get_screenshot','get_design_context','get_figjam','get_variable_defs','get_libraries','search_design_system','get_component_context','get_local_component_links','get_capabilities','get_motion_context','download_assets','get_design_reference'])
+ const descendants=node=>{const out=[],visit=n=>{if(out.length>1500)throw Error('Cleanup subtree exceeds 1500 nodes');out.push(n);for(const c of n.children??[])visit(c)};visit(node);return out}
+ function discard(runtime){for(const record of runtime.cleanupRecords?.values()??[])record.dispose?.();runtime.cleanupRecords?.clear()}
+ function before(runtime,method,args,operationId){
+  if(runtime.cleanupRecords?.size&&method!=='rollback'&&!reads.has(method)&&!(method==='use_figma'&&args.readOnly))discard(runtime)
+  runtime.creationReceipt=null
+  if(method!=='use_figma'||!args.trackCreated)return
+  if(args.readOnly)throw Error('trackCreated is incompatible with readOnly')
+  const page=runtime.figma.currentPage,record={operationId,pageId:page.id,ids:new Set(),roots:[],dirty:false,expires:Date.now()+600000,coverage:'observed node factories only; existing edits/variables are not undone'}
+  const change=()=>{if(record.sealed)record.dirty=true},pageChange=()=>{record.dirty=true}
+  if(typeof page.on!=='function'||typeof page.off!=='function'||typeof runtime.figma.on!=='function'||typeof runtime.figma.off!=='function')record.unavailable='Editor lacks scoped change observation'
+  else{page.on('nodechange',change);runtime.figma.on('currentpagechange',pageChange);record.dispose=()=>{try{page.off('nodechange',change)}catch{}try{runtime.figma.off('currentpagechange',pageChange)}catch{}if(record.timer)clearTimeout(record.timer)}}
+  runtime.creationReceipt=record
+ }
+ function created(runtime,node){
+  const r=runtime.creationReceipt;if(!r||!node?.id)return
+  try{for(const n of descendants(node)){if(r.ids.size>=1500){r.unavailable='Created-node budget exceeded';break}r.ids.add(n.id)}}catch{r.unavailable='Created subtree too large'}
+ }
+ async function fingerprint(node){
+  const raw=await node.exportAsync({format:'JSON_REST_V1'})
+  if(!raw?.document||raw.document.id!==node.id)throw Error('Native JSON snapshot unavailable')
+  const text=JSON.stringify({parent:node.parent?.id,document:raw.document})
+  if(text.length>2000000)throw Error('Cleanup snapshot exceeds 2 MiB')
+  return text
+ }
+ async function failed(runtime){
+  const r=runtime.creationReceipt;if(!r)return null
+  r.sealed=true
+  const candidates=[]
+  for(const id of r.ids){const node=await runtime.figma.getNodeByIdAsync(id);if(node&&!node.removed&&!r.ids.has(node.parent?.id))candidates.push(node)}
+  let bytes=0
+  for(const node of candidates){
+   try{
+    const children=descendants(node)
+    if(children.some(n=>!r.ids.has(n.id)||!disposable.has(n.type)))throw Error('Subtree contains existing/untracked or dependency-bearing nodes')
+    const snapshot=await fingerprint(node);bytes+=snapshot.length;if(bytes>4000000)throw Error('Cleanup receipt exceeds 4 MiB')
+    r.roots.push({id:node.id,snapshot,ids:children.map(n=>n.id)})
+   }catch(error){r.roots.push({id:node.id,reason:error.message})}
+  }
+  if(!r.operationId||r.unavailable||r.dirty){r.dispose?.();return {available:false,reason:r.unavailable??'Canvas changed or operation identity unavailable',createdNodeIds:[...r.ids]}}
+  runtime.cleanupRecords??=new Map();while(runtime.cleanupRecords.size>=10){const key=runtime.cleanupRecords.keys().next().value;runtime.cleanupRecords.get(key).dispose?.();runtime.cleanupRecords.delete(key)}
+  runtime.cleanupRecords.set(r.operationId,r)
+  r.timer=setTimeout(()=>{r.dispose?.();runtime.cleanupRecords.delete(r.operationId)},600000);r.timer?.unref?.()
+  return {available:true,operationId:r.operationId,createdNodeIds:[...r.ids],expiresAt:r.expires,coverage:r.coverage,reconcile:{tool:'rollback',args:{operationId:r.operationId}}}
+ }
+ async function rollback(runtime,operationId){
+  const r=runtime.cleanupRecords?.get(operationId)
+  if(!r)throw Object.assign(Error('Cleanup receipt unavailable or invalidated by a subsequent write; inspect the affected nodes'),{safeToRetryWithoutCanvasRead:true})
+  const removed=[],skipped=[]
+  for(const entry of r.roots){
+   const node=await runtime.figma.getNodeByIdAsync(entry.id)
+   if(!node||node.removed){skipped.push({nodeId:entry.id,reason:'already-absent'});continue}
+   let reason=r.dirty?'intervening-canvas-edit':Date.now()>r.expires?'receipt-expired':runtime.figma.currentPage.id!==r.pageId?'page-changed':entry.reason
+   if(!reason){try{if(await fingerprint(node)!==entry.snapshot)reason='subtree-modified';else if(descendants(node).some(n=>!r.ids.has(n.id)||!disposable.has(n.type)))reason='untracked-or-dependent-descendant'}catch{reason='snapshot-unavailable'}}
+   if(r.dirty)reason='intervening-canvas-edit'
+   if(reason){skipped.push({nodeId:entry.id,reason});continue}
+   // Removing a verified root removes only the verified descendants atomically in Figma.
+   runtime.mutationEntered=true;node.remove();removed.push(...entry.ids)
+  }
+  r.dispose?.();runtime.cleanupRecords.delete(operationId)
+  return {operationId,removed,skipped,scope:'created disposable subtrees only',existingEditsRestored:false,requiresInspection:true,reconcile:{tool:'get_metadata',args:{nodeId:r.pageId,profile:'full',depth:10},hint:'Also inspect any variables or other resources changed by the original script.'}}
+ }
+ scope.DshFigmaRecovery={before,created,failed,rollback,success(runtime){runtime.creationReceipt?.dispose?.()},discard}
+})(globalThis)
+
+/* MIT — read-only scripts are interpreted, never passed to Function/eval. */
+;(function(scope){
+ const denied=new Set(['constructor','prototype','__proto__','caller','callee','arguments','__defineGetter__','__defineSetter__','__lookupGetter__','__lookupSetter__'])
+ const nativeReads=new Set(['getNodeByIdAsync','getLocalPaintStylesAsync','getLocalTextStylesAsync','getLocalEffectStylesAsync','getLocalGridStylesAsync','listAvailableFontsAsync','getLocalVariablesAsync','getLocalVariableCollectionsAsync','getVariableByIdAsync','getVariableCollectionByIdAsync','getCSSAsync','getMainComponentAsync','getPluginData','getPluginDataKeys','getSharedPluginData','getSharedPluginDataKeys','getRangeFontName','getRangeFontSize','getStyledTextSegments','getAvailableLibraryVariableCollectionsAsync'])
+ function readonlyFacade(figma){
+  const cache=new WeakMap()
+  const wrap=value=>{
+   if(!value||typeof value!=='object')return value
+   if(Array.isArray(value))return value.map(wrap)
+   if(cache.has(value))return cache.get(value)
+   const proxy=new Proxy({}, {get(_,key){
+    if(denied.has(key))throw Error('Restricted property in readOnly script')
+    const v=value[key]
+    if(typeof v==='function'){
+     if(!nativeReads.has(key))throw Error('Native method '+String(key)+' is unavailable in readOnly mode')
+     return async(...args)=>wrap(await v.apply(value,args))
+    }
+    return wrap(v)
+   },has(_,key){return !denied.has(key)&&key in value},ownKeys(){return Object.keys(value).filter(k=>!denied.has(k)&&typeof value[k]!=='function')},getOwnPropertyDescriptor(){return {configurable:true,enumerable:true}},set(){throw Error('Canvas writes are forbidden in readOnly mode')},defineProperty(){throw Error('Canvas writes are forbidden in readOnly mode')},deleteProperty(){throw Error('Canvas writes are forbidden in readOnly mode')}})
+   cache.set(value,proxy);return proxy
+  }
+  return wrap(figma)
+ }
+ async function execute(figma,program){
+  if(program?.type!=='Program')throw Error('Missing validated read-only program; update both host and companion')
+  const funcs=new WeakSet(),maxSteps=100000;let steps=0
+  const globals=Object.assign(Object.create(null),{figma:readonlyFacade(figma),undefined,NaN,Infinity,Math:Object.fromEntries(Object.getOwnPropertyNames(Math).filter(k=>!denied.has(k)).map(k=>[k,Math[k]])),JSON:{parse:JSON.parse,stringify:JSON.stringify},Object:{keys:Object.keys,values:Object.values,entries:Object.entries,fromEntries:Object.fromEntries},Array:{isArray:Array.isArray},Number:{isFinite:Number.isFinite,isInteger:Number.isInteger},String:v=>String(v),Boolean:v=>Boolean(v),Error:message=>Error(message)})
+  const env=(parent)=>({values:Object.create(null),parent}),root=env(null);Object.assign(root.values,globals)
+  const find=(e,key)=>Object.hasOwn(e.values,key)?e:e.parent?find(e.parent,key):null
+  const read=(e,key)=>{const owner=find(e,key);if(!owner)throw Error('Unknown identifier in readOnly script: '+key);return owner.values[key]}
+  const write=(e,key,value)=>{const owner=find(e,key);if(!owner||owner===root)throw Error('Cannot assign a global in readOnly script');owner.values[key]=value;return value}
+  const keyOf=async(n,e)=>n.computed?await value(n.property,e):n.property.name
+  const get=(object,key)=>{if(denied.has(String(key))||typeof key!=='string'&&typeof key!=='number')throw Error('Restricted property in readOnly script');if(funcs.has(object))throw Error('Functions are opaque in readOnly scripts');if(object==null)throw Error('Cannot read '+String(key)+' of '+object);return object[key]}
+  async function invoke(fn,args){
+   if(funcs.has(fn)){const e=env(fn.env);fn.node.params.forEach((p,i)=>e.values[p.name]=args[i]);if(fn.node.body.type==='BlockStatement'){const r=await block(fn.node.body.body,e);return r?.kind==='return'?r.value:undefined}return value(fn.node.body,e)}
+   if(typeof fn!=='function')throw Error('Value is not callable in readOnly script')
+   return fn(...args)
+  }
+  async function value(n,e){
+   if(++steps>maxSteps)throw Error('readOnly script exceeded 100000 interpreter steps')
+   if(!n)return undefined
+   switch(n.type){
+    case 'Literal':return n.value
+    case 'Identifier':return read(e,n.name)
+    case 'ChainExpression':case 'AwaitExpression':return value(n.expression??n.argument,e)
+    case 'MemberExpression':{const object=await value(n.object,e);return n.optional&&object==null?undefined:get(object,await keyOf(n,e))}
+    case 'ArrayExpression':{const a=[];for(const item of n.elements)a.push(await value(item,e));return a}
+    case 'ObjectExpression':{const o=Object.create(null);for(const p of n.properties){const k=p.computed?await value(p.key,e):p.key.name??p.key.value;if(denied.has(String(k)))throw Error('Restricted object key');o[k]=await value(p.value,e)}return o}
+    case 'ArrowFunctionExpression':case 'FunctionExpression':{const f={node:n,env:e};funcs.add(f);return f}
+    case 'ConditionalExpression':return await value(n.test,e)?value(n.consequent,e):value(n.alternate,e)
+    case 'LogicalExpression':{const a=await value(n.left,e);return n.operator==='&&'?(a?value(n.right,e):a):n.operator==='||'?(a?a:value(n.right,e)):(a??await value(n.right,e))}
+    case 'UnaryExpression':{const a=await value(n.argument,e);if(n.operator==='!')return !a;if(n.operator==='-')return -a;if(n.operator==='+')return +a;if(n.operator==='typeof')return typeof a;if(n.operator==='void')return undefined;throw Error('Unsupported unary operator')}
+    case 'BinaryExpression':{const a=await value(n.left,e),b=await value(n.right,e);switch(n.operator){case '+':return a+b;case '-':return a-b;case '*':return a*b;case '/':return a/b;case '%':return a%b;case '**':return a**b;case '===':return a===b;case '!==':return a!==b;case '==':return a==b;case '!=':return a!=b;case '<':return a<b;case '>':return a>b;case '<=':return a<=b;case '>=':return a>=b;case 'in':return a in b;default:throw Error('Unsupported binary operator')}}
+    case 'AssignmentExpression':return write(e,n.left.name,await value(n.right,e))
+    case 'UpdateExpression':{const old=read(e,n.argument.name),next=n.operator==='++'?old+1:old-1;write(e,n.argument.name,next);return n.prefix?next:old}
+    case 'TemplateLiteral':{let out=n.quasis[0].value.cooked;for(let i=0;i<n.expressions.length;i++)out+=String(await value(n.expressions[i],e))+n.quasis[i+1].value.cooked;return out}
+    case 'NewExpression':return Error(await value(n.arguments[0],e))
+    case 'CallExpression':{
+     const args=[];for(const arg of n.arguments)args.push(await value(arg,e))
+     if(n.callee.type==='MemberExpression'){
+      const receiver=await value(n.callee.object,e),key=await keyOf(n.callee,e);if(n.callee.optional&&receiver==null)return undefined
+      if(Array.isArray(receiver)&&['map','filter','find','some','every','forEach','reduce'].includes(key)){
+       const output=[];let accumulator=args[1],start=0;if(key==='reduce'&&args.length<2){if(!receiver.length)throw Error('Reduce of empty array');accumulator=receiver[0];start=1}
+       for(let i=start;i<receiver.length;i++){const r=await invoke(args[0],key==='reduce'?[accumulator,receiver[i],i]:[receiver[i],i]);if(key==='map')output.push(r);if(key==='filter'&&r)output.push(receiver[i]);if(key==='find'&&r)return receiver[i];if(key==='some'&&r)return true;if(key==='every'&&!r)return false;if(key==='reduce')accumulator=r}
+       return key==='reduce'?accumulator:key==='some'?false:key==='every'?true:['find','forEach'].includes(key)?undefined:output
+      }
+      const method=get(receiver,key);if(typeof method!=='function')return invoke(method,args)
+      return method.apply(receiver,args)
+     }
+     return invoke(await value(n.callee,e),args)
+    }
+    default:throw Error('Unsupported readOnly expression: '+n.type)
+   }
+  }
+  async function statement(n,e){
+   if(++steps>maxSteps)throw Error('readOnly script exceeded 100000 interpreter steps')
+   switch(n.type){
+    case 'EmptyStatement':return
+    case 'BlockStatement':return block(n.body,env(e))
+    case 'ExpressionStatement':await value(n.expression,e);return
+    case 'VariableDeclaration':for(const d of n.declarations)e.values[d.id.name]=await value(d.init,e);return
+    case 'FunctionDeclaration':{const f={node:n,env:e};funcs.add(f);e.values[n.id.name]=f;return}
+    case 'ReturnStatement':return {kind:'return',value:await value(n.argument,e)}
+    case 'ThrowStatement':throw await value(n.argument,e)
+    case 'BreakStatement':return {kind:'break'}
+    case 'ContinueStatement':return {kind:'continue'}
+    case 'IfStatement':return await value(n.test,e)?statement(n.consequent,e):n.alternate?statement(n.alternate,e):undefined
+    case 'ForOfStatement':{
+     const items=await value(n.right,e);if(!Array.isArray(items)&&typeof items!=='string')throw Error('readOnly for-of requires an array or string')
+     for(const item of items){const local=env(e);if(n.left.type==='VariableDeclaration')local.values[n.left.declarations[0].id.name]=item;else write(e,n.left.name,item);const r=await statement(n.body,local);if(r?.kind==='return')return r;if(r?.kind==='break')break}return
+    }
+    case 'ForStatement':case 'WhileStatement':{const local=env(e);if(n.init){if(n.init.type==='VariableDeclaration')await statement(n.init,local);else await value(n.init,local)}while(!n.test||await value(n.test,local)){const r=await statement(n.body,local);if(r?.kind==='return')return r;if(r?.kind==='break')break;if(n.update)await value(n.update,local)}return}
+    default:throw Error('Unsupported readOnly statement: '+n.type)
+   }
+  }
+  async function block(nodes,e){for(const n of nodes){const r=await statement(n,e);if(r)return r}}
+  return (await block(program.body,env(root)))?.value
+ }
+ scope.DshFigmaReadonly={execute}
+})(globalThis)
+
 /* MIT — Copyright (c) 2026 Duoasa. Runs inside the Figma plugin sandbox only. */
 ;(function (scope) {
   const MAX_NODES = 1500
@@ -1481,6 +1702,7 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
       await hydrate(figma.currentPage)
       const unwrap = value => raws.get(value) || (Array.isArray(value) ? value.map(unwrap) : value)
       const set = (node, props) => {
+        if(runtime.creationReceipt&&!runtime.creationReceipt.ids.has(node.id))runtime.creationReceipt.unavailable='Script edits existing objects; cleanup ownership/dependencies cannot be established'
         if (!props || typeof props !== 'object' || Array.isArray(props)) throw new Error('set expects a property object')
         if (Object.hasOwn(props,'layoutMode')) node.layoutMode = props.layoutMode
         if ('width' in props || 'height' in props) node.resize(props.width ?? node.width, props.height ?? node.height)
@@ -1535,6 +1757,7 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
         const proxy = new Proxy({}, {
           get(_target, key) {
             const target = value
+            if(runtime.creationReceipt&&target===figma&&['variables','teamLibrary'].includes(key))runtime.creationReceipt.unavailable='Script accesses resources outside node-only cleanup'
             if (key === 'mainComponent' && target.type === 'INSTANCE') throw new Error('Synchronous mainComponent access on instance '+target.id+' is not supported. Use const main = await instance.getMainComponentAsync(); then read main?.id or main?.name. This script has started: inspect affected nodes and variables before retrying; do not replay creation.')
             if (key === 'set') return props => set(target, props)
             if (key === 'query' && target.findAll) return selector => query(target, selector)
@@ -1549,6 +1772,7 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
               const right=target.children.reduce((edge,node)=>Math.max(edge,(node.absoluteBoundingBox?.x??node.x??0)+(node.absoluteBoundingBox?.width??node.width??0)),0)
               return {x:right+80,y:80,width:size.width,height:size.height}
             }
+            if (target === figma && key === 'icon') return (name,options)=>{const node=scope.DshFigmaIcons.create(figma,name,options);if(runtime.creationReceipt)scope.DshFigmaRecovery.created(runtime,node);return wrap(node)}
             if (target === figma && key === 'io') return io
             if (target === figma && key === 'setCurrentPageAsync') return async page => {
               if(runtime.taskPageId&&unwrap(page).id!==runtime.taskPageId)throw new Error('Explicit step tasks cannot switch away from their original page')
@@ -1558,14 +1782,15 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
             if (target === figma && key === 'createAutoLayout') return (direction = 'HORIZONTAL', props = {}) => {
               if (typeof direction === 'object') { props = direction; direction = 'HORIZONTAL' }
               if (!['HORIZONTAL','VERTICAL'].includes(direction)) throw new Error('Invalid auto-layout direction')
-              const frame = figma.createFrame(); frame.layoutMode = direction
+              const frame = figma.createFrame(); if(runtime.creationReceipt)scope.DshFigmaRecovery.created(runtime,frame); frame.layoutMode = direction
               frame.primaryAxisSizingMode = 'AUTO'; frame.counterAxisSizingMode = 'AUTO'
               frame.layoutSizingHorizontal = 'HUG'; frame.layoutSizingVertical = 'HUG'
               return set(frame, props)
             }
             const v = target[key]
             return typeof v === 'function' ? (...args) => {
-              const out=v.apply(target,args.map(unwrap));if(runtime.writeJournal){if(String(key).startsWith('create')&&isNode(out))runtime.recordWrite({created:[out.id],api:String(key)});else if(isNode(target)&&/^(set|append|insert|resize|remove|swap|apply)/.test(String(key)))runtime.recordWrite({updated:{nodeId:target.id,api:String(key)}})}
+              if(runtime.creationReceipt){const receipt=runtime.creationReceipt;if((String(key).startsWith('create')&&!['createFrame','createRectangle','createEllipse','createLine','createPolygon','createStar','createText','createVector','createSection','createComponent','createNodeFromSvg','createInstance'].includes(key))||isNode(target)&&!receipt.ids.has(target.id)&&/^(set|remove|resize|swap|apply|insert)/.test(String(key))||isNode(target)&&key==='appendChild'&&!receipt.ids.has(unwrap(args[0])?.id))receipt.unavailable='Script changes existing/dependent resources outside cleanup coverage'}
+              const out=v.apply(target,args.map(unwrap));if(runtime.creationReceipt&&(String(key).startsWith('create')||key==='clone')){if(out?.then)out.then(node=>scope.DshFigmaRecovery.created(runtime,node),()=>{});else scope.DshFigmaRecovery.created(runtime,out)}if(runtime.writeJournal){if(String(key).startsWith('create')&&isNode(out))runtime.recordWrite({created:[out.id],api:String(key)});else if(isNode(target)&&/^(set|append|insert|resize|remove|swap|apply)/.test(String(key)))runtime.recordWrite({updated:{nodeId:target.id,api:String(key)}})}
               if(out&&typeof out.then==='function')return out.then(async resolved=>{if(key==='getMainComponentAsync')components.set(target,resolved);await hydrate(key==='loadAsync'?target:resolved);return wrap(resolved)})
               if(key==='createInstance'&&target.type==='COMPONENT')components.set(out,target)
               if(key==='swapComponent')components.set(target,unwrap(args[0]))
@@ -1578,6 +1803,7 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
             return key in value
           },
           set(_target, key, next) {
+            if(runtime.creationReceipt&&isNode(value)&&!runtime.creationReceipt.ids.has(value.id))runtime.creationReceipt.unavailable='Script edits existing objects; cleanup ownership/dependencies cannot be established'
             if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
             if(isNode(value)&&['animationStyles','manualKeyframeTracks','timelines','animations'].includes(key))throw new Error('Native motion collections are read-only. Use applyManualKeyframeTrack/removeManualKeyframeTrack, setTimelineDuration, or dsh.updateAnimationStyle; inspect the motion guide. This script has already started.')
             if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
@@ -1619,13 +1845,14 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
       }
       return wrap(figma)
     }
-    async run(method, args = {}) {
+    async run(method, args = {}, execution = {}) {
       if(!args||typeof args!=='object'||Array.isArray(args))throw new Error('Arguments must be an object')
       const started=now()
       this.writeJournal=args.journal===true?{coverage:'observed-node-proxy-writes-only; excludes variables, indirect effects and native helper internals',complete:false,entries:[]}:null;this.taskPageId=args.taskPageId;this.scriptEntered=false;this.mutationEntered=false;this.pageSwitches=0;this.clearPlaceholders=null
       this.metrics={runtimeMs:0,exportMs:0,serializationMs:0,nodeCount:0,imageCount:0,images:[],valueBytes:0}
       this.readOptions={};this.snapshotBudget=null
       try{
+        scope.DshFigmaRecovery?.before(this,method,args,execution.operationId)
         if(this.taskPageId&&this.figma.currentPage.id!==this.taskPageId)throw Error('Task page changed before step execution')
         if(['get_metadata','get_selection','get_component_context','get_design_context','get_figjam','search_design_system'].includes(method)){
           if(args.profile!==undefined&&!['summary','full'].includes(args.profile))throw new Error('profile must be summary or full')
@@ -1637,6 +1864,15 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
           }
         }
         const result=await this.execute(method,args)
+        if(method==='use_figma'){
+          result.verification={state:result.images.length?'image-returned':'not-requested',visualAcceptance:'not-established'}
+          if(args.verify){
+            let verifyId=args.verify.nodeId
+            try{if(args.verify.resultPath){let resolved=result.value;for(const key of args.verify.resultPath.split('.').filter(k=>k!=='$')){if(['__proto__','constructor','prototype'].includes(key))throw Error('Invalid verify resultPath');resolved=resolved?.[key]}if(typeof resolved!=='string'||!resolved)throw Error('verify resultPath did not resolve to a node ID');verifyId=resolved}
+              if(result.images.length>=4)throw Error('Screenshot limit reached; request get_screenshot separately');const target=await this.node(verifyId);result.images.push(await this.screenshot(target,args.verify,true));result.verification={state:'image-returned',nodeId:target.id,visualAcceptance:'not-established'}}
+            catch(error){result.verification={state:'failed',nodeId:verifyId??null,error:String(error.message??error),writeState:args.readOnly?'read-only':'completed',...(verifyId?{reconcile:{tool:'get_screenshot',args:{nodeId:verifyId,...(args.verify.scale?{scale:args.verify.scale}:{})}}}:{}),suggestedAction:'Retry verification only; do not replay the creation script.'}}
+          }
+        }
         const serializeStart=now()
         result.value=jsonValue(result.value)??null
         let valueJson=JSON.stringify(result.value)
@@ -1656,12 +1892,15 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
         this.metrics.runtimeMs=now()-started
         if(this.writeJournal)result.journal=this.writeJournal
         result.metrics=this.metrics
+        scope.DshFigmaRecovery?.success(this)
         return result
       }catch(cause){
         // Never trust an exception property supplied by user code. Only pre-execution failures are retry-safe.
         const nativeMessage=String(cause&&cause.message||cause)
         const error=new Error(/createCodeLayer.*(?:not a function|undefined)/.test(nativeMessage)&&typeof this.figma.createCodeLayer!=='function'?'FIGMA_CODE_LAYER_UNAVAILABLE: This editor does not expose local Code Layer creation. '+nativeMessage:nativeMessage)
-        error.safeToRetryWithoutCanvasRead=method==='use_figma'?!this.scriptEntered:['batch_edit','generate_diagram','generate_deck','apply_shader','import_dom_snapshot','create_variables','add_variable_modes','set_design_reference','clear_design_reference'].includes(method)&&!this.mutationEntered
+        error.safeToRetryWithoutCanvasRead=method==='use_figma'?args.readOnly===true||!this.scriptEntered:method==='rollback'?!this.mutationEntered:['batch_edit','generate_diagram','generate_deck','apply_shader','import_dom_snapshot','create_variables','add_variable_modes','set_design_reference','clear_design_reference'].includes(method)&&!this.mutationEntered
+        if(method==='use_figma'&&args.readOnly)error.executionState='read-only'
+        if(this.creationReceipt){try{error.cleanup=await scope.DshFigmaRecovery.failed(this)}catch{this.creationReceipt.dispose?.();error.cleanup={available:false,reason:'Cleanup evidence unavailable'}}}
         if(this.writeJournal)error.journal={...this.writeJournal,failedAt:{stack:String(cause.stack??'').split('\n').slice(0,3).join('\n')}}
         for(const key of ['journal','affected','failureClass'])if(cause?.[key]&&method!=='use_figma')error[key]=cause[key]
         if(cause?.batchResult)error.batchResult=cause.batchResult
@@ -1672,12 +1911,13 @@ globalThis.DSH_FIGMA_VERSION = "0.4.1";
     async execute(method, args = {}) {
       const f = this.figma, images = []
       let value, assets
-      for(const extension of [scope.DshFigmaContext,scope.DshFigmaMedia,scope.DshFigmaAuthoring,scope.DshFigmaOperations,scope.DshFigmaReference]){
+      for(const extension of [scope.DshFigmaContext,scope.DshFigmaMedia,scope.DshFigmaAuthoring,scope.DshFigmaOperations,scope.DshFigmaReference,scope.DshFigmaQuality]){
         const result=await extension?.execute(this,method,args);if(result)return result
       }
       const depth = integer(args.depth,3,0,10,'depth')
       switch (method) {
         case 'use_figma': {
+          if(args.readOnly){this.scriptEntered=true;value=await scope.DshFigmaReadonly.execute(f,args.readOnlyProgram);break}
           if (typeof args.code !== 'string' || !args.code.trim() || args.code.length > 150000) throw new Error('Provide a script of 1–150000 characters')
           const run = new Function('figma', 'dsh', '"use strict"; return (async () => {\n' + args.code + '\n})()')
           // The local plugin shares the user's editor. Preserve its page and
@@ -1846,7 +2086,7 @@ figma.ui.onmessage = async message => {
   if (message.type === 'describe') {
     let capabilities
     try { capabilities = await globalThis.DshFigmaCapabilities.probe(figma) } catch {} // Discovery must not prevent pairing.
-    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 5, designReference:referenceSummary(), referenceSerial, capabilities, companionVersion, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
+    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 6, designReference:referenceSummary(), referenceSerial, capabilities, companionVersion, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
     return
   }
   if (message.type === 'reference') {
@@ -1867,7 +2107,7 @@ figma.ui.onmessage = async message => {
   if(referenceWork)await referenceWork
   if (busy) { figma.ui.postMessage({ type: 'result', id: message.id, ok: false, error: 'An operation is already running', safeToRetryWithoutCanvasRead:true }); return }
   busy = true
-  try { const result = await runtime.run(message.method, message.args); if(['get_design_reference','set_design_reference','clear_design_reference'].includes(message.method))result.referenceSerial=++referenceSerial; figma.ui.postMessage({ type: 'result', id: message.id, ok: true, result }); if(['get_design_reference','set_design_reference','clear_design_reference'].includes(message.method))notifyReference(result.value.reference) }
-  catch (error) { figma.ui.postMessage({ type: 'result', id: message.id, ok: false, error: String(error && error.message || error), safeToRetryWithoutCanvasRead: error?.safeToRetryWithoutCanvasRead === true, batchResult:error?.batchResult,createdNodeIds:error?.createdNodeIds,journal:error?.journal,affected:error?.affected,failureClass:error?.failureClass }) }
+  try { const result = await runtime.run(message.method, message.args,{operationId:message.id}); if(['get_design_reference','set_design_reference','clear_design_reference'].includes(message.method))result.referenceSerial=++referenceSerial; figma.ui.postMessage({ type: 'result', id: message.id, ok: true, result }); if(['get_design_reference','set_design_reference','clear_design_reference'].includes(message.method))notifyReference(result.value.reference) }
+  catch (error) { figma.ui.postMessage({ type: 'result', id: message.id, ok: false, error: String(error && error.message || error), safeToRetryWithoutCanvasRead: error?.safeToRetryWithoutCanvasRead === true, executionState:error?.executionState,cleanup:error?.cleanup,batchResult:error?.batchResult,createdNodeIds:error?.createdNodeIds,journal:error?.journal,affected:error?.affected,failureClass:error?.failureClass }) }
   finally { busy = false }
 }

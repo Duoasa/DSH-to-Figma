@@ -128,3 +128,22 @@ test('new options never silently fall back to a legacy route that ignores them',
     ['get_motion_context',{maxNodes:5},/recursive:true/],
   ])await assert.rejects(f.runtime.run(method,args),pattern)
 })
+test('quality host routes verified output and constrained read-only payloads through protocol 6',async t=>{
+ const f=await setup(t,{featureVersion:6})
+ let out=await f.invoke('use_figma',{code:'return {frameId:figma.createFrame().id}',verify:{resultPath:'frameId'}})
+ assert.equal(out.isError,undefined);assert.equal(out.structuredContent.verification.state,'image-returned');assert.equal(out.content.filter(b=>b.type==='image').length,1)
+ out=await f.invoke('use_figma',{code:'return figma.currentPage.children.map(n=>n.id)',readOnly:true})
+ assert.equal(out.isError,undefined);assert.equal(f.calls.at(-1).options.mutation,false);assert.equal(f.calls.at(-1).args.readOnlyProgram.type,'Program')
+ const calls=f.calls.length
+ await assert.rejects(f.invoke('use_figma',{code:'figma.createFrame()',verify:{}}),/verify requires/);assert.equal(f.calls.length,calls)
+ await assert.rejects(f.invoke('use_figma',{code:'figma.currentPage.name="bad"',readOnly:true}),/READ_ONLY_SCRIPT_SUBSET/);assert.equal(f.calls.length,calls)
+ out=await f.invoke('resolve_fonts',{specs:[{family:'Inter',style:'Regular'}]});assert.equal(out.structuredContent.result.resolved[0].fallback,false)
+})
+test('comparison host confines reference files and forwards only raster bytes to the companion',async t=>{
+ const f=await setup(t,{featureVersion:6}),node=f.figma.createFrame();node.absoluteBoundingBox={x:0,y:0,width:100,height:100};f.page.appendChild(node)
+ await writeFile(join(f.home,'reference.png'),PNG)
+ const out=await f.invoke('compare',{nodeId:node.id,reference:{path:'reference.png'}})
+ assert.equal(out.isError,undefined);assert.equal(f.calls.at(-1).method,'compare');assert.equal(f.calls.at(-1).args.referenceImage.mimeType,'image/png');assert.equal(f.calls.at(-1).options.mutation,false)
+ const count=f.calls.length
+ await assert.rejects(f.invoke('compare',{nodeId:node.id,reference:{path:'../outside.png'}}),/inside the current workspace/);assert.equal(f.calls.length,count)
+})

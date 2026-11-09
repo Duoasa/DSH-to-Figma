@@ -5,6 +5,8 @@ description: Answer DSH to Figma setup and usage questions; inspect, create, edi
 
 # Figma workbench
 
+UI quality is a delivery prerequisite: make verification easy and recovery cheap while keeping routine operations light. For replication, reuse the user’s stated fidelity target. If neither the request nor prior context establishes it, clarify once before drawing: fast draft (main layout/hierarchy, approximate details), balanced reproduction (recommended; close proportions/colors/key components), or fine reproduction (closer spacing/typography/icon details). Do not ask again per tool call. Judge visual quality against the agreed target; every tier requires a real visual check. Do not promise percentage fidelity, pixel perfection or fixed timing.
+
 Current development scope: **0.4.1 (unreleased), comprehensively upgrading 0.3.5**. Verify the installed version and connected companion through status before relying on new workflows.
 
 ## User help
@@ -48,8 +50,8 @@ Load `motion` for keyframes/timelines, `text-motion` for within-text animation, 
 1. Unknown target: locate it with shallow `get_metadata({profile:"summary"})`. Known ID/selection: read needed details directly. Avoid a mandatory summary-then-full sequence. Follow pagination/truncation; partial absence does not prove document-wide absence.
 2. Read only requested properties. For a few named descendants of a known frame, prefer one scoped script that finds them and returns those values, rather than a full subtree plus separate context reads. Native properties need bounded metadata; use `get_design_context` for useful CSS/implementation context, with `includeScreenshot:false` unless needed. Query resources only when relevant. For prescribed edits, validate user-specified constraints and capture current values to preserve, then edit/read back in one script. Do not invent expected labels or values and abort against those guesses.
 3. Plan hierarchy, typography, spacing and states. Create native editable layers, use auto layout for related children, preserve untouched content and load exact fonts before text mutations.
-4. Batch edits and structural readback in one `use_figma` call. Await APIs, including `instance.getMainComponentAsync()` instead of the synchronous `mainComponent` getter. Return IDs and concise counts/values. Add `await node.screenshot()` when needed. Scripts have no host filesystem/network access.
-5. Inspect a real screenshot after composition changes; repeat after a fix, not an unchanged read. Check bindings/components structurally. A screenshot hash covers only that image. State image-input limitations; structural checks do not establish visual acceptance.
+4. Batch edits and structural readback in one `use_figma` call. Await APIs, including `instance.getMainComponentAsync()` instead of the synchronous `mainComponent` getter. Return IDs and concise counts/values. At composition completion, include `verify:{nodeId}` or `verify:{resultPath:"frameId"}` on `use_figma`, or `await node.screenshot()`; inspect the returned image. Scripts have no host filesystem/network access.
+5. Inspect a real screenshot after composition changes; use `compare` against the reference for replication and correct observed defects; repeat after a fix, not an unchanged read. Check bindings/components structurally. A screenshot hash covers only that image. State image-input limitations; structural checks do not establish visual acceptance.
 
 Reuse collections: `get_variable_defs({collectionsOnly:true,query:"..."})` searches collection names, including empty collections. Normal variable queries return related collections, not a complete inventory. Check coverage/pagination before creating replacements.
 

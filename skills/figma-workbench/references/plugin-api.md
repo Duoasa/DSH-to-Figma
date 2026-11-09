@@ -1,6 +1,6 @@
 # Local figma-use contract (Codex Figma plugin 17.0.0 baseline)
 
-Read this guide before writing Plugin API code. This implements the documented helper contract in the real Figma editor, not the private cloud executor. See `docs/figma-use-17-alignment.md` for exact differences. Use `figma_status` to verify companion featureVersion >= 5 for the new semantic/workflow tools, >= 4 for earlier capability/motion reads, or >= 3 for legacy core scripts. Read `components-variables` as well for ANY component creation, `figjam-slides` for those editors, and [local workflows](local-workflows.md) for structured authoring, baselines, project reuse and media.
+Read this guide before writing Plugin API code. This implements the documented helper contract in the real Figma editor, not the private cloud executor. See `docs/figma-use-17-alignment.md` for exact differences. Use `figma_status` to verify companion featureVersion >= 6 for quality/recovery tools and options, >= 5 for semantic/workflow tools, >= 4 for earlier capability/motion reads, or >= 3 for legacy core scripts. Read `components-variables` as well for ANY component creation, `figjam-slides` for those editors, and [local workflows](local-workflows.md) for structured authoring, baselines, project reuse and media.
 
 ## Invocation and output
 
@@ -82,3 +82,11 @@ Advanced native APIs pass through the facade; the bridge cannot enable private s
 ## Code Layers
 
 `CODE_INSTANCE` is an opaque Code Layer, not a FigJam Code Block or an editable DOM import. Metadata, semantic context and `tree()` label it `opaque:true`: only exposed external properties are read; internal source and children are unavailable, not empty or failed reads. Screenshot/export is conditional on the target's native export API and permissions. Do not retry internal-code reads. When the connected editor reports no `createCodeLayer` API, direct creation calls fail preflight before any script runs. An exposed constructor is not proof of a validated creation contract. Official tools remain separate and require their actual advertised capabilities.
+
+## Local quality helpers (featureVersion 6)
+
+`figma.icon(name,{size:24,color:"#000000",strokeWidth:2})` creates an editable Feather vector. Supported names: search, home, menu, x, check, plus, minus, chevron-up/down/left/right, arrow-left/right, settings, user, calendar, clock, play, pause, heart, bell, more-horizontal, file, folder, trash-2, copy, download. Colors are six-digit hex. No network or font files are needed.
+
+Use `resolve_fonts({specs:[{family:"SF Mono",style:"Regular"},{semantic:"sans",style:"Medium"}]})` once per design batch. Use returned exact families/styles in `loadFontAsync`. Inspect explicit family/style fallbacks; glyph coverage is not established. `forceRefresh` refreshes the brief availability cache.
+
+`use_figma({readOnly:true,code})` uses a bounded interpreter, not arbitrary JavaScript execution. Supports simple local variables, async native getters, property reads, arrays/map/filter/find, plain return objects, templates and bounded loops. No canvas setters, node factories, globals, dynamic code, destructuring or arbitrary native methods. Prefer `children.filter(...)` over native `findAll` callbacks. Unsupported syntax fails before dispatch. A read-only failure cannot create a new write barrier and cannot clear an earlier uncertain write.

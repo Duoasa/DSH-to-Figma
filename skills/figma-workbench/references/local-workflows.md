@@ -237,3 +237,17 @@ Figma UI 与 DSH 工具的绑定/换绑/解绑共用文件内状态。插件 UI 
 通知仅含文件身份、参考名称/类型、节点 ID、版本和一句使用规则；不含截图、完整 UI 或规范正文。正常步骤只读取内存中的当前文档描述，不调工具、不扫描画布；宿主将变化的上下文记录到会话，未变的快照不重复追加。多个文档按当前 Work 绑定隔离；断开或工作区改变时不沿用旧状态。消息序号阻止迟到心跳把新绑定覆盖回旧绑定。旧宿主无动态上下文接口时使用同样简短的当前状态提示词段落。
 
 设计参考栏目保持原结构：左侧线性图标与名称，右侧线性展开箭头，展开时箭头向上。
+
+## Visual comparison and restricted cleanup (featureVersion 6)
+
+```js
+// A new frame ID need not be known before creation.
+use_figma({code:'const frame=figma.createFrame(); /* ... */ return {frameId:frame.id}',verify:{resultPath:'frameId'}})
+compare({nodeId:'12:34',reference:{path:'reference.png'},crop:{x:0,y:0,width:1440,height:900},regions:[{name:'panel',nodeId:'12:35',referenceBounds:{x:1200,y:0,width:240,height:900}}]})
+```
+
+`reference` accepts exactly one workspace `path` or current Work message `attachmentId`. Comparison uses the local companion iframe. The left image is the reference, right is the actual render; the second image overlays them at 50%. Alignment is uniform-width and top-left, never stretched. Region rectangles use original reference-image pixel coordinates, including the crop offset. Explicit region mapping reports bounds differences in Figma units and candidate properties; auto-layout offsets may require parent spacing/sizing changes. Sampled CIE76 differences and projected edges are diagnostics, not semantic recognition or automatic visual acceptance. Font rasterization can contribute differences. Do not invent reference regions or claim a pixel match from a numeric score alone.
+
+Opt into `trackCreated:true` for creation batches where failed-subtree cleanup is useful. On failure, `cleanup` reports availability and the operation ID. `rollback({operationId})` only accepts a failed operation owned by the current Work/file. It removes recorded disposable subtrees only after scoped change observation and native JSON snapshot checks. Existing edits, variables, components/dependencies and untracked children are never claimed restored. Later normal scripts invalidate receipts conservatively; intervening edits, lost evidence, page changes or expired receipts cause skips. Receipts are bounded and expire after ten minutes. Cleanup itself does not establish that the original operation’s other changes are reconciled; follow the returned inspection guidance. It is explicit and is never run automatically.
+
+Normal writes do not run image analysis, record cleanup snapshots or scan the whole document. An execution result, an image-returned result, and visual acceptance remain separate.

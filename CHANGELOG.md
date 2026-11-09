@@ -4,6 +4,11 @@ Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions i
 
 ## 0.4.1 (unreleased) — comprehensive upgrade of 0.3.5
 
+- Establish the project-wide principle: UI quality first, easier verification, cheaper recovery, and lightweight routine operations. Clarify replication fidelity once when unclear using fast draft / balanced reproduction / fine reproduction; all tiers require visual verification.
+- Add protocol-6 local `compare`, optional `use_figma.verify` (including IDs from script results), bounded `resolve_fonts`, and 27 licensed Feather icons. Comparison and image-returned states do not claim visual acceptance; verification failure never asks to replay successful creation.
+- Add interpreted read-only scripts that cannot introduce a new write barrier; preserve previous uncertain writes and distinguish their blocking operation. Add opt-in failed-creation receipts and explicit conservative `rollback`, never automatic Undo or a transaction. Extend native error repair guidance without normal-path probes.
+- Keep product version 0.4.1. Real-editor acceptance of these additions is pending; npm publication remains paused.
+
 - Exclude showcase screenshots, README artwork and social previews from the DSH installation package. Preserve the runtime icon, embedded companion UI and required license; README images link to the repository, while DSH's plugin page uses a compact bundled connection guide.
 
 - Adapt proven Figma `getNodeById` calls in await-capable script scopes to `await getNodeByIdAsync` during the existing local parse. No additional canvas reads, prompt text, retries or parsing pass; synchronous callbacks and unproven receivers are left unchanged.
