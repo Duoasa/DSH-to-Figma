@@ -141,7 +141,7 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 ## 手動インストール
 
-DSH と Figma Desktop を用意してください。単独の CLI 環境では Node.js 22 以上が必要です。公開パッケージのインストールに npm ログインは不要です。
+DSH と Figma Desktop を用意してください。プラグイン自体は Node.js 22 以上が必要です。単独の CLI 環境では DSH 側の要件も満たしてください（現在の DSH 0.2.2-rc.1 は Node.js 24.9 以上）。Desktop ではアプリ同梱のランタイムを推奨します。公開パッケージのインストールに npm ログインは不要です。
 
 **npm からインストール・更新：**
 

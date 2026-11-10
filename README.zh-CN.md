@@ -144,7 +144,7 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ## 手动安装
 
-安装前准备好 DSH 与 Figma 桌面端；独立命令行环境需要 Node.js 22 或更高版本。用户安装公开 npm 包无需 npm 登录。
+安装前准备好 DSH 与 Figma 桌面端。插件自身要求 Node.js 22+；独立命令行环境还需满足 DSH 的要求（当前 DSH 0.2.2-rc.1 为 Node.js 24.9+），桌面端优先使用应用自带运行时。用户安装公开 npm 包无需 npm 登录。
 
 **从 npm 安装或升级：**
 

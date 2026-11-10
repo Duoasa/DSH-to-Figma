@@ -41,6 +41,16 @@ After installation, confirm the plugin is running in DSH, restart the host if ne
 
 安装后，在 DSH 中确认插件运行，必要时重启宿主，再让 DSH 调用 `figma_setup`。在 Figma 桌面端导入返回的本机 `manifest.json`，在目标文件运行插件，再通过 DSH 的 `figma_status` 确认两端版本与连接。保留导入目录，每次升级后关闭并重新运行 Figma 插件。包安装成功本身不代表 Figma 已连接。
 
+### Compatibility / 兼容范围
+
+The plugin does not pin the DSH host version (`engines.dsh: "*"`). Its peer ranges admit DSH service releases throughout `0.2.x`, plus prereleases of `0.2.0`, `0.2.1` and `0.2.2`; Cordis `4.x`; and Schemastery `3.18.0` up to, but not including, `4.0.0`. npm prerelease matching is specific to the version tuple: a future `0.2.3-rc` is not automatically admitted by these ranges. Range admission is not a claim of testing every version; native integration is verified on DSH `0.2.1-rc.5` and `0.2.2-rc.1` with a simulated Figma runtime.
+
+插件不锁定 DSH 宿主版本（`engines.dsh: "*"`）。peer 范围接受 DSH 服务的 `0.2.x` 正式版及 `0.2.0`、`0.2.1`、`0.2.2` 的预发布版、Cordis `4.x` 和 Schemastery `>=3.18.0 <4.0.0`。npm 按具体版本号匹配预发布版，因此未来的 `0.2.3-rc` 不会自动包含在内。范围放行不等于每个版本都已实测；原生集成已验证 DSH `0.2.1-rc.5` 与 `0.2.2-rc.1`，Figma 侧使用模拟运行时。
+
+The plugin itself needs Node.js `>=22`; the host may require a newer version. DSH `0.2.2-rc.1` requires Node.js `>=24.9.0` for standalone CLI use. Desktop users should use the app's bundled CLI/runtime. These are installation constraints, with no added per-call checks or prompts.
+
+插件自身要求 Node.js `>=22`，宿主可能要求更高版本。独立使用 DSH `0.2.2-rc.1` CLI 时需要 Node.js `>=24.9.0`；桌面用户优先使用应用自带 CLI 和运行时。这些仅为安装约束，不增加每次工具调用的检查或提示词。
+
 ### Source installation / 源码安装
 
 Use an explicit profile and its host's CLI. For example, after cloning this repository:

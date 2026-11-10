@@ -141,7 +141,7 @@ This example illustrates how a stronger model can be used for a complex UI task.
 
 ## Manual installation
 
-Have DSH and Figma Desktop installed. Standalone CLI environments require Node.js 22 or later. Installing the public package does not require an npm login.
+Have DSH and Figma Desktop installed. The plugin requires Node.js 22+; standalone CLI environments must also meet the host requirement (currently Node.js 24.9+ for DSH 0.2.2-rc.1). Prefer the bundled runtime on Desktop. Installing the public package does not require an npm login.
 
 **Install or update from npm:**
 
