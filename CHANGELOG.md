@@ -2,7 +2,10 @@
 
 Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions in that span are listed in [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) as v0.2.1, v0.2.2, v0.2.3, and v0.3.0. This file continues from 0.3.1.
 
-## 0.4.1 (unreleased) — comprehensive upgrade of 0.3.5
+## 0.4.1 — 2026-11-10
+
+- Publish to npm with broad DSH peer ranges; keep the package and companion at 0.4.1.
+- Refresh bundled setup, user help, capability coverage and companion instructions. README uses feature lists, prompt/npm installation and a linked demonstration. This same-version documentation revision is delivered through GitHub; the published npm 0.4.1 archive and README remain unchanged.
 
 - Clarify unresolved fidelity/use before detailed measurement; assemble coherent regions, combine milestone verification, and let observed defects drive further work. No fixed round limit or Auto Layout quota.
 - Fix comparison geometry: default to exact node bounds excluding outside effects; optional render bounds include shadows with explicit offsets. Verify export dimensions, preserve aspect ratios, and require companion protocol 7 for this corrected comparison path; other protocol-6 tools remain compatible.
@@ -14,7 +17,7 @@ Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions i
 - Establish the project-wide principle: UI quality first, easier verification, cheaper recovery, and lightweight routine operations. Clarify replication fidelity once when unclear using fast draft / balanced reproduction / fine reproduction; all tiers require visual verification.
 - Add protocol-6 local `compare`, optional `use_figma.verify` (including IDs from script results), bounded `resolve_fonts`, and 27 licensed Feather icons. Comparison and image-returned states do not claim visual acceptance; verification failure never asks to replay successful creation.
 - Add interpreted read-only scripts that cannot introduce a new write barrier; preserve previous uncertain writes and distinguish their blocking operation. Add opt-in failed-creation receipts and explicit conservative `rollback`, never automatic Undo or a transaction. Extend native error repair guidance without normal-path probes.
-- Keep product version 0.4.1. Broader real-editor acceptance beyond the recorded focused checks remains pending; npm publication remains paused.
+- Keep product version 0.4.1. Recorded focused checks do not establish broader real-editor acceptance.
 
 - Exclude showcase screenshots, README artwork and social previews from the DSH installation package. Preserve the runtime icon, embedded companion UI and required license; README images link to the repository, while DSH's plugin page uses a compact bundled connection guide.
 
@@ -26,7 +29,7 @@ Versions 0.1.5 through 0.3.0 are not recorded in this file. Published versions i
 - Address #19: full/default metadata use the same uncertainty recovery rules; inspect actual returned subtree completeness, report recovery only while protected, and include actionable errors without additional native reads. Summary/paged/truncated responses never unlock blindly.
 - Address #13: document local Code Layer boundaries, label CODE_INSTANCE reads/tree as opaque, and reject known unsupported constructor calls during existing preflight. No cloud dependency or routine extra tool calls.
 
-- Upgrade 0.3.5 to the unreleased 0.4.1 development version. Keep the local companion as the default route and retain official desktop/remote MCP discovery, schemas and pass-through. This section does not announce publication of a release.
+- Upgrade 0.3.5 to 0.4.1. Keep the local companion as the default route and retain official desktop/remote MCP discovery, schemas and pass-through.
 - Add opt-in semantic Design/component/FigJam context, target variable usage and alias resolution, explicit cross-page search and coverage/section plans. Shared styles and optional component deduplication reduce repeated data without disguising omitted fields as complete reads.
 - Add persistent `design_diff` baselines with file/node provenance, collection-policy checks, explicit create/update and optimistic revisions. Add a bounded workspace component/token/SVG index, evidence-based matching, explicit local mappings and an inert script recipe library.
 - Extend image replacement, export-settings handling, subtree SVG extraction and screenshot sizing. Add native MP4/GIF/WebM export with bounded chunked transfer, workspace output and container checks; actual encoder availability remains editor-dependent.

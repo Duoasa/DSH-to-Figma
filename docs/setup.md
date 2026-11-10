@@ -16,6 +16,10 @@ Only the local backend uses port `3055` and `figma_select_document`. Official ba
 
 ## Install and update / 安装与更新
 
+Choose prompt installation from the [README](../README.en.md#install-with-a-prompt), or run the npm-based host command below.
+
+可以使用 [README 中的提示词安装](../README.md#提示词安装)，或执行下面的 npm 安装命令。
+
 Install the npm package through the current host's plugin manager. For macOS DSH Desktop:
 
 通过当前宿主的插件管理命令安装 npm 包。macOS DSH Desktop 使用应用自带 CLI：
@@ -41,17 +45,21 @@ After installation, confirm the plugin is running in DSH, restart the host if ne
 
 安装后，在 DSH 中确认插件运行，必要时重启宿主，再让 DSH 调用 `figma_setup`。在 Figma 桌面端导入返回的本机 `manifest.json`，在目标文件运行插件，再通过 DSH 的 `figma_status` 确认两端版本与连接。保留导入目录，每次升级后关闭并重新运行 Figma 插件。包安装成功本身不代表 Figma 已连接。
 
+npm versions are immutable: GitHub documentation or same-version archive revisions do not change an already published npm package. Compare actual file content when diagnosing a same-version installation; reinstalling `@latest` cannot fetch unpublished documentation.
+
+npm 已发布版本不可覆盖：GitHub 上的文档或同版本安装包修订不会改变 npm 包。同版本排查应核对实际文件内容；重装 `@latest` 不能取得未发布到 npm 的文档。
+
 ### Compatibility / 兼容范围
 
-The plugin does not pin the DSH host version (`engines.dsh: "*"`). Its peer ranges admit DSH service releases throughout `0.2.x`, plus prereleases of `0.2.0`, `0.2.1` and `0.2.2`; Cordis `4.x`; and Schemastery `3.18.0` up to, but not including, `4.0.0`. npm prerelease matching is specific to the version tuple: a future `0.2.3-rc` is not automatically admitted by these ranges. Range admission is not a claim of testing every version; native integration is verified on DSH `0.2.1-rc.5` and `0.2.2-rc.1` with a simulated Figma runtime.
+The plugin does not pin the DSH host version (`engines.dsh: "*"`). Its peer ranges admit DSH service releases throughout `0.2.x`, plus prereleases of `0.2.0`, `0.2.1` and `0.2.2`; Cordis `4.x`; and Schemastery `3.18.0` up to, but not including, `4.0.0`. npm prerelease matching is specific to the version tuple: a future `0.2.3-rc` is not automatically admitted by these ranges. Range admission does not establish compatibility with every runtime combination.
 
-插件不锁定 DSH 宿主版本（`engines.dsh: "*"`）。peer 范围接受 DSH 服务的 `0.2.x` 正式版及 `0.2.0`、`0.2.1`、`0.2.2` 的预发布版、Cordis `4.x` 和 Schemastery `>=3.18.0 <4.0.0`。npm 按具体版本号匹配预发布版，因此未来的 `0.2.3-rc` 不会自动包含在内。范围放行不等于每个版本都已实测；原生集成已验证 DSH `0.2.1-rc.5` 与 `0.2.2-rc.1`，Figma 侧使用模拟运行时。
+插件不锁定 DSH 宿主版本（`engines.dsh: "*"`）。peer 范围接受 DSH 服务的 `0.2.x` 正式版及 `0.2.0`、`0.2.1`、`0.2.2` 的预发布版、Cordis `4.x` 和 Schemastery `>=3.18.0 <4.0.0`。npm 按具体版本号匹配预发布版，因此未来的 `0.2.3-rc` 不会自动包含在内。范围放行不等于每个运行时组合都已验证。
 
 The plugin itself needs Node.js `>=22`; the host may require a newer version. DSH `0.2.2-rc.1` requires Node.js `>=24.9.0` for standalone CLI use. Desktop users should use the app's bundled CLI/runtime. These are installation constraints, with no added per-call checks or prompts.
 
 插件自身要求 Node.js `>=22`，宿主可能要求更高版本。独立使用 DSH `0.2.2-rc.1` CLI 时需要 Node.js `>=24.9.0`；桌面用户优先使用应用自带 CLI 和运行时。这些仅为安装约束，不增加每次工具调用的检查或提示词。
 
-### Source installation / 源码安装
+### Development from source / 开发者源码接入
 
 Use an explicit profile and its host's CLI. For example, after cloning this repository:
 
@@ -84,9 +92,9 @@ node /absolute/path/to/plugin/cli.mjs install \
 
 ## Official desktop MCP (optional) / 官方桌面 MCP（可选）
 
-Open the target Design file in Figma desktop and enable the built-in desktop MCP. On the verified app, Cmd+K → MCP → Enable desktop MCP server produced the confirmation `http://127.0.0.1:3845/mcp`. Keep Figma open. No companion, pairing token or remote OAuth login is needed. See [Figma’s desktop requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/) for eligible plans/seats.
+Open the target Design file in Figma desktop and enable the built-in desktop MCP. Use Figma’s desktop MCP settings and its displayed server address (normally `http://127.0.0.1:3845/mcp`). Keep Figma open. No companion, pairing token or remote OAuth login is needed. See [Figma’s desktop requirements](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/) for eligible plans/seats.
 
-在 Figma 桌面端打开目标 Design 文件并启用内置桌面 MCP。本次实测通过 Cmd+K → MCP → Enable desktop MCP server，出现 `http://127.0.0.1:3845/mcp` 提示。保持 Figma 打开即可，无需配套插件、配对密钥或远程 OAuth 登录。套餐与席位条件见 [Figma 官方说明](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)。
+在 Figma 桌面端打开目标 Design 文件并启用内置桌面 MCP。使用 Figma 的桌面 MCP 设置及其显示的服务器地址，通常为 `http://127.0.0.1:3845/mcp`。保持 Figma 打开即可，无需配套插件、配对密钥或远程 OAuth 登录。套餐与席位条件见 [Figma 官方说明](https://developers.figma.com/docs/figma-mcp-server/local-server-installation/)。
 
 New installations default to local editing. To use official desktop reading instead, add/update this entry in your profile’s `cordis.patch.yml`, preserving other entries, then restart/reload DSH:
 
@@ -120,9 +128,9 @@ Restart/reload DSH. Import the generated manifest once through Figma Plugins →
 
 重启或重载 DSH，通过 Figma 开发插件菜单首次导入生成的 manifest。在目标文件运行 **DSH to Figma · Local**，插件自动连接，保持窗口打开即可。生成目录位置稳定，每次 DSH 启动时更新；解压到其他位置的 ZIP 副本不会自动更新。
 
-One connected document is bound automatically on first canvas use. Multiple connected documents require `figma_select_document`; a disconnected binding never silently changes targets. Empty documents means the companion is not connected yet. Idle disconnects retry automatically. If the connection breaks during an operation, reopen the companion and inspect the canvas before another write; no operation is replayed.
+One connected document is bound automatically on first canvas use. Multiple connected documents require `figma_select_document`; a disconnected binding never silently changes targets. Empty documents means the companion is not connected yet. Idle disconnects retry automatically. If an operation loses its connection, reopen the companion, confirm the file, then follow the error’s reconcile action: check retained operation results first and inspect affected resources only when needed. No operation is replayed.
 
-单个连接文档在首次画布调用时自动绑定。多个文档需要明确选择，断开的旧绑定不会自动转向其他文件。文档列表为空表示插件尚未连接。空闲断线会自动重试；执行中断线需重新打开插件并先检查画布，操作不会自动重放。
+单个连接文档在首次画布调用时自动绑定。多个文档需要明确选择，断开的旧绑定不会自动转向其他文件。文档列表为空表示插件尚未连接。空闲断线会自动重试；执行中断线时重新打开插件、确认文件，按错误的 reconcile 指引先查操作状态，再按需核查受影响资源；操作不会自动重放。
 
 The generated directory and paired ZIP contain a local credential. They are private installation artifacts, not shareable release packages. The public standalone ZIP from `npm run package:companion` contains no credentials; it needs either a generated paired replacement or a token entered under Advanced.
 
@@ -174,10 +182,10 @@ Logout removes local credentials. Reconnect/restart to close existing sessions; 
 | `bridge_port_in_use` | Another host may own `3055`; disable the duplicate bridge / 另一宿主可能占用端口，请禁用重复桥接 |
 | No documents in local mode / 本地模式没有文档 | Run the paired companion generated by this DSH home; use figma_setup for its path / 运行这台 DSH 生成的已配对插件，调用 figma_setup 获取路径 |
 | Work session required / 要求 Work 会话 | Open a conversation attached to a workspace / 使用已关联工作区的会话 |
-| Choose document / 要求选择文档 | Call `figma_status`, then bind the intended `connectionId` / 获取状态后明确绑定目标文档 |
-| Font error / 字体错误 | Query `list_fonts`; load each exact font before changing text / 先查询并加载准确字体样式，再修改文字 |
+| Choose document / 要求选择文档 | Use returned candidates, or query status if missing, then select the target / 优先使用错误中的候选，缺失时再查状态并选择目标 |
+| Font error / 字体错误 | Use `resolve_fonts` for a batch, then load the selected styles before editing / 批量解析字体后，加载选定字重再修改文字 |
 | Image unavailable / 图像不可用 | The selected model needs image-input support; exports may still be saved / 选择支持图像输入的模型，导出文件仍可能可用 |
-| Timeout after write / 写入后超时 | Do not replay blindly; inspect metadata and the canvas first / 不要盲目重试，先检查元数据和画布 |
+| Timeout after write / 写入后超时 | Follow reconcile: query operation_status with includeResult, then scoped reads if needed / 按 reconcile 先查原操作及保留结果，再按需局部核查 |
 | Stuck script / 脚本卡住 | Close/reopen the companion, pair, bind and inspect; no automatic rollback / 关闭并重新打开配套插件，配对、绑定并检查；没有自动回滚 |
 | `oauth_client_registration_forbidden` / 远程注册 403 | Registration was rejected before user authorization; an approved MCP client is needed. Desktop mode does not use remote OAuth / 用户授权前的客户端注册被拒绝，需要获批的 MCP 客户端；桌面模式不使用远程 OAuth |
 

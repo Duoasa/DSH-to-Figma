@@ -1,16 +1,31 @@
 # 安装、连接与升级
 
-适用：DSH to Figma 0.4.1（未发布，基于 0.3.5 全面升级）。具体菜单文字可能随宿主版本变化；先核对用户当前环境，不凭开发机器的绝对路径回答。
+适用：DSH to Figma 0.4.1。具体菜单文字可能随宿主版本变化；安装时使用当前宿主的 CLI、profile 和 DSH_HOME，不套用开发机器的路径。
 
-## 桌面版安装命令
+## 提示词安装
+
+把下面这段话发给 DSH：
+
+```text
+帮我安装或升级 DSH to Figma：https://github.com/Duoasa/DSH-to-Figma
+按仓库 docs/setup.md，使用当前宿主的 CLI、profile 和 DSH_HOME，
+安装 dsh-to-figma@latest，保留现有配置，使用 local 模式。
+安装后调用 figma_setup，给我本机 manifest.json 路径并指导导入 Figma。
+若已安装，更新原目录并提醒我重新运行 Figma 插件，最后用 figma_status 确认连接。
+```
+
+## npm 安装
 
 macOS Desktop 的 `desktop` profile 由桌面应用管理。请使用应用内置 CLI 的完整路径，例如：
 
 ```sh
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add "file:/absolute/path/package.tgz"
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
+  plugin --profile desktop add dsh-to-figma@latest
 ```
 
-应用位置和包路径以本机为准。若全局 `dsh` 报 `managed exclusively by the Electron application`，改用内置 CLI；不要删除或重建 desktop profile，也不要尝试绕过宿主管理。
+其他宿主使用对应 CLI：`dsh plugin --profile <你的-profile> add dsh-to-figma@latest`。固定本版可用 `dsh-to-figma@0.4.1`；安装无需 npm 账号。普通 `npm install` 只下载包，不会在 DSH 中启用。
+
+应用位置以本机为准。若全局 `dsh` 报 `managed exclusively by the Electron application`，改用内置 CLI；不要删除或重建 desktop profile。
 
 ## 第一次使用本地模式
 
@@ -28,6 +43,7 @@ macOS Desktop 的 `desktop` profile 由桌面应用管理。请使用应用内�
 - **暂停按钮**：暂停本地连接；再次点击恢复。执行中的操作需要先结束，暂停不是强制回滚。
 - **设置按钮**：展开高级设置，包含版本、手动配对密钥和可选 Figma 文件链接。正常配对流程通常不用填写。
 - **文件链接**：仅在编辑器未返回真实文件 key 时补充文件身份；不能覆盖编辑器提供的真实 key。填写链接不会打开文件、授予编辑权限或切换操作目标。
+- **设计参考**：展开后可绑定当前选区、查看名称和小缩略图、点击「解绑」。规范引用显示名称；DSH 也能绑定、换绑、解绑，变更在下一次模型请求前同步，不重复注入完整画板或规范。
 - **关闭窗口**：停止该窗口的配套执行。重新打开可连接；关闭并不撤销已完成的画布修改。
 - 名称前的 `</>` 是 Figma 本地 Development 插件的宿主标识。当前 manifest 不提供自定义图标字段；插件内容区的配图和 DSH 的插件图标是不同位置。不要为修改它擅自发布插件。
 
@@ -60,18 +76,18 @@ macOS Desktop 的 `desktop` profile 由桌面应用管理。请使用应用内�
 
 ## 升级与旧版清理
 
-1. 使用面向当前 DSH 宿主/profile 的新安装包更新。不同宿主或 home 的插件安装相互独立。
+1. 再执行当前宿主/profile 的 `add dsh-to-figma@latest` 命令。不同宿主或 home 的插件安装相互独立。
 2. 重载 DSH 的插件组件，必要时重启宿主。仅磁盘包版本变新，不代表正在运行的代码已更新。
 3. 让 DSH 调用 `figma_setup` 更新当前配对目录；在 Figma 关闭并重新运行 Local 插件。通常原 manifest 路径不变，不必重复注册。
 4. 核对 DSH 运行版本和 Figma companionVersion。若仍旧，检查是否启动了旧的 Test/Workbench/其他 home 的 manifest。
 5. 确定失效后再移除旧开发插件入口。保留当前配对目录和用户规范；不要为了升级删除整个 DSH home。
 
-本地 `.tgz` 安装不应被承诺会自动升级。同名同版本包可能被包管理器缓存；开发包更新应验证安装文件内容，必要时用新的包路径重新安装。不要把缺少宿主注入的 peer 提示直接当成需要向 profile 安装整套 DSH 内核。
+原有本地安装不会随 GitHub Release 自动更新，可用上述命令切换到 npm。npm 同一版本不能覆盖发布，`@latest` 也不会取得仅在 GitHub 修订的同版本文档；同版本排查应核对实际文件内容。不要把缺少宿主注入的 peer 提示直接当成需要向 profile 安装整套 DSH 内核。
 
 ## 兼容性
 
-0.4.1 沿用 0.3.5 的兼容声明：Node >=22，DSH engine 不锁定到单个 RC；Cordis `4.0.x || 4.1.x`、Schemastery `3.18.x || 3.19.x`，相关 DSH 包采用 `^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0`。这接纳 0.2.x 稳定版及声明列出的 patch 元组预发布版本；npm 默认不接纳未列出的 0.2.3-rc 等预发布元组。开发测试版本的固定值不等于产品只支持该测试版本。
+插件要求 Node.js `>=22`，不锁定 DSH engine；Cordis `^4.0.0`、Schemastery `^3.18.0`，相关 DSH 包采用 `^0.2.0-0 || ^0.2.1-0 || ^0.2.2-0`。这接纳 0.2.x 稳定版及所列 patch 元组的预发布版，未列出的 0.2.3-rc 等不会自动包含。开发测试的固定依赖不等于产品仅支持该版本。
 
 版本声明被接纳不等于所有组合都已实测。编辑器是否开放 Motion、Specs 等 API，还要查询实际能力。
 
-0.3.5 已在 DSH Desktop 0.2.1-rc.5 与 0.2.2-rc.1 上完成本地连接、画布读写、截图和导出实测；这不代表所有准入版本都已实测。
+宿主可能要求更高的 Node.js 版本：独立运行 DSH 0.2.2-rc.1 CLI 需要 `>=24.9.0`；桌面用户使用应用自带 CLI 和运行时。

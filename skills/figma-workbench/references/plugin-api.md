@@ -1,6 +1,6 @@
 # Local figma-use contract (Codex Figma plugin 17.0.0 baseline)
 
-Read this guide before writing Plugin API code. This implements the documented helper contract in the real Figma editor, not the private cloud executor. See `docs/figma-use-17-alignment.md` for exact differences. Use `figma_status` to verify companion featureVersion >= 6 for quality/recovery tools and options, >= 5 for semantic/workflow tools, >= 4 for earlier capability/motion reads, or >= 3 for legacy core scripts. Read `components-variables` as well for ANY component creation, `figjam-slides` for those editors, and [local workflows](local-workflows.md) for structured authoring, baselines, project reuse and media.
+Read this guide before writing Plugin API code. This implements the documented helper contract in the real Figma editor, not the private cloud executor. See `docs/figma-use-17-alignment.md` for exact differences. Use `figma_status` to verify companion featureVersion >= 7 for corrected comparison, >= 6 for other quality/recovery tools and options, >= 5 for semantic/workflow tools, >= 4 for earlier capability/motion reads, or >= 3 for legacy core scripts. Read `components-variables` as well for ANY component creation, `figjam-slides` for those editors, and [local workflows](local-workflows.md) for structured authoring, baselines, project reuse and media.
 
 ## Invocation and output
 
@@ -68,7 +68,7 @@ Load current fonts before changing existing text, using `getStyledTextSegments([
 
 ## Recovery
 
-Read `safeToRetryWithoutCanvasRead` on a failed use_figma result. true means no user script ran (validation/compilation/pre-dispatch failure): correct and retry. false means execution may have changed the document: inspect affected nodes AND variables/components before changing anything. The local executor is nontransactional; it does not claim automatic rollback. An unknown outcome stays blocked until a full get_metadata read reconciles the canvas. Never blindly replay creation. If the same API error recurs, inspect that API definition and correct the root cause.
+Read `safeToRetryWithoutCanvasRead` on a failed result. true means this call did not write, including restricted read-only failures; correct it without a new canvas read, while honoring earlier `blockingOperation` or `recovery.needsInspection`. For an unknown or partial write, follow `suggestedAction` / `reconcile`: retrieve retained operation results first when indicated, then inspect only affected resources if still required. Complete scoped metadata may use `responseMode:"recovery"` for a compact inventory; inspect relevant omitted properties and variable/component state separately. Check `recovery.cleared`. The executor is nontransactional; never blindly replay creation. If drawing succeeded but verification failed, retry only verification.
 
 The public native API remains available where Figma exposes it. Cloud-only APIs, cloud file creation, cloud design-system search, Code Connect publication and server recording are not silently emulated. Official backends retain their own discovered schemas.
 

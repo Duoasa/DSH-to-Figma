@@ -1,8 +1,8 @@
-# Local workflow tools — 0.4.1 (unreleased)
+# Local workflow tools — 0.4.1
 
-These workflows belong to **0.4.1 (unreleased), a comprehensive upgrade of 0.3.5**. They use the paired local companion and workspace helpers; no official remote MCP access is required. Official MCP mode still exposes its discovered schemas unchanged. The local tool contracts below must not be applied to an official tool merely because its name matches.
+These workflows are included in **0.4.1**. They use the paired local companion and workspace helpers; no official remote MCP access is required. Official MCP mode still exposes its discovered schemas unchanged. The local tool contracts below must not be applied to an official tool merely because its name matches.
 
-Canvas additions and new options need companion featureVersion 5. Run `figma_setup`, then close and rerun the paired companion if status shows an older feature version. The four workspace tools (`project_index`, `project_match`, `project_mappings`, `local_recipes`) require an active Work workspace but no connected canvas. Other calls use the selected document; keep them sequential.
+Semantic reads and base canvas workflows need companion featureVersion 5; quality/recovery options need 6, and corrected comparison needs 7. Run `figma_setup`, then close and rerun the paired companion if status shows an older feature version. The four workspace tools (`project_index`, `project_match`, `project_mappings`, `local_recipes`) require an active Work workspace but no connected canvas. Other calls use the selected document; keep them sequential.
 
 Replace example IDs, paths and revisions with values discovered in the current task. Read capability results and errors literally: a probe does not create a node, import a shader or test an encoder. Automated fixtures verify contracts; they do not establish real-editor rendering, font layout, animation playback or user visual acceptance.
 
@@ -196,7 +196,7 @@ Canvas results include an `operationId`. Query `operation_status` in the same Wo
 
 Status is bounded in-memory history, not a durable cross-restart journal. `resultStage:"native"` identifies the companion result; `resultStage:"host"` identifies final host processing such as a saved workspace file. Small completed results may be retained. For a completed native video export whose host transfer is still pending, `includeResult:true` claims that existing transfer once, saves it to the workspace and returns the processed result. Later reads reuse the saved result; they do not encode or save a duplicate. Private transfer handles stay hidden. An expired or unavailable transfer is reported and must not be mistaken for a saved file.
 
-Status never retries a canvas job or proves a failed mutation did nothing. includeResult can clear only the uncertainty associated with its retained successful result; other unresolved writes stay protected. After an uncertain outcome, follow the full/default non-paged target metadata reconciliation (`recovery.cleared`) and inspect affected variables/components as needed. Reconnect and explicitly select the intended document when required.
+Status never retries a canvas job or proves a failed mutation did nothing. includeResult can clear only the uncertainty associated with its retained successful result; other unresolved writes stay protected. If the retained result does not resolve uncertainty, follow `reconcile` for scoped metadata or variable reads. Use `responseMode:"recovery"` for a compact complete-subtree inventory and check `recovery.cleared`; inspect relevant omitted properties as needed. Reconnect and explicitly select the intended document when required.
 
 
 ## Lightweight recovery and explicit tasks (0.4.1)
@@ -238,7 +238,7 @@ Figma UI 与 DSH 工具的绑定/换绑/解绑共用文件内状态。插件 UI 
 
 设计参考栏目保持原结构：左侧线性图标与名称，右侧线性展开箭头，展开时箭头向上。
 
-## Visual comparison and restricted cleanup (featureVersion 6)
+## Visual verification, fonts and cleanup (comparison: 7; other options: 6)
 
 ```js
 // A new frame ID need not be known before creation.
@@ -247,6 +247,10 @@ compare({nodeId:'12:34',reference:{path:'reference.png'},crop:{x:0,y:0,width:144
 ```
 
 `reference` accepts exactly one workspace `path` or current Work message `attachmentId`. Comparison uses the local companion iframe. The left image is the reference, right is the actual render; the second image overlays them at 50%. Alignment is uniform-width and top-left, never stretched. Region rectangles use original reference-image pixel coordinates, including the crop offset. Explicit region mapping reports bounds differences in Figma units and candidate properties; auto-layout offsets may require parent spacing/sizing changes. Sampled CIE76 differences and projected edges are diagnostics, not semantic recognition or automatic visual acceptance. Font rasterization can contribute differences. Do not invent reference regions or claim a pixel match from a numeric score alone.
+
+`verify` is optional. If drawing succeeds but verification fails, retain the returned IDs and retry verification alone, never the creation script. `readOnly:true` runs a restricted read-only interpreter: a read failure cannot introduce a write barrier, but does not clear earlier uncertain writes.
+
+`resolve_fonts({specs:[{family:"Inter",style:"Medium"},{semantic:"mono"}],allowFallback:true})` resolves up to 50 requests against available fonts with explicit fallback/missing results. It caches availability briefly; use `forceRefresh:true` after installing fonts. It does not load fonts or prove glyph coverage. `figma.icon(name,{size,color})` creates one of the bundled Feather icons; use supported names or import custom SVG.
 
 Opt into `trackCreated:true` for creation batches where failed-subtree cleanup is useful. On failure, `cleanup` reports availability and the operation ID. `rollback({operationId})` only accepts a failed operation owned by the current Work/file. It removes recorded disposable subtrees only after scoped change observation and native JSON snapshot checks. Existing edits, variables, components/dependencies and untracked children are never claimed restored. Later normal scripts invalidate receipts conservatively; intervening edits, lost evidence, page changes or expired receipts cause skips. Receipts are bounded and expire after ten minutes. Cleanup itself does not establish that the original operation’s other changes are reconciled; follow the returned inspection guidance. It is explicit and is never run automatically.
 
