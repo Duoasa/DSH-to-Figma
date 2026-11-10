@@ -47,8 +47,6 @@ Compatibility verified with DSH Desktop 0.2.1-rc.5 and 0.2.2-rc.1.
 
 ## Install with a prompt
 
-> The first npm publication is still pending. The npm commands below become available after publication. For now, use an existing [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) tarball or follow the [source installation guide](docs/setup.md#source-installation--源码安装).
-
 Send this to the DSH host you currently use:
 
 ```text

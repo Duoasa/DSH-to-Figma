@@ -47,8 +47,6 @@ DSH Desktop 0.2.1-rc.5 と 0.2.2-rc.1 で互換性を検証済みです。
 
 ## プロンプトでインストール
 
-> npm への初回公開はまだ完了していません。以下の npm コマンドは公開後に利用できます。それまでは [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) の既存パッケージ、または[ソースからの導入手順](docs/setup.md#source-installation--源码安装)を使用してください。
-
 普段使っている DSH に、次の文章を送ってください。
 
 ```text
