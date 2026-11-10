@@ -16,6 +16,45 @@ Only the local backend uses port `3055` and `figma_select_document`. Official ba
 
 ## Install and update / 安装与更新
 
+> First npm publication is pending. Until then, use an existing GitHub Release tarball or the source installation steps below. / npm 首次发布待完成；目前请使用 GitHub Release 中已有的安装包，或按下方源码安装步骤操作。
+
+Install the npm package through the current host's plugin manager. For macOS DSH Desktop:
+
+通过当前宿主的插件管理命令安装 npm 包。macOS DSH Desktop 使用应用自带 CLI：
+
+```sh
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
+  plugin --profile desktop add dsh-to-figma@latest
+```
+
+For other hosts, use their own CLI and profile, for example:
+
+其他宿主使用对应 CLI 和 profile，例如：
+
+```sh
+dsh plugin --profile web add dsh-to-figma@latest
+```
+
+Use `dsh-to-figma@0.4.1` to pin this version. Installing a public npm package does not require an npm account. Plain `npm install` downloads the package but does not activate it in DSH. Repeating the host's `add dsh-to-figma@latest` command updates an existing installation, including one previously installed from a local tarball.
+
+固定本版可用 `dsh-to-figma@0.4.1`。安装公开 npm 包无需 npm 账号；普通 `npm install` 仅下载包，不会在 DSH 中启用。再次执行宿主的 `add dsh-to-figma@latest` 可更新现有安装，也适用于从本地安装包切换到 npm。
+
+After installation, confirm the plugin is running in DSH, restart the host if needed, and ask DSH to call `figma_setup`. Import its generated local `manifest.json` in Figma Desktop, run the companion in the intended file, and call `figma_status` in DSH to confirm both versions and the connection. Keep the imported directory in place; close and rerun the Figma companion after each update. A successful package install alone does not verify a live Figma connection.
+
+安装后，在 DSH 中确认插件运行，必要时重启宿主，再让 DSH 调用 `figma_setup`。在 Figma 桌面端导入返回的本机 `manifest.json`，在目标文件运行插件，再通过 DSH 的 `figma_status` 确认两端版本与连接。保留导入目录，每次升级后关闭并重新运行 Figma 插件。包安装成功本身不代表 Figma 已连接。
+
+### Compatibility / 兼容范围
+
+The plugin does not pin the DSH host version (`engines.dsh: "*"`). Its peer ranges admit DSH service releases throughout `0.2.x`, plus prereleases of `0.2.0`, `0.2.1` and `0.2.2`; Cordis `4.x`; and Schemastery `3.18.0` up to, but not including, `4.0.0`. npm prerelease matching is specific to the version tuple: a future `0.2.3-rc` is not automatically admitted by these ranges. Range admission is not a claim of testing every version; native integration is verified on DSH `0.2.1-rc.5` and `0.2.2-rc.1` with a simulated Figma runtime.
+
+插件不锁定 DSH 宿主版本（`engines.dsh: "*"`）。peer 范围接受 DSH 服务的 `0.2.x` 正式版及 `0.2.0`、`0.2.1`、`0.2.2` 的预发布版、Cordis `4.x` 和 Schemastery `>=3.18.0 <4.0.0`。npm 按具体版本号匹配预发布版，因此未来的 `0.2.3-rc` 不会自动包含在内。范围放行不等于每个版本都已实测；原生集成已验证 DSH `0.2.1-rc.5` 与 `0.2.2-rc.1`，Figma 侧使用模拟运行时。
+
+The plugin itself needs Node.js `>=22`; the host may require a newer version. DSH `0.2.2-rc.1` requires Node.js `>=24.9.0` for standalone CLI use. Desktop users should use the app's bundled CLI/runtime. These are installation constraints, with no added per-call checks or prompts.
+
+插件自身要求 Node.js `>=22`，宿主可能要求更高版本。独立使用 DSH `0.2.2-rc.1` CLI 时需要 Node.js `>=24.9.0`；桌面用户优先使用应用自带 CLI 和运行时。这些仅为安装约束，不增加每次工具调用的检查或提示词。
+
+### Source installation / 源码安装
+
 Use an explicit profile and its host's CLI. For example, after cloning this repository:
 
 使用明确的 profile 和对应宿主的 CLI。例如，克隆仓库后执行：

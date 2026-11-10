@@ -10,6 +10,7 @@
 
 DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデザインから編集可能な画面を作ります。
 
+[![npm](https://img.shields.io/npm/v/dsh-to-figma)](https://www.npmjs.com/package/dsh-to-figma)
 [![Release](https://img.shields.io/github/v/release/Duoasa/DSH-to-Figma)](https://github.com/Duoasa/DSH-to-Figma/releases/latest)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-native%20plugin-536DFE)](https://github.com/deepseek-ai/deepseek-harness)
@@ -21,6 +22,12 @@ DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデ�
 </div>
 
 **ローカルモードでは公式 Figma MCP の呼び出し枠を消費しません。** DSH がこの PC 用のペアリング済み Figma プラグインを生成します。初回にインポートすれば、以後は起動するだけで接続できます。
+
+## 0.4.1
+
+参考画像との比較、編集後の任意のスクリーンショット返却、デザイン参照の関連付けと変更通知、実行状態に応じた復旧を追加しました。適切なレイアウトと編集可能な構造を保持します。スクリーンショットの出力成功だけでは、見た目の検証完了とはみなしません。[更新内容](docs/0.4.1-upgrade.md) と [視覚品質の説明](docs/0.4.1-visual-quality.md) を参照してください。
+
+npm パッケージ名は [`dsh-to-figma`](https://www.npmjs.com/package/dsh-to-figma) です。DSH のプラグイン管理コマンドで導入すると、DSH がローカルで Figma 連携プラグインを生成・ペアリングします。
 
 ## 0.3.5 の新機能
 
@@ -36,9 +43,11 @@ DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデ�
 
 DSH Desktop 0.2.1-rc.5 と 0.2.2-rc.1 で互換性を検証済みです。
 
-**更新方法：** DSH パッケージと Figma 連携プラグインの両方を更新し、`figma_setup` を実行して Local を開き直してください。`figma_status` で DSH 側と連携プラグインの両方が 0.3.5 であることを確認してください。
+**更新方法：** DSH パッケージと Figma 連携プラグインの両方を更新し、`figma_setup` を実行して Local を開き直してください。`figma_status` で DSH 側と連携プラグインの両方が 0.4.1 であることを確認してください。
 
 ## プロンプトでインストール
+
+> npm への初回公開はまだ完了していません。以下の npm コマンドは公開後に利用できます。それまでは [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) の既存パッケージ、または[ソースからの導入手順](docs/setup.md#source-installation--源码安装)を使用してください。
 
 普段使っている DSH に、次の文章を送ってください。
 
@@ -48,8 +57,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 リポジトリの最新 README に従って進めてください。
 1. 現在のホストの設定と実行環境から CLI、profile、DSH_HOME を確認し、そのホストの CLI を使用する。既存設定と他のプラグインを保持し、対象を特定できない場合だけ確認する。
-2. GitHub の最新正式 Release の説明で推奨される dsh-to-figma-<バージョン>[-hotfix.N].tgz と SHA256SUMS を取得して SHA-256 を検証する。npm のバージョンを推測したり、Figma 用 ZIP を DSH 用パッケージとして使ったりしない。
-3. ホストの plugin --profile <現在のprofile> add コマンドでインストールまたは更新し、local モードを使用する。既存のものはそのまま更新し、重複が確認できた場合だけ重複項目を整理する。
+2. npm に公開済みの dsh-to-figma@latest を優先する。本バージョンに固定する場合は dsh-to-figma@0.4.1 を使う。未公開の場合は GitHub Release に存在する .tgz のバージョンを明示して利用するか、ソースから導入する。Figma 用 ZIP を DSH 用パッケージとして使わない。
+3. ホストの plugin --profile <現在のprofile> add <確認済みのパッケージ名またはfile:パス> コマンドでインストールまたは更新し、local モードを使用する。既存のものはそのまま更新し、重複が確認できた場合だけ重複項目を整理する。
 4. コンポーネントが実行中で、ツールが利用できることを確認する。ホストの再起動が必要なら伝え、再起動後に接続設定を続ける。
 5. figma_setup を呼び出し、ペアリング済み manifest.json の絶対パスを提示する。Figma Desktop でインポートし DSH to Figma · Local を実行する手順を案内する。導入済みなら同じフォルダーを更新して再実行する。ペアリング情報を表示したり、生成ファイルをアップロードしたりしない。
 6. 対象の Figma ファイルでプラグインを実行した後、figma_status で両側のバージョンと接続を確認する。複数ファイルがある場合は対象を確認し、選択中のアートボードを読み取ってスクリーンショットを返す。この段階では既存デザインを変更しない。
@@ -134,7 +143,9 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 ## 手動インストール
 
-[最新 Release](https://github.com/Duoasa/DSH-to-Figma/releases/latest) から DSH パッケージと `SHA256SUMS` を取得し、チェックサムを確認してからホストの CLI でインストールします。
+DSH と Figma Desktop を用意してください。プラグイン自体は Node.js 22 以上が必要です。単独の CLI 環境では DSH 側の要件も満たしてください（現在の DSH 0.2.2-rc.1 は Node.js 24.9 以上）。Desktop ではアプリ同梱のランタイムを推奨します。公開パッケージのインストールに npm ログインは不要です。
+
+**npm からインストール・更新：**
 
 **macOS DSH Desktop：**
 
@@ -142,18 +153,26 @@ Figma Desktop の **Plugins → Development → Import plugin from manifest…**
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.5.tgz"
+  plugin --profile desktop add dsh-to-figma@latest
 ```
 
 **その他の DSH ホスト：**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.5.tgz"
+dsh plugin --profile <your-profile> add dsh-to-figma@latest
 ```
 
-パスと profile は実際の値に変更してください。デスクトップ版ではアプリ付属の CLI を使います。プラグイン画面で **DSH to Figma → 実行中** を確認し、`figma_setup` を呼び出してください。
+他のホストでは profile を実際のものに置き換えてください。バージョン固定には `@latest` の代わりに `@0.4.1` を使います。通常の `npm install` だけでは DSH 側のプラグインは有効になりません。
 
-通常は DSH が生成するペアリング済みプラグインを使います。`DSH-to-Figma-companion-0.3.5.zip` は手動ペアリング用の予備パッケージです。ペアリング済みのフォルダーと ZIP には認証情報が含まれるため、この PC 内に保管してください。
+インストール後の手順：
+
+1. DSH のプラグイン画面で **DSH to Figma → 実行中** を確認し、必要なら現在のホストを再起動します。
+2. DSH に `figma_setup` を実行させ、返された `manifest.json` を Figma Desktop の **Plugins → Development → Import plugin from manifest…** から読み込みます。
+3. 対象ファイルでプラグインを起動してウィンドウを開いたままにし、DSH の `figma_status` で両側のバージョンと接続を確認します。更新も同じインストールコマンドで行い、Figma 側を閉じて再実行してください。
+
+[GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) にある `.tgz` と `SHA256SUMS` を取得して検証した場合は、上記のパッケージ名を `"file:/absolute/path/downloaded-package.tgz"` に置き換えて導入することもできます。npm と GitHub Release は別々に公開されるため、それぞれのバージョンを確認してください。
+
+通常は DSH が生成するペアリング済みプラグインを使います。Release の単独 companion ZIP は手動ペアリング用です。生成済みフォルダーや ZIP にはローカル認証情報が含まれるため、共有しないでください。
 
 ## 接続と設定
 

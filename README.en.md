@@ -10,6 +10,7 @@
 
 Connect DeepSeek Harness to Figma and turn briefs, reference images and existing designs into editable canvas content.
 
+[![npm](https://img.shields.io/npm/v/dsh-to-figma)](https://www.npmjs.com/package/dsh-to-figma)
 [![Release](https://img.shields.io/github/v/release/Duoasa/DSH-to-Figma)](https://github.com/Duoasa/DSH-to-Figma/releases/latest)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-native%20plugin-536DFE)](https://github.com/deepseek-ai/deepseek-harness)
@@ -21,6 +22,12 @@ Connect DeepSeek Harness to Figma and turn briefs, reference images and existing
 </div>
 
 **Local mode does not consume the official Figma MCP call quota.** DSH generates a paired Figma companion for your computer. Import it once, then run it to connect.
+
+## 0.4.1
+
+This version adds reference-image comparison, optional screenshots returned with edits, design-reference binding and change notifications, and recovery based on known execution state. Preserve appropriate layouts and editable structure; a successful screenshot export is not visual acceptance. See the [upgrade notes](docs/0.4.1-upgrade.md) and [visual quality notes](docs/0.4.1-visual-quality.md).
+
+npm package: [`dsh-to-figma`](https://www.npmjs.com/package/dsh-to-figma). Install through your host's DSH plugin command; DSH generates and pairs the Figma companion locally.
 
 ## New in 0.3.5
 
@@ -36,9 +43,11 @@ Motion depends on APIs exposed by the editor. After a disconnect, confirm the ta
 
 Compatibility verified with DSH Desktop 0.2.1-rc.5 and 0.2.2-rc.1.
 
-**Upgrading:** Update both the DSH package and Figma companion, run `figma_setup`, then close and reopen Local. Use `figma_status` to confirm that both the DSH plugin and companion report 0.3.5.
+**Upgrading:** Update both the DSH package and Figma companion, run `figma_setup`, then close and reopen Local. Use `figma_status` to confirm that both the DSH plugin and companion report 0.4.1.
 
 ## Install with a prompt
+
+> The first npm publication is still pending. The npm commands below become available after publication. For now, use an existing [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) tarball or follow the [source installation guide](docs/setup.md#source-installation--源码安装).
 
 Send this to the DSH host you currently use:
 
@@ -48,8 +57,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 Follow the latest repository README:
 1. Identify this host's CLI, profile and DSH_HOME from its configuration and running environment. Use its own CLI, preserve existing settings and other plugins, and ask only if the target cannot be determined.
-2. Download the dsh-to-figma-<version>[-hotfix.N].tgz recommended in the release notes and SHA256SUMS from the latest stable GitHub Release. Verify SHA-256. Use the release package, not an assumed npm version or the standalone Figma ZIP.
-3. Install or update through the host's native plugin --profile <current-profile> add command, using local mode. Upgrade in place; address duplicate entries only if they actually exist.
+2. Prefer a published dsh-to-figma@latest from npm, or dsh-to-figma@0.4.1 to pin this version. If npm publication is pending, use an existing GitHub Release .tgz and state its version, or follow the source installation guide. Do not use the standalone Figma ZIP as a DSH package.
+3. Install or update through the host's native plugin --profile <current-profile> add <verified-package-or-file:path> command, using local mode. Upgrade in place; address duplicate entries only if they actually exist.
 4. Confirm that the plugin component is running and its tools are available. If a host restart is required, tell me and continue setup afterward.
 5. Run figma_setup and give me the full path to the generated paired manifest.json. Guide me to import and run DSH to Figma · Local in Figma Desktop. For an existing installation, update the same folder and rerun the companion. Do not display pairing credentials or upload paired files.
 6. Once I open the target Figma file and run the companion, use figma_status to check both versions and the connection. Confirm the target if several files are connected, then read my selected artboard and return a screenshot without editing the design.
@@ -134,7 +143,9 @@ This example illustrates how a stronger model can be used for a complex UI task.
 
 ## Manual installation
 
-Download the DSH package and `SHA256SUMS` from the [latest Release](https://github.com/Duoasa/DSH-to-Figma/releases/latest), verify the checksum, then use your host's CLI.
+Have DSH and Figma Desktop installed. The plugin requires Node.js 22+; standalone CLI environments must also meet the host requirement (currently Node.js 24.9+ for DSH 0.2.2-rc.1). Prefer the bundled runtime on Desktop. Installing the public package does not require an npm login.
+
+**Install or update from npm:**
 
 **macOS DSH Desktop:**
 
@@ -142,18 +153,26 @@ Download the DSH package and `SHA256SUMS` from the [latest Release](https://gith
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/absolute/path/dsh-to-figma-0.3.5.tgz"
+  plugin --profile desktop add dsh-to-figma@latest
 ```
 
 **Other DSH hosts:**
 
 ```sh
-dsh plugin --profile <your-profile> add "file:/absolute/path/dsh-to-figma-0.3.5.tgz"
+dsh plugin --profile <your-profile> add dsh-to-figma@latest
 ```
 
-Replace the path and profile. Use the desktop app's bundled CLI for the desktop profile. Confirm **DSH to Figma → Running** in the plugin panel, then call `figma_setup`.
+Replace the profile for other hosts. Use `@0.4.1` instead of `@latest` to pin this version. Plain `npm install` downloads the package but does not enable it in DSH.
 
-The usual workflow uses the companion generated by DSH. `DSH-to-Figma-companion-0.3.5.zip` is an alternative for manual pairing. Keep generated paired folders and ZIPs private because they contain local pairing credentials.
+After installation:
+
+1. Confirm **DSH to Figma → Running** in DSH's plugin panel; restart the current host if needed.
+2. Ask DSH to call `figma_setup`. Import the returned local `manifest.json` in Figma Desktop via **Plugins → Development → Import plugin from manifest…**.
+3. Run the companion in the target Figma file, keep its window open, and ask DSH to call `figma_status` to check both versions and the connection. To update, repeat the installation command and close/reopen the Figma companion.
+
+Alternatively, download an available `.tgz` and `SHA256SUMS` from [GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases), verify the checksum, and replace the package name above with `"file:/absolute/path/downloaded-package.tgz"`. npm and GitHub Releases are published independently; check the version offered by each channel.
+
+The usual workflow uses the companion generated by DSH. The standalone companion ZIP from a release is an alternative for manual pairing. Keep generated paired folders and ZIPs private because they contain local pairing credentials.
 
 ## Connection and configuration
 
