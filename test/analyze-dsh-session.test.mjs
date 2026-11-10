@@ -60,3 +60,14 @@ test('session analysis does not present incomplete usage or a mid-turn cut as co
   assert.equal(partial.totals.activeWallMs, null)
   assert.equal(analyzeSession(rows, { turn: 2 }).turns[0].complete, false)
 })
+
+test('timing unions concurrent tools and separates user wait without guessing model compute',()=>{
+ const rows=[header,event('turn/start',1,{turn:1},0),
+  event('tool/call',2,{callId:'a',name:'read'},10),event('tool/call',3,{callId:'b',name:'read'},20),
+  event('tool/result',4,{message:{toolCallId:'a'}},40),event('tool/result',5,{message:{toolCallId:'b'}},50),
+  event('tool/call',6,{callId:'q',name:'ask_user_question'},60),event('tool/result',7,{message:{toolCallId:'q'}},90),
+  event('turn/end',8,{reason:'completed'},100)]
+ const timing=analyzeSession(rows).turns[0].timing
+ assert.equal(timing.toolWallSumMs,90);assert.equal(timing.toolIntervalsMs,70);assert.equal(timing.executionToolIntervalsMs,40);assert.equal(timing.humanQuestionIntervalsMs,30);assert.equal(timing.outsideToolIntervalsMs,30)
+ assert.equal(analyzeSession(rows.slice(0,-1)).turns[0].timing.complete,false)
+})

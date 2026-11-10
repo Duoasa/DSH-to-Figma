@@ -49,10 +49,11 @@
    const metrics=measure(ac.getImageData(0,0,width,height).data,bc.getImageData(0,0,width,height).data,width,height,args.tolerance)
    const side=canvas(width*2,height),sc=side.getContext('2d');sc.drawImage(a,0,0);sc.drawImage(b,width,0)
    const overlay=canvas(width,height),oc=overlay.getContext('2d');oc.drawImage(a,0,0);oc.globalAlpha=.5;oc.drawImage(b,0,0)
-   const units=result.value.width/crop.width,deltas=(result.value.regions??[]).map(r=>{
+   const targetWidth=result.value.geometry?.exportBounds.width??result.value.width
+   const units=targetWidth/crop.width,deltas=(result.value.regions??[]).map(r=>{
     const expected={x:(r.referenceBounds.x-crop.x)*units,y:(r.referenceBounds.y-crop.y)*units,width:r.referenceBounds.width*units,height:r.referenceBounds.height*units}
     const difference=Object.fromEntries(Object.keys(expected).map(k=>[k,round(r.actualBounds[k]-expected[k])]))
-    return {...r,expectedBounds:expected,deltaFigmaUnits:difference,outsideTolerance:Object.values(difference).some(n=>Math.abs(n)*width/result.value.width>(args.tolerance?.edgePx??1)),confidence:'explicit-region-mapping',...layoutAdvice(r)}
+    return {...r,expectedBounds:expected,deltaFigmaUnits:difference,outsideTolerance:Object.values(difference).some(n=>Math.abs(n)*width/targetWidth>(args.tolerance?.edgePx??1)),confidence:'explicit-region-mapping',...layoutAdvice(r)}
    })
    return {...result,value:{...result.value,comparison:{alignment:'uniform-width; top-left; white alpha background; no stretch or automatic registration',referenceCrop:crop,referenceScale:refScale,actualScale,comparisonSize:{width,height},...metrics,deltas,visualAcceptance:'not-established'}},images:[png(side),png(overlay)]}
   }finally{reference?.close();actual?.close()}

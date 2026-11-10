@@ -11,7 +11,8 @@ import {LocalBridge} from '../lib/bridge.mjs'
 const plain=x=>JSON.parse(JSON.stringify(x))
 test('quality options require protocol 6; legacy calls keep their gate',()=>{
  assert.equal(requiredQueryFeatureVersion('use_figma',{code:'return 1'}),3)
- for(const name of ['compare','resolve_fonts','rollback'])assert.equal(requiredQueryFeatureVersion(name),6)
+ for(const name of ['resolve_fonts','rollback'])assert.equal(requiredQueryFeatureVersion(name),6)
+ assert.equal(requiredQueryFeatureVersion('compare'),7)
  for(const option of ['readOnly','trackCreated','verify'])assert.equal(requiredQueryFeatureVersion('use_figma',{[option]:true}),6)
 })
 test('verify failure preserves successful drawing, undo count and result',async()=>{

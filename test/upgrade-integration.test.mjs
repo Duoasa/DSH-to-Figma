@@ -140,10 +140,24 @@ test('quality host routes verified output and constrained read-only payloads thr
  out=await f.invoke('resolve_fonts',{specs:[{family:'Inter',style:'Regular'}]});assert.equal(out.structuredContent.result.resolved[0].fallback,false)
 })
 test('comparison host confines reference files and forwards only raster bytes to the companion',async t=>{
- const f=await setup(t,{featureVersion:6}),node=f.figma.createFrame();node.absoluteBoundingBox={x:0,y:0,width:100,height:100};f.page.appendChild(node)
+ const f=await setup(t,{featureVersion:7}),node=f.figma.createFrame();node.resize(1,1);node.absoluteBoundingBox={x:0,y:0,width:1,height:1};f.page.appendChild(node)
  await writeFile(join(f.home,'reference.png'),PNG)
  const out=await f.invoke('compare',{nodeId:node.id,reference:{path:'reference.png'}})
  assert.equal(out.isError,undefined);assert.equal(f.calls.at(-1).method,'compare');assert.equal(f.calls.at(-1).args.referenceImage.mimeType,'image/png');assert.equal(f.calls.at(-1).options.mutation,false)
  const count=f.calls.length
  await assert.rejects(f.invoke('compare',{nodeId:node.id,reference:{path:'../outside.png'}}),/inside the current workspace/);assert.equal(f.calls.length,count)
 })
+
+ test('old companions cannot silently use pre-fix comparison geometry',async t=>{
+  const f=await setup(t,{featureVersion:6})
+  await assert.rejects(f.invoke('compare',{nodeId:'1:1',reference:{path:'ref.png'}}),/7|companion|配套/)
+  assert.equal(f.calls.length,0)
+ })
+ test('host recovery projection rejects shallow summary policy before dispatch and preserves unknown evidence',async t=>{
+  const f=await setup(t,{featureVersion:7}),node=f.figma.createFrame();f.page.appendChild(node)
+  await assert.rejects(f.invoke('get_metadata',{nodeId:node.id,profile:'summary',responseMode:'recovery'}),/full/)
+  assert.equal(f.calls.length,0)
+  const out=await f.invoke('get_metadata',{nodeId:node.id,profile:'full',depth:10,responseMode:'recovery'})
+  assert.equal(out.structuredContent.result.responseMode,'recovery');assert.equal(out.structuredContent.result.nodes[0].id,node.id)
+  assert.equal(out.structuredContent.result.evidence.propertyValidation,'not-established')
+ })

@@ -102,6 +102,22 @@ function normalizeArguments(raw) {
 
 function safeName(name) { return typeof name === 'string' && /^[A-Za-z0-9_./:-]{1,200}$/.test(name) ? name : 'unknown' }
 
+function timing(turn) {
+  if(turn.start===null||turn.end===null||turn.calls.some(c=>c.wallMs===null))return {complete:false}
+  const union = calls => {
+    const intervals=calls.map(c=>[Math.max(turn.start,c.startedAt),Math.min(turn.end,c.startedAt+c.wallMs)]).filter(([a,b])=>b>=a).sort((a,b)=>a[0]-b[0])
+    let total=0,end=-Infinity
+    for(const [a,b] of intervals){total+=Math.max(0,b-Math.max(a,end));end=Math.max(end,b)}
+    return total
+  }
+  const human=c=>['ask_user_question','request_user_input','request_user_input_async'].includes(c.tool)
+  const occupied=union(turn.calls)
+  return {complete:true,toolWallSumMs:turn.calls.reduce((s,c)=>s+c.wallMs,0),toolIntervalsMs:occupied,
+    executionToolIntervalsMs:union(turn.calls.filter(c=>!human(c))),humanQuestionIntervalsMs:union(turn.calls.filter(human)),
+    outsideToolIntervalsMs:Math.max(0,turn.end-turn.start-occupied),
+    interpretation:'Outside-tool time includes model generation, scheduling and other delays; not a measurement of pure model compute. Tool intervals can overlap human-question intervals.'}
+}
+
 export function analyzeSession(records, { afterSeq = -1, turn: selectedTurn, includePrompts = false } = {}) {
   const turns = new Map(), calls = new Map(), models = new Map()
   let activeTurn = null, currentModel = null
@@ -148,6 +164,7 @@ export function analyzeSession(records, { afterSeq = -1, turn: selectedTurn, inc
     turn: turn.turn, startedAt: turn.start === null ? null : new Date(turn.start).toISOString(), endedAt: turn.end === null ? null : new Date(turn.end).toISOString(),
     complete: turn.start !== null && turn.end !== null, outcome: turn.reason,
     wallMs: turn.start !== null && turn.end !== null ? Math.max(0, turn.end - turn.start) : null,
+    timing: timing(turn),
     steps: turn.steps, modelRequests: turn.samples.length, retriedAttempts: turn.attempts, committedResponses: turn.committedResponses,
     usage: summarizeUsage(turn.samples), models: [...turn.modelSelections.values()],
     toolCalls: turn.calls.length, toolErrors: turn.calls.filter(call => call.status === 'error').length,
