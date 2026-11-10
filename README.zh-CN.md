@@ -12,6 +12,7 @@
 
 连接 DeepSeek Harness 与 Figma，把需求、参考图和设计稿变成可以继续编辑的画布。
 
+[![npm](https://img.shields.io/npm/v/dsh-to-figma)](https://www.npmjs.com/package/dsh-to-figma)
 [![Release](https://img.shields.io/github/v/release/Duoasa/DSH-to-Figma)](https://github.com/Duoasa/DSH-to-Figma/releases/latest)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-native%20plugin-536DFE)](https://github.com/deepseek-ai/deepseek-harness)
@@ -24,6 +25,12 @@
 </div>
 
 **本地模式不消耗官方 Figma MCP 调用额度。** DSH 会自动生成本机已配对的 Figma 插件，首次导入一次，之后运行即可连接。
+
+## 0.4.1
+
+本版加入参考图对照、按需回图、设计参考绑定与变更同步，以及按执行状态恢复失败操作。保留合理布局与可编辑结构；截图导出成功不等于完成视觉验收。详见 [升级说明](docs/0.4.1-upgrade.md) 与 [视觉质量说明](docs/0.4.1-visual-quality.md)。
+
+npm 包名：[`dsh-to-figma`](https://www.npmjs.com/package/dsh-to-figma)。通过 DSH 自带的插件管理命令安装，Figma 端由 DSH 在本机生成并配对。
 
 ## 0.3.5 更新
 
@@ -39,11 +46,11 @@
 
 已通过 DSH Desktop 0.2.1-rc.5 与 0.2.2-rc.1 的兼容性验证。
 
-**升级要点：** 同步更新 DSH 包与 Figma 配套插件，运行 `figma_setup` 后关闭并重新打开 Local 插件。通过 `figma_status` 确认 DSH 端与配套插件均为 0.3.5。
+**升级要点：** 同步更新 DSH 包与 Figma 配套插件，运行 `figma_setup` 后关闭并重新打开 Local 插件。通过 `figma_status` 确认 DSH 端与配套插件均为 0.4.1。
 
 ## 安装：把下面这段话发给 DSH
 
-推荐直接让 DSH 完成下载、校验和安装。打开当前使用的 DSH，复制发送：
+推荐直接让 DSH 从 npm 安装并完成连接。打开当前使用的 DSH，复制发送：
 
 ```text
 帮我安装或升级 DSH to Figma：
@@ -51,8 +58,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 请按仓库最新 README 完成以下操作：
 1. 从当前宿主配置和运行环境确认对应的 CLI、profile 与 DSH_HOME，使用这个宿主的 CLI。保留其他插件和现有配置；只有无法确定安装目标时才问我。
-2. 从 GitHub 最新正式 Release 获取 Release 说明推荐的 dsh-to-figma-<版本>[-hotfix.N].tgz 和 SHA256SUMS，核对 SHA-256。使用 Release 安装包，不要猜测 npm 包版本，也不要把独立 Figma ZIP 当成 DSH 安装包。
-3. 通过宿主原生 plugin --profile <当前 profile> add 命令安装或升级，使用 local 模式。若已有旧版，原位升级；仅在确认有重复入口时处理重复项。
+2. 从 npm 安装 dsh-to-figma@latest；需要固定本版时使用 dsh-to-figma@0.4.1。不要把独立 Figma ZIP 当成 DSH 安装包。
+3. 通过宿主原生 plugin --profile <当前 profile> add dsh-to-figma@latest 命令安装或升级，使用 local 模式。若已有旧版，原位升级；仅在确认有重复入口时处理重复项。
 4. 检查插件组件是否运行、工具是否可用。需要重启宿主时告诉我，重启后继续完成连接。
 5. 调用 figma_setup，给我本机已配对插件 manifest.json 的完整路径，指导我在 Figma 桌面端导入并运行 DSH to Figma · Local。已导入过则更新原目录，关闭旧插件后重新运行。不要显示配对密钥或上传已配对文件。
 6. 等我打开目标 Figma 文件并运行插件后，调用 figma_status，确认两端版本和连接状态。多文件时确认目标，再读取我选中的画板并返回截图；这一步不修改已有设计。
@@ -137,7 +144,9 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ## 手动安装
 
-从 [最新 Release](https://github.com/Duoasa/DSH-to-Figma/releases/latest) 下载 DSH 安装包与 `SHA256SUMS`，校验后使用当前宿主的 CLI 安装。
+安装前准备好 DSH 与 Figma 桌面端；独立命令行环境需要 Node.js 22 或更高版本。用户安装公开 npm 包无需 npm 登录。
+
+**从 npm 安装或升级：**
 
 **macOS DSH Desktop：**
 
@@ -145,18 +154,26 @@ https://github.com/Duoasa/DSH-to-Figma
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
-  plugin --profile desktop add "file:/绝对路径/dsh-to-figma-0.3.5.tgz"
+  plugin --profile desktop add dsh-to-figma@latest
 ```
 
 **其他 DSH 宿主：**
 
 ```sh
-dsh plugin --profile <你的-profile> add "file:/绝对路径/dsh-to-figma-0.3.5.tgz"
+dsh plugin --profile <你的-profile> add dsh-to-figma@latest
 ```
 
-把路径和 profile 替换为实际值。桌面版使用应用自带 CLI；其他宿主按实际 profile 安装。安装后在插件面板确认 **DSH to Figma → 运行中**，再让 DSH 调用 `figma_setup` 完成配对。
+其他宿主请替换实际 profile；固定安装本版可将 `@latest` 改为 `@0.4.1`。普通 `npm install` 只下载包，不会把插件启用到 DSH。
 
-DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的 `DSH-to-Figma-companion-0.3.5.zip` 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
+安装后完成三步：
+
+1. 在 DSH 插件面板确认 **DSH to Figma → 运行中**；如需重启，重启当前宿主。
+2. 让 DSH 调用 `figma_setup`，取得本机 `manifest.json` 路径，在 Figma 桌面端通过 **Plugins → Development → Import plugin from manifest…** 导入。
+3. 在目标 Figma 文件运行插件，保持窗口打开，再让 DSH 调用 `figma_status` 确认两端版本与连接。升级时使用同一条安装命令，并关闭、重新运行 Figma 插件。
+
+也可下载 [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) 中实际存在的 `.tgz` 和 `SHA256SUMS`，校验后将上述包名替换为 `"file:/绝对路径/下载的安装包.tgz"`。npm 与 GitHub Release 独立发布，以各渠道标注的版本为准。
+
+DSH 会生成已经配对的 Figma 插件，日常安装不需要额外下载 ZIP。Release 中的独立 companion ZIP 是手动配对备用包。DSH 在本机生成的已配对目录与 ZIP 含配对凭证，请保留在本机；Release 中的通用 ZIP 不含凭证。
 
 ## 连接与配置
 

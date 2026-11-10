@@ -16,6 +16,33 @@ Only the local backend uses port `3055` and `figma_select_document`. Official ba
 
 ## Install and update / 安装与更新
 
+Install the npm package through the current host's plugin manager. For macOS DSH Desktop:
+
+通过当前宿主的插件管理命令安装 npm 包。macOS DSH Desktop 使用应用自带 CLI：
+
+```sh
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
+  plugin --profile desktop add dsh-to-figma@latest
+```
+
+For other hosts, use their own CLI and profile, for example:
+
+其他宿主使用对应 CLI 和 profile，例如：
+
+```sh
+dsh plugin --profile web add dsh-to-figma@latest
+```
+
+Use `dsh-to-figma@0.4.1` to pin this version. Installing a public npm package does not require an npm account. Plain `npm install` downloads the package but does not activate it in DSH. Repeating the host's `add dsh-to-figma@latest` command updates an existing installation, including one previously installed from a local tarball.
+
+固定本版可用 `dsh-to-figma@0.4.1`。安装公开 npm 包无需 npm 账号；普通 `npm install` 仅下载包，不会在 DSH 中启用。再次执行宿主的 `add dsh-to-figma@latest` 可更新现有安装，也适用于从本地安装包切换到 npm。
+
+After installation, confirm the plugin is running in DSH, restart the host if needed, and ask DSH to call `figma_setup`. Import its generated local `manifest.json` in Figma Desktop, run the companion in the intended file, and call `figma_status` in DSH to confirm both versions and the connection. Keep the imported directory in place; close and rerun the Figma companion after each update. A successful package install alone does not verify a live Figma connection.
+
+安装后，在 DSH 中确认插件运行，必要时重启宿主，再让 DSH 调用 `figma_setup`。在 Figma 桌面端导入返回的本机 `manifest.json`，在目标文件运行插件，再通过 DSH 的 `figma_status` 确认两端版本与连接。保留导入目录，每次升级后关闭并重新运行 Figma 插件。包安装成功本身不代表 Figma 已连接。
+
+### Source installation / 源码安装
+
 Use an explicit profile and its host's CLI. For example, after cloning this repository:
 
 使用明确的 profile 和对应宿主的 CLI。例如，克隆仓库后执行：
