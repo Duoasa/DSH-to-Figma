@@ -47,6 +47,8 @@ DSH Desktop 0.2.1-rc.5 と 0.2.2-rc.1 で互換性を検証済みです。
 
 ## プロンプトでインストール
 
+> npm への初回公開はまだ完了していません。以下の npm コマンドは公開後に利用できます。それまでは [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) の既存パッケージ、または[ソースからの導入手順](docs/setup.md#source-installation--源码安装)を使用してください。
+
 普段使っている DSH に、次の文章を送ってください。
 
 ```text
@@ -55,8 +57,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 リポジトリの最新 README に従って進めてください。
 1. 現在のホストの設定と実行環境から CLI、profile、DSH_HOME を確認し、そのホストの CLI を使用する。既存設定と他のプラグインを保持し、対象を特定できない場合だけ確認する。
-2. npm から dsh-to-figma@latest をインストールする。本バージョンに固定する場合は dsh-to-figma@0.4.1 を使う。Figma 用 ZIP を DSH 用パッケージとして使わない。
-3. ホストの plugin --profile <現在のprofile> add dsh-to-figma@latest コマンドでインストールまたは更新し、local モードを使用する。既存のものはそのまま更新し、重複が確認できた場合だけ重複項目を整理する。
+2. npm に公開済みの dsh-to-figma@latest を優先する。本バージョンに固定する場合は dsh-to-figma@0.4.1 を使う。未公開の場合は GitHub Release に存在する .tgz のバージョンを明示して利用するか、ソースから導入する。Figma 用 ZIP を DSH 用パッケージとして使わない。
+3. ホストの plugin --profile <現在のprofile> add <確認済みのパッケージ名またはfile:パス> コマンドでインストールまたは更新し、local モードを使用する。既存のものはそのまま更新し、重複が確認できた場合だけ重複項目を整理する。
 4. コンポーネントが実行中で、ツールが利用できることを確認する。ホストの再起動が必要なら伝え、再起動後に接続設定を続ける。
 5. figma_setup を呼び出し、ペアリング済み manifest.json の絶対パスを提示する。Figma Desktop でインポートし DSH to Figma · Local を実行する手順を案内する。導入済みなら同じフォルダーを更新して再実行する。ペアリング情報を表示したり、生成ファイルをアップロードしたりしない。
 6. 対象の Figma ファイルでプラグインを実行した後、figma_status で両側のバージョンと接続を確認する。複数ファイルがある場合は対象を確認し、選択中のアートボードを読み取ってスクリーンショットを返す。この段階では既存デザインを変更しない。

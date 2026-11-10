@@ -47,6 +47,8 @@ Compatibility verified with DSH Desktop 0.2.1-rc.5 and 0.2.2-rc.1.
 
 ## Install with a prompt
 
+> The first npm publication is still pending. The npm commands below become available after publication. For now, use an existing [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) tarball or follow the [source installation guide](docs/setup.md#source-installation--源码安装).
+
 Send this to the DSH host you currently use:
 
 ```text
@@ -55,8 +57,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 Follow the latest repository README:
 1. Identify this host's CLI, profile and DSH_HOME from its configuration and running environment. Use its own CLI, preserve existing settings and other plugins, and ask only if the target cannot be determined.
-2. Install dsh-to-figma@latest from npm, or dsh-to-figma@0.4.1 to pin this version. Do not use the standalone Figma ZIP as a DSH package.
-3. Install or update through the host's native plugin --profile <current-profile> add dsh-to-figma@latest command, using local mode. Upgrade in place; address duplicate entries only if they actually exist.
+2. Prefer a published dsh-to-figma@latest from npm, or dsh-to-figma@0.4.1 to pin this version. If npm publication is pending, use an existing GitHub Release .tgz and state its version, or follow the source installation guide. Do not use the standalone Figma ZIP as a DSH package.
+3. Install or update through the host's native plugin --profile <current-profile> add <verified-package-or-file:path> command, using local mode. Upgrade in place; address duplicate entries only if they actually exist.
 4. Confirm that the plugin component is running and its tools are available. If a host restart is required, tell me and continue setup afterward.
 5. Run figma_setup and give me the full path to the generated paired manifest.json. Guide me to import and run DSH to Figma · Local in Figma Desktop. For an existing installation, update the same folder and rerun the companion. Do not display pairing credentials or upload paired files.
 6. Once I open the target Figma file and run the companion, use figma_status to check both versions and the connection. Confirm the target if several files are connected, then read my selected artboard and return a screenshot without editing the design.

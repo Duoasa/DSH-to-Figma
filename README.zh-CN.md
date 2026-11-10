@@ -50,6 +50,8 @@ npm 包名：[`dsh-to-figma`](https://www.npmjs.com/package/dsh-to-figma)。通�
 
 ## 安装：把下面这段话发给 DSH
 
+> npm 首次发布尚未完成。下列 npm 命令在发布后可用；目前可使用 [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) 中已有的安装包，或按[源码安装指引](docs/setup.md#source-installation--源码安装)安装当前源码。
+
 推荐直接让 DSH 从 npm 安装并完成连接。打开当前使用的 DSH，复制发送：
 
 ```text
@@ -58,8 +60,8 @@ https://github.com/Duoasa/DSH-to-Figma
 
 请按仓库最新 README 完成以下操作：
 1. 从当前宿主配置和运行环境确认对应的 CLI、profile 与 DSH_HOME，使用这个宿主的 CLI。保留其他插件和现有配置；只有无法确定安装目标时才问我。
-2. 从 npm 安装 dsh-to-figma@latest；需要固定本版时使用 dsh-to-figma@0.4.1。不要把独立 Figma ZIP 当成 DSH 安装包。
-3. 通过宿主原生 plugin --profile <当前 profile> add dsh-to-figma@latest 命令安装或升级，使用 local 模式。若已有旧版，原位升级；仅在确认有重复入口时处理重复项。
+2. 优先使用 npm 上已发布的 dsh-to-figma@latest；需要固定本版时使用 dsh-to-figma@0.4.1。若 npm 尚未发布，使用 GitHub Release 中实际存在的 .tgz 并说明其版本，或按源码安装指引操作。不要把独立 Figma ZIP 当成 DSH 安装包。
+3. 通过宿主原生 plugin --profile <当前 profile> add <已确认的包名或file:路径> 命令安装或升级，使用 local 模式。若已有旧版，原位升级；仅在确认有重复入口时处理重复项。
 4. 检查插件组件是否运行、工具是否可用。需要重启宿主时告诉我，重启后继续完成连接。
 5. 调用 figma_setup，给我本机已配对插件 manifest.json 的完整路径，指导我在 Figma 桌面端导入并运行 DSH to Figma · Local。已导入过则更新原目录，关闭旧插件后重新运行。不要显示配对密钥或上传已配对文件。
 6. 等我打开目标 Figma 文件并运行插件后，调用 figma_status，确认两端版本和连接状态。多文件时确认目标，再读取我选中的画板并返回截图；这一步不修改已有设计。

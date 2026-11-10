@@ -16,6 +16,8 @@ Only the local backend uses port `3055` and `figma_select_document`. Official ba
 
 ## Install and update / 安装与更新
 
+> First npm publication is pending. Until then, use an existing GitHub Release tarball or the source installation steps below. / npm 首次发布待完成；目前请使用 GitHub Release 中已有的安装包，或按下方源码安装步骤操作。
+
 Install the npm package through the current host's plugin manager. For macOS DSH Desktop:
 
 通过当前宿主的插件管理命令安装 npm 包。macOS DSH Desktop 使用应用自带 CLI：
