@@ -30,17 +30,23 @@
  }
  async function compare(runtime,args){
   const node=await runtime.node(args.nodeId),bounds=node.absoluteBoundingBox
-  if(!bounds||node.rotation)throw Error('Compare requires an unrotated scene node with absolute bounds')
+  if(!bounds||node.rotation||node.absoluteTransform&&(Math.abs(node.absoluteTransform[0][1])>1e-6||Math.abs(node.absoluteTransform[1][0])>1e-6))throw Error('Compare requires an axis-aligned scene node with absolute bounds')
+  const mode=args.bounds??'node'
+  if(!['node','render'].includes(mode))throw Error('Comparison bounds must be node or render')
+  const exportBounds=mode==='node'?bounds:node.absoluteRenderBounds
+  if(!exportBounds||!['x','y','width','height'].every(k=>Number.isFinite(exportBounds[k]))||exportBounds.width<=0||exportBounds.height<=0)throw Error('Comparison export bounds are unavailable or empty')
   const mappings=[]
   for(const region of args.regions??[]){
    const child=await runtime.node(region.nodeId);let parent=child
    while(parent&&parent.id!==node.id)parent=parent.parent
    if(!parent||!child.absoluteBoundingBox)throw Error('Comparison regions must map to descendants of the target')
    const b=child.absoluteBoundingBox
-   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE',layoutContext:layoutContext(child)})
+   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-exportBounds.x),y:round(b.y-exportBounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE',layoutContext:layoutContext(child)})
   }
-  const image=await runtime.screenshot(node,{maxDimension:args.maxDimension??1200,contentsOnly:true})
-  return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings},images:[image]}
+  const {exportGeometry,...image}=await runtime.screenshot(node,{scale:Math.min(1,(args.maxDimension??1200)/Math.max(exportBounds.width,exportBounds.height)),contentsOnly:true,useAbsoluteBounds:mode==='node',captureGeometry:true})
+  // Reject unexpected export padding instead of silently scaling the wrong rectangle.
+  if(Math.abs(exportGeometry.width-exportBounds.width*exportGeometry.scale)>2||Math.abs(exportGeometry.height-exportBounds.height*exportGeometry.scale)>2)throw Error('Comparison export dimensions do not match the selected bounds; no pixel comparison was performed. Choose an explicit frame whose bounds match the reference.')
+  return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings,geometry:{mode,nodeBounds:bounds,exportBounds,raster:exportGeometry,subjectOffset:{x:bounds.x-exportBounds.x,y:bounds.y-exportBounds.y},outsideEffects:mode==='node'?'excluded':'included'}},images:[image]}
  }
  scope.DshFigmaQuality={resolveFonts,layoutContext,readLayout,async execute(runtime,method,args){
   if(method==='resolve_fonts')return {value:await resolveFonts(runtime,args),images:[]}

@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fixtureRuntime } from '../test/fixtures.mjs'
+import {metadataInspection,recoveryResponse} from '../lib/recovery.mjs'
 
 // Deterministic data; timings depend on this machine. No editor, model or API calls.
 const options = { runs: 9, output: null }
@@ -87,6 +88,10 @@ function identities(node, out = []) {
 }
 const full = await measure('get_metadata', { nodeId: root.id, depth: 3 })
 const summary = await measure('get_metadata', { nodeId: root.id, depth: 3, profile: 'summary' })
+const recoveryStarted=performance.now(),inspection=metadataInspection({nodeId:root.id},full.value),compact=recoveryResponse(full.value,inspection)
+const recoveryStats={modelTextUtf8Bytes:Buffer.byteLength(JSON.stringify(compact)),hostProjectionMs:round(performance.now()-recoveryStarted),nativeReadsAdded:0,complete:compact.evidence.complete}
+assert.equal(compact.nodes.length,521);assert.equal(compact.evidence.complete,true)
+assert.deepEqual(compact.nodes.map(n=>n.id),identities(full.value).map(n=>n[0]))
 assert.equal(identities(full.value).length, 521)
 assert.deepEqual(identities(summary.value), identities(full.value), 'summary must preserve all discovery identities and bounds')
 assert.ok(summary.stats.modelTextUtf8Bytes < full.stats.modelTextUtf8Bytes, 'summary should reduce discovery payload')
@@ -109,6 +114,7 @@ const report = {
   measurement: { source: 'synthetic Plugin API fixtures; no Figma editor or model calls', warmupRuns: 2, measuredRuns: options.runs, actualModelUsage: null, modelTurns: null, taskWallMs: null, screenshotExportMs: null },
   dataset: { subtreeNodes: 521, fonts: fonts.length, variables: variables.length },
   comparisons: [
+    {task:'Recover the same complete subtree inventory; detailed property validation remains explicit',full:full.stats,optimized:recoveryStats,identityCheck:'passed',textByteReductionPercent:round((1-recoveryStats.modelTextUtf8Bytes/full.stats.modelTextUtf8Bytes)*100)},
     { task: 'Discover the same subtree identities and bounds', full: full.stats, optimized: summary.stats, identityCheck: 'passed', textByteReductionPercent: round((1 - summary.stats.modelTextUtf8Bytes / full.stats.modelTextUtf8Bytes) * 100) },
     { task: 'Find the four available styles for Bench Sans 025', full: allFonts.stats, optimized: chosenFonts.stats, matchCheck: 'passed' },
     { task: 'Read five known variables in Light mode', full: allVariables.stats, optimized: chosenVariables.stats, matchCheck: 'passed' },

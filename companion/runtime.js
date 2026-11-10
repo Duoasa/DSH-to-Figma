@@ -76,10 +76,12 @@
       let scale=args.scale??(inline&&args.quality===undefined?Math.min(0.5,1024/Math.max(node.width||1,node.height||1)):Math.min(1,edge/Math.max(node.width||1,node.height||1)))
       if(!Number.isFinite(scale)||scale<=0||scale>4)throw new Error('Screenshot scale must be positive and at most 4')
       if(args.maxDimension!==undefined)scale=Math.min(scale,edge/Math.max(node.width||1,node.height||1))
-      const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false})
+      const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false,...(args.useAbsoluteBounds!==undefined?{useAbsoluteBounds:args.useAbsoluteBounds}:{}),...(args.captureGeometry?{colorProfile:'SRGB'}:{})})
       if(this.metrics){this.metrics.exportMs+=now()-started;const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3];this.metrics.images.push({...(bytes.length>=24&&bytes[0]===137&&bytes[1]===80?{width:dimension(16),height:dimension(20)}:{}),bytes:bytes.length})}
       if(bytes.length>8*1024*1024)throw new Error('Screenshot exceeds 8 MiB; select a smaller node or scale')
-      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes),...(inline?{name:`${node.name} (${node.width}x${node.height} at ${node.x},${node.y}).png`}:{})}
+      const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3]
+      if(args.captureGeometry&&(bytes.length<24||bytes[0]!==137||bytes[1]!==80))throw Error('Comparison export did not return a PNG with dimensions')
+      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes),...(args.captureGeometry?{exportGeometry:{scale,width:dimension(16),height:dimension(20)}}:{}),...(inline?{name:`${node.name} (${node.width}x${node.height} at ${node.x},${node.y}).png`}:{})}
     }
     async facade(images, assets) {
       const runtime = this, figma = this.figma, cache = new WeakMap(), raws = new WeakMap()
@@ -204,11 +206,13 @@
             return key in value
           },
           set(_target, key, next) {
+            if(isNode(value)&&key==='strokeDashes')throw new Error('FIGMA_INVALID_PROPERTY: strokeDashes on '+value.type+' '+value.id+'; use dashPattern = [dash, gap]. This script has already started.')
             if(runtime.creationReceipt&&isNode(value)&&!runtime.creationReceipt.ids.has(value.id))runtime.creationReceipt.unavailable='Script edits existing objects; cleanup ownership/dependencies cannot be established'
             if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
             if(isNode(value)&&['animationStyles','manualKeyframeTracks','timelines','animations'].includes(key))throw new Error('Native motion collections are read-only. Use applyManualKeyframeTrack/removeManualKeyframeTrack, setTimelineDuration, or dsh.updateAnimationStyle; inspect the motion guide. This script has already started.')
             if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
-            value[key] = unwrap(next); if(isNode(value))runtime.recordWrite({updated:{nodeId:value.id,prop:String(key)}});return true
+            try{value[key] = unwrap(next)}catch(error){throw new Error('Cannot set '+String(key)+(isNode(value)?' on '+value.type+' '+value.id:'')+': '+String(error.message??error))}
+            if(isNode(value))runtime.recordWrite({updated:{nodeId:value.id,prop:String(key)}});return true
           }
         })
         cache.set(value, proxy); raws.set(proxy, value); return proxy

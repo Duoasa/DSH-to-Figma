@@ -90,3 +90,5 @@ Advanced native APIs pass through the facade; the bridge cannot enable private s
 Use `resolve_fonts({specs:[{family:"SF Mono",style:"Regular"},{semantic:"sans",style:"Medium"}]})` once per design batch. Use returned exact families/styles in `loadFontAsync`. Inspect explicit family/style fallbacks; glyph coverage is not established. `forceRefresh` refreshes the brief availability cache.
 
 `use_figma({readOnly:true,code})` uses a bounded interpreter, not arbitrary JavaScript execution. Supports simple local variables, async native getters, property reads, arrays/map/filter/find, plain return objects, templates and bounded loops. No canvas setters, node factories, globals, dynamic code, destructuring or arbitrary native methods. Prefer `children.filter(...)` over native `findAll` callbacks. Unsupported syntax fails before dispatch. A read-only failure cannot create a new write barrier and cannot clear an earlier uncertain write.
+
+For dashed strokes use `node.dashPattern = [2, 2]`, not `strokeDashes`. Literal unsupported bundled icons and proven-node invalid properties are checked in the existing parse; do not add a capability-probe round before ordinary drawing.

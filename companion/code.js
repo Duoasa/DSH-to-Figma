@@ -1418,17 +1418,23 @@ const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" widt
  }
  async function compare(runtime,args){
   const node=await runtime.node(args.nodeId),bounds=node.absoluteBoundingBox
-  if(!bounds||node.rotation)throw Error('Compare requires an unrotated scene node with absolute bounds')
+  if(!bounds||node.rotation||node.absoluteTransform&&(Math.abs(node.absoluteTransform[0][1])>1e-6||Math.abs(node.absoluteTransform[1][0])>1e-6))throw Error('Compare requires an axis-aligned scene node with absolute bounds')
+  const mode=args.bounds??'node'
+  if(!['node','render'].includes(mode))throw Error('Comparison bounds must be node or render')
+  const exportBounds=mode==='node'?bounds:node.absoluteRenderBounds
+  if(!exportBounds||!['x','y','width','height'].every(k=>Number.isFinite(exportBounds[k]))||exportBounds.width<=0||exportBounds.height<=0)throw Error('Comparison export bounds are unavailable or empty')
   const mappings=[]
   for(const region of args.regions??[]){
    const child=await runtime.node(region.nodeId);let parent=child
    while(parent&&parent.id!==node.id)parent=parent.parent
    if(!parent||!child.absoluteBoundingBox)throw Error('Comparison regions must map to descendants of the target')
    const b=child.absoluteBoundingBox
-   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-bounds.x),y:round(b.y-bounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE',layoutContext:layoutContext(child)})
+   mappings.push({name:region.name,nodeId:child.id,referenceBounds:region.referenceBounds,actualBounds:{x:round(b.x-exportBounds.x),y:round(b.y-exportBounds.y),width:round(b.width),height:round(b.height)},layoutMode:child.parent?.layoutMode??'NONE',layoutContext:layoutContext(child)})
   }
-  const image=await runtime.screenshot(node,{maxDimension:args.maxDimension??1200,contentsOnly:true})
-  return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings},images:[image]}
+  const {exportGeometry,...image}=await runtime.screenshot(node,{scale:Math.min(1,(args.maxDimension??1200)/Math.max(exportBounds.width,exportBounds.height)),contentsOnly:true,useAbsoluteBounds:mode==='node',captureGeometry:true})
+  // Reject unexpected export padding instead of silently scaling the wrong rectangle.
+  if(Math.abs(exportGeometry.width-exportBounds.width*exportGeometry.scale)>2||Math.abs(exportGeometry.height-exportBounds.height*exportGeometry.scale)>2)throw Error('Comparison export dimensions do not match the selected bounds; no pixel comparison was performed. Choose an explicit frame whose bounds match the reference.')
+  return {value:{nodeId:node.id,width:node.width,height:node.height,regions:mappings,geometry:{mode,nodeBounds:bounds,exportBounds,raster:exportGeometry,subjectOffset:{x:bounds.x-exportBounds.x,y:bounds.y-exportBounds.y},outsideEffects:mode==='node'?'excluded':'included'}},images:[image]}
  }
  scope.DshFigmaQuality={resolveFonts,layoutContext,readLayout,async execute(runtime,method,args){
   if(method==='resolve_fonts')return {value:await resolveFonts(runtime,args),images:[]}
@@ -1685,10 +1691,12 @@ const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" widt
       let scale=args.scale??(inline&&args.quality===undefined?Math.min(0.5,1024/Math.max(node.width||1,node.height||1)):Math.min(1,edge/Math.max(node.width||1,node.height||1)))
       if(!Number.isFinite(scale)||scale<=0||scale>4)throw new Error('Screenshot scale must be positive and at most 4')
       if(args.maxDimension!==undefined)scale=Math.min(scale,edge/Math.max(node.width||1,node.height||1))
-      const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false})
+      const started=now(),bytes=await node.exportAsync({format:'PNG',constraint:{type:'SCALE',value:scale},contentsOnly:args.contentsOnly!==false,...(args.useAbsoluteBounds!==undefined?{useAbsoluteBounds:args.useAbsoluteBounds}:{}),...(args.captureGeometry?{colorProfile:'SRGB'}:{})})
       if(this.metrics){this.metrics.exportMs+=now()-started;const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3];this.metrics.images.push({...(bytes.length>=24&&bytes[0]===137&&bytes[1]===80?{width:dimension(16),height:dimension(20)}:{}),bytes:bytes.length})}
       if(bytes.length>8*1024*1024)throw new Error('Screenshot exceeds 8 MiB; select a smaller node or scale')
-      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes),...(inline?{name:`${node.name} (${node.width}x${node.height} at ${node.x},${node.y}).png`}:{})}
+      const dimension=at=>bytes[at]*16777216+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3]
+      if(args.captureGeometry&&(bytes.length<24||bytes[0]!==137||bytes[1]!==80))throw Error('Comparison export did not return a PNG with dimensions')
+      return {type:'image',mimeType:'image/png',data:this.figma.base64Encode(bytes),...(args.captureGeometry?{exportGeometry:{scale,width:dimension(16),height:dimension(20)}}:{}),...(inline?{name:`${node.name} (${node.width}x${node.height} at ${node.x},${node.y}).png`}:{})}
     }
     async facade(images, assets) {
       const runtime = this, figma = this.figma, cache = new WeakMap(), raws = new WeakMap()
@@ -1813,11 +1821,13 @@ const node=figma.createNodeFromSvg(`<svg xmlns="http://www.w3.org/2000/svg" widt
             return key in value
           },
           set(_target, key, next) {
+            if(isNode(value)&&key==='strokeDashes')throw new Error('FIGMA_INVALID_PROPERTY: strokeDashes on '+value.type+' '+value.id+'; use dashPattern = [dash, gap]. This script has already started.')
             if(runtime.creationReceipt&&isNode(value)&&!runtime.creationReceipt.ids.has(value.id))runtime.creationReceipt.unavailable='Script edits existing objects; cleanup ownership/dependencies cannot be established'
             if(value===figma&&key==='currentPage')throw new Error('Setting figma.currentPage is not supported; await figma.setCurrentPageAsync(page)')
             if(isNode(value)&&['animationStyles','manualKeyframeTracks','timelines','animations'].includes(key))throw new Error('Native motion collections are read-only. Use applyManualKeyframeTrack/removeManualKeyframeTrack, setTimelineDuration, or dsh.updateAnimationStyle; inspect the motion guide. This script has already started.')
             if(key==='placeholder'&&isNode(value)){if(typeof next!=='boolean')throw new Error('placeholder must be boolean');if(next)placeholders.set(value.id,value);else placeholders.delete(value.id);progress();return true}
-            value[key] = unwrap(next); if(isNode(value))runtime.recordWrite({updated:{nodeId:value.id,prop:String(key)}});return true
+            try{value[key] = unwrap(next)}catch(error){throw new Error('Cannot set '+String(key)+(isNode(value)?' on '+value.type+' '+value.id:'')+': '+String(error.message??error))}
+            if(isNode(value))runtime.recordWrite({updated:{nodeId:value.id,prop:String(key)}});return true
           }
         })
         cache.set(value, proxy); raws.set(proxy, value); return proxy
@@ -2098,7 +2108,7 @@ figma.ui.onmessage = async message => {
   if (message.type === 'describe') {
     let capabilities
     try { capabilities = await globalThis.DshFigmaCapabilities.probe(figma) } catch {} // Discovery must not prevent pairing.
-    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 6, designReference:referenceSummary(), referenceSerial, capabilities, companionVersion, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
+    figma.ui.postMessage({ type: 'document', name: figma.root.name, editorType: figma.editorType, fileKey: figma.fileKey || null, featureVersion: 7, designReference:referenceSummary(), referenceSerial, capabilities, companionVersion, connection: globalThis.DSH_FIGMA_BOOTSTRAP || null })
     return
   }
   if (message.type === 'reference') {

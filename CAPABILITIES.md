@@ -45,3 +45,11 @@ The [0.4.1 upgrade record](docs/0.4.1-upgrade.md) separates 208 automated tests,
 - “Local” describes the Plugin API/host route, not a promise that Figma, library access or host model inference works offline. No cloud Figma service was added to implement these workflows.
 
 Official reference points: [Plugin API](https://developers.figma.com/docs/plugins/api/figma/), [manifest](https://developers.figma.com/docs/plugins/manifest/), [MCP tools](https://developers.figma.com/docs/figma-mcp-server/tools-and-prompts/), [remote installation](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/).
+
+### First-use efficiency (0.4.1 development)
+
+Corrected `compare` requires companion **featureVersion 7**; optional `verify`, restricted reads, font resolution and cleanup keep their protocol-6 gates. Product/package versions remain 0.4.1. `bounds:"node"` uses the node rectangle (outside shadows/strokes excluded); `bounds:"render"` includes the native effect extent and reports the subject offset. Reference crops must describe the same chosen rectangle. Export dimensions are checked against native bounds; the small raster-rounding allowance is not a visual acceptance tolerance. Images retain aspect ratio, no automatic registration/stretching.
+
+`get_metadata({nodeId,profile:"full",depth:10,responseMode:"recovery"})` returns node identity, parent, bounds, layout mode and text snippets after existing full-response completeness checks. Shortened fields are explicit; detailed paints, text runs, bindings and component properties remain available through normal scoped reads. The inventory does not prove which operation created a node or validate omitted properties. Incomplete reads and variable-resource barriers remain protected. Normal metadata responses are unchanged.
+
+Common literal icon-name errors and proven-node `strokeDashes` assignments fail in the existing parse before dispatch. Dynamic errors retain partial-write semantics with actionable diagnostics. No new always-on canvas scans, screenshots, model calls or dependencies.
