@@ -22,7 +22,7 @@ Create variable collections with `figma.variables.createVariableCollection`. Use
 
 Keep typography, effects and grid styles as real local styles when reusable. Use asynchronous style APIs and node setters where required by dynamic-page access. Return variable IDs, mode IDs, component IDs and instance counts from the write. Verify a representative instance and theme state visually, then fix only the faulty component or binding.
 
-Batch related variable/component edits and structural readback in one script, retaining actual IDs. Do not replace an existing variable or component solely because its name matches. After an uncertain write, reconcile the affected variable values, aliases and bindings or component properties in addition to a `get_metadata` read with full/default profile and no pagination; check `recovery.cleared` and follow any depth/budget omissions; a node snapshot alone does not establish variable state. Partial metadata reads do not clear the bridge's write barrier.
+Batch related variable/component edits and structural readback in one script, retaining actual IDs. Do not replace an existing variable or component solely because its name matches. After an uncertain write, follow `reconcile` for the affected resources. Full `get_variable_defs` values can reconcile controlled variable operations for the returned collection; they cannot clear unrelated canvas writes. For affected nodes, use complete scoped metadata without pagination, optionally `responseMode:"recovery"`, and check `recovery.cleared`. Inspect relevant omitted bindings/component properties; a node inventory alone does not establish variable state.
 
 ## Variable mode limits and a single-mode fallback
 
@@ -55,7 +55,7 @@ try {
 }
 ```
 
-Report `mode-limit` as a constraint, not as a created Dark mode. Re-read the collection and relevant variables before choosing the next write. A caught error is not proof of rollback, and an uncaught tool error is not automatically safe to replay. If `safeToRetryWithoutCanvasRead` is false or absent, first reconcile variable values, aliases, modes and affected node bindings; also perform the required `get_metadata` read of the affected target with full/default profile and no pagination; check `recovery.cleared` and follow any depth/budget omissions. `get_variable_defs` alone does not clear the bridge's uncertainty guard, and metadata alone does not verify variables. Then continue only the missing work.
+Report `mode-limit` as a constraint, not as a created Dark mode. Re-read the collection and relevant variables before choosing the next write. A caught error is not proof of rollback, and an uncaught tool error is not automatically safe to replay. If `safeToRetryWithoutCanvasRead` is false or absent, follow `reconcile`: inspect affected collection values, aliases and modes, plus any node bindings actually touched. Controlled variable operations can reconcile through complete collection values; arbitrary scripts or other unresolved canvas writes may still require scoped metadata. Check the returned recovery state, then continue only missing work.
 
 When the requested visual result can use independent theme tokens, a single-mode fallback may be appropriate:
 
