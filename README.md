@@ -50,8 +50,6 @@ npm 包名：[`dsh-to-figma`](https://www.npmjs.com/package/dsh-to-figma)。通�
 
 ## 安装：把下面这段话发给 DSH
 
-> npm 首次发布尚未完成。下列 npm 命令在发布后可用；目前可使用 [GitHub Release](https://github.com/Duoasa/DSH-to-Figma/releases) 中已有的安装包，或按[源码安装指引](docs/setup.md#source-installation--源码安装)安装当前源码。
-
 推荐直接让 DSH 从 npm 安装并完成连接。打开当前使用的 DSH，复制发送：
 
 ```text
