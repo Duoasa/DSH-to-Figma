@@ -2,205 +2,94 @@
 
 ![DSH to Figma](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/readme-hero.gif)
 
-<sub>DSH to Figma 0.3.5 · タイトルデザインとネイティブアニメーション</sub>
-
 # DSH to Figma
 
-**自然な言葉で Figma のデザインを読み取り、作成・編集。**
-
-DeepSeek Harness と Figma をつなぎ、要件、参考画像、既存のデザインから編集可能な画面を作ります。
+**自然言語で Figma のデザインを読み取り、作成・編集。**
 
 [![npm](https://img.shields.io/npm/v/dsh-to-figma)](https://www.npmjs.com/package/dsh-to-figma)
-[![Release](https://img.shields.io/github/v/release/Duoasa/DSH-to-Figma)](https://github.com/Duoasa/DSH-to-Figma/releases/latest)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![DSH](https://img.shields.io/badge/DSH-native%20plugin-536DFE)](https://github.com/deepseek-ai/deepseek-harness)
 
 [简体中文](README.md) · [English](README.en.md) · **日本語**
 
-[プロンプトでインストール](#プロンプトでインストール) · [主な機能](#主な機能) · [実際の操作例](#実際の操作例) · [手動インストール](#手動インストール)
+[機能](#機能) · [実機デモ](#実機デモ) · [プロンプトでインストール](#プロンプトでインストール) · [npm からインストール](#npm-からインストール)
 
 </div>
 
-**ローカルモードでは公式 Figma MCP の呼び出し枠を消費しません。** DSH がこの PC 用のペアリング済み Figma プラグインを生成します。初回にインポートすれば、以後は起動するだけで接続できます。
+DeepSeek Harness と Figma を接続。ローカルプラグインを標準経路とし、公式 MCP 接続にも対応します。ローカルモードは公式 Figma MCP の呼び出し枠を消費しません。
 
-## 0.4.1
+## 機能
 
-参考画像との比較、編集後の任意のスクリーンショット返却、デザイン参照の関連付けと変更通知、実行状態に応じた復旧を追加しました。適切なレイアウトと編集可能な構造を保持します。スクリーンショットの出力成功だけでは、見た目の検証完了とはみなしません。[更新内容](docs/0.4.1-upgrade.md) と [視覚品質の説明](docs/0.4.1-visual-quality.md) を参照してください。
+- **キャンバスの読み取り**：選択範囲、ページ、レイヤー、テキスト、寸法、レイアウト、スタイル、コンポーネント情報。名前・属性・ページで検索。
+- **UI の作成・編集**：要件からの生成、スクリーンショットの再現、既存 UI からの派生ページ作成、ネイティブノードと JSON シーンの読み込み。
+- **レイアウトと操作**：Auto Layout、固定サイズ・位置、制約、重なり、レイヤーロック、プロトタイプの操作。
+- **コンポーネントとデザインシステム**：コンポーネント、セット、バリアント、インスタンス属性とオーバーライド。コンポーネント・スタイル・アクセス可能なチーム変数ライブラリの検索と再利用。
+- **変数とテーマ**：変数作成、モード追加、値・エイリアスの設定、変数のバインド、依存関係とモード情報の読み取り。
+- **デザイン参照**：仕様やアートボードの紐付け・変更・解除。プラグインに名前とサムネイルを表示し、DSH と双方向で変更を同期。
+- **デザイン仕様**：ローカルのビジュアル仕様の抽出・保存・編集。エディターが API を提供する場合、ネイティブ Specs 文書とコメントを読み書き。
+- **フォントとアイコン**：フォント検索、一括解決と代替フォント選択、内蔵ベクターアイコン。
+- **スクリーンショットと参照画像の比較**：必要に応じた画像返却、サイズ指定、並列・重ね合わせ画像、ピクセル・色の差分、主要レイアウト属性の読み取り。
+- **デザイン差分**：スナップショットと基準を保存し、構造・スタイル・内容の変更を比較。
+- **素材の入出力**：画像・SVG の読み込み、画像塗りの置換、PNG・JPG・SVG・PDF の書き出し、元画像の抽出、ノードとファイルの対応付け。
+- **ネイティブモーション**：キーフレーム、文字アニメーション、アニメーションスタイル、タイムラインの編集。モーションの読み取りと一部属性の CSS 変換。
+- **動画出力**：エディターのネイティブ API による MP4・GIF・WebM の書き出し。
+- **FigJam**：ボードの読み取り、編集可能な図形・テキスト・接続線の作成。構造化データと Mermaid フローチャートのサブセットに対応。
+- **Slides**：接続中のプレゼンテーションに、編集可能なスライド、タイトル、本文、テーマレイアウト、ノートを作成。
+- **Shaders**：利用可能な Shader の検索、ファイル内の使用箇所の確認、既存 Shader の読み込みと適用。
+- **Web ページの読み込み**：ローカルブラウザーでページを取得し、対応する DOM 内容を編集可能なレイヤーへ変換。
+- **デザインからコードへ**：意味情報を含むデザイン構造、CSS、素材の取得。プロジェクトのコンポーネント・Token・アイコン索引と、ローカルのコンポーネント／コード対応付け。
+- **コードレイヤーの読み取り**：既存 Code Layers の公開された外部属性を取得。
+- **スクリプトと一括操作**：キャンバススクリプト、一括編集、ローカルレシピ、段階的タスク、チェックポイントからの再開。
+- **エラー回復**：構造化エラーと修正案、操作状態、書き込みログ、冪等性、対象範囲の確認、失敗した操作が作成した条件適合ノードの削除。
+- **接続とヘルプ**：ペアリング済みプラグインの生成、ファイル選択、再接続、機能照会、実行状態、呼び出し時間、内蔵ガイド。
+- **MCP 接続**：公式デスクトップ・リモート MCP、認証、ツール検出、リソースとプロンプトの取得。
 
-npm パッケージ名は [`dsh-to-figma`](https://www.npmjs.com/package/dsh-to-figma) です。DSH のプラグイン管理コマンドで導入すると、DSH がローカルで Figma 連携プラグインを生成・ペアリングします。
+## 実機デモ
 
-## 0.3.5 の新機能
-
-| 新機能 | できること |
-| --- | --- |
-| ネイティブアニメーション | キーフレーム、文字の入場、アニメーションスタイルを作成・編集し、Figma のタイムラインで調整 |
-| 再接続 | ネイティブのファイル識別情報で再接続候補を確認し、対象を選び直して操作を再開 |
-| 機能の検出 | 操作前に現在のエディターが対応する機能を確認 |
-| 組み込みガイド | 接続方法、使い方、エラーについて DSH に直接質問 |
-| UI と互換性 | アイコンとコンパクトな UI を更新。単一の RC に固定しない幅広い互換範囲を維持 |
-
-アニメーションはエディターが公開する API に依存します。切断後は対象ファイルを再確認してください。中断された操作は自動で再実行されません。
-
-DSH Desktop 0.2.1-rc.5 と 0.2.2-rc.1 で互換性を検証済みです。
-
-**更新方法：** DSH パッケージと Figma 連携プラグインの両方を更新し、`figma_setup` を実行して Local を開き直してください。`figma_status` で DSH 側と連携プラグインの両方が 0.4.1 であることを確認してください。
+[DSH to Figma 0.4.1 — Figma で UI とモーションを作成（X 長文記事・中国語）↗](https://x.com/double_asa/status/2120059438002561341)
 
 ## プロンプトでインストール
 
-普段使っている DSH に、次の文章を送ってください。
+次の文章を DSH に送ってください。
 
 ```text
 DSH to Figma をインストール、または更新してください。
 https://github.com/Duoasa/DSH-to-Figma
 
-リポジトリの最新 README に従って進めてください。
-1. 現在のホストの設定と実行環境から CLI、profile、DSH_HOME を確認し、そのホストの CLI を使用する。既存設定と他のプラグインを保持し、対象を特定できない場合だけ確認する。
-2. npm に公開済みの dsh-to-figma@latest を優先する。本バージョンに固定する場合は dsh-to-figma@0.4.1 を使う。未公開の場合は GitHub Release に存在する .tgz のバージョンを明示して利用するか、ソースから導入する。Figma 用 ZIP を DSH 用パッケージとして使わない。
-3. ホストの plugin --profile <現在のprofile> add <確認済みのパッケージ名またはfile:パス> コマンドでインストールまたは更新し、local モードを使用する。既存のものはそのまま更新し、重複が確認できた場合だけ重複項目を整理する。
-4. コンポーネントが実行中で、ツールが利用できることを確認する。ホストの再起動が必要なら伝え、再起動後に接続設定を続ける。
-5. figma_setup を呼び出し、ペアリング済み manifest.json の絶対パスを提示する。Figma Desktop でインポートし DSH to Figma · Local を実行する手順を案内する。導入済みなら同じフォルダーを更新して再実行する。ペアリング情報を表示したり、生成ファイルをアップロードしたりしない。
-6. 対象の Figma ファイルでプラグインを実行した後、figma_status で両側のバージョンと接続を確認する。複数ファイルがある場合は対象を確認し、選択中のアートボードを読み取ってスクリーンショットを返す。この段階では既存デザインを変更しない。
+docs/setup.md に従い、現在のホストの CLI、profile、DSH_HOME を使用してください。
+dsh-to-figma@latest をインストールし、既存設定を保持して local モードを使ってください。
+figma_setup を実行し、ローカルの manifest.json のパスと Figma への導入手順を案内してください。
+導入済みなら同じフォルダーを更新し、Figma プラグインの再実行を案内してください。
+最後に figma_status で接続を確認してください。
 ```
 
-Figma Desktop の **Plugins → Development → Import plugin from manifest…** から、案内された manifest を選びます。対象ファイルで **DSH to Figma · Local** を実行し、ウィンドウを開いたままにしてください。
+## npm からインストール
 
-通常のパスは `~/.dsh/figma/companion/manifest.json` ですが、`figma_setup` の返すパスを使用してください。更新時は両側を更新し、元のフォルダーを保持したまま Figma プラグインを閉じて再実行します。
-
-## 主な機能
-
-| やりたいこと | 操作 |
-| --- | --- |
-| 既存デザインを理解する | 選択中の画面、レイヤー、文字、サイズ、レイアウト、スタイル、スクリーンショットを取得 |
-| 要件や参考画像から作る | ネイティブのフレーム、文字、ベクター、Auto Layout を作成して調整 |
-| まとめて編集する | 文言、色、文字サイズ、余白、角丸、レイアウトを変更し、名前・属性・階層でレイヤーを検索 |
-| デザインシステムを整える | コンポーネント、バリアント、インスタンス、スタイル、変数、モード、エイリアスとバインドを作成・編集 |
-| デザインからコードへ | デザイン情報と素材を現在のプロジェクトに合わせてフロントエンドへ反映 |
-| 素材を受け渡す | 画像・SVG のインポート、PNG・JPG・SVG・PDF のエクスポート、スクリプト出力の保存 |
-| 文書形式に合わせて作業する | FigJam の図、Slides の内容、プロトタイプのインタラクションを整理 |
-
-たとえば、次のように依頼できます。
-
-> 選択中の画面の主要ボタンを高さ 40px、角丸 8px にそろえ、変更後のスクリーンショットを見せて。
-
-> 既存の色変数とボタンを再利用し、Auto Layout でライトテーマのダッシュボードを新しく作って。
-
-> このボタンにホバー状態と無効状態を追加し、色をセマンティック変数にバインドして。
-
-> この参考画像を新しいアートボードで再現し、文字とレイアウトを編集できるようにして。
-
-> この画面を現在のプロジェクトに実装し、既存コンポーネントを再利用して必要な素材を出力して。
-
-プラグインがモデルと画布・ツールをつなぎます。会話を続けて調整することも、Figma で直接編集することもできます。
-
-## 実際の操作例
-
-以下は開発版で撮影した実機スクリーンショットによる制作フローの紹介です。画像内の開発バージョン番号は実際のリリースバージョン番号を示すものではありません。公開版の機能は本 README の機能説明をご確認ください。
-
-**DSH to Figma 0.3.5 は、以下のデモで紹介する制作フロー全体に対応しています。** 参考画像を編集可能なレイヤーとして再現し、続けてネイティブアニメーションを追加します。冒頭の GIF が完成例です。モデル：GPT-6-Astra High、2026 年 11 月 4 日。
-
-### 1. 参考画像を送り、続けてアニメーションを依頼
-
-> この画像を、現在の Figma アートボードに再現して。
->
-> このアートボードで Figma アニメーションを作って。
-
-![参考画像の再現からアニメーション追加までの DSH の会話](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-conversation.png)
-
-### 2. Figma のレイヤーとして編集を続ける
-
-2172 × 724 のアートボードに、文字、Logo、図形、接続線を個別の編集可能なレイヤーとして保持。
-
-![Figma の編集可能なレイヤーと接続中の DSH to Figma プラグイン](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-editable.png)
-
-### 3. タイムラインで動きを調整
-
-8 秒のループ、32 本のトラック。タイトルが順に現れ、タイルが浮遊し、最後にフェードアウトします。冒頭の GIF は Figma から書き出しました。
-
-![Figma のタイトルアニメーションとキーフレームのタイムライン](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/v040-hero-motion.png)
-
-## 応用例：より高性能なモデルで複雑な UI を再現
-
-**DSH により高性能なモデルを接続すると、DSH to Figma で複雑な UI を再現し、レイアウトや細部をさらに作り込めます。** プラグインがキャンバスの読み書きを担い、モデルが参考画像を理解し、画面を分解して段階的にデザインを作成します。
-
-2026 年 11 月 3 日の実際の使用例です。DSH の選択モデルには **GPT-6-Astra Max** と表示されています。tweakcn テーマエディターのスクリーンショットを添えて、次のように依頼しました。
-
-> 現在開いている Figma のアートボードに、この UI を再現して。
-
-結果は **2264 × 1308** の Figma フレームで、テーマ編集エリア、株価チャート、取引カード、アクティビティ一覧、チャットパネルを含みます。レイヤーパネルには独立した文字レイヤーやグループが見え、DSH の返答では主要 UI の文字・アイコン・チャートを引き続き編集できると報告されています。
-
-![DSH の GPT-6-Astra Max で再現した tweakcn UI と Figma のレイヤー](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-figma.png)
-
-<details>
-<summary>DSH の参考画像・指示・返答を見る</summary>
-
-![GPT-6-Astra Max で複雑な UI を再現する DSH の会話](https://raw.githubusercontent.com/Duoasa/DSH-to-Figma/main/assets/examples/advanced-model-ui-conversation.png)
-
-</details>
-
-複雑な UI タスクに高性能なモデルを活用した一例です。最終確認中に Figma との接続が切れ、一部の文字間隔の修正は未確認ですが、キャンバス上で引き続き調整できます。
-
-## 手動インストール
-
-DSH と Figma Desktop を用意してください。プラグイン自体は Node.js 22 以上が必要です。単独の CLI 環境では DSH 側の要件も満たしてください（現在の DSH 0.2.2-rc.1 は Node.js 24.9 以上）。Desktop ではアプリ同梱のランタイムを推奨します。公開パッケージのインストールに npm ログインは不要です。
-
-**npm からインストール・更新：**
-
-**macOS DSH Desktop：**
-
-> **デスクトップ版では、下記のアプリ付属 CLI のフルパスを使ってください。** グローバルの `dsh` で `desktop` profile を操作すると、`managed exclusively by the Electron application` と表示される場合があります。付属 CLI に切り替え、desktop profile は削除・再作成しないでください。
+**macOS DSH Desktop** ではアプリ同梱の CLI を使用します。
 
 ```sh
 "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" \
   plugin --profile desktop add dsh-to-figma@latest
 ```
 
-**その他の DSH ホスト：**
+**その他の DSH ホスト** では対応する CLI と profile を使用します。
 
 ```sh
-dsh plugin --profile <your-profile> add dsh-to-figma@latest
+dsh plugin --profile <使用中のprofile> add dsh-to-figma@latest
 ```
 
-他のホストでは profile を実際のものに置き換えてください。バージョン固定には `@latest` の代わりに `@0.4.1` を使います。通常の `npm install` だけでは DSH 側のプラグインは有効になりません。
+本バージョンに固定する場合は `dsh-to-figma@0.4.1` を使います。npm アカウントは不要です。DSH のプラグイン管理コマンドでインストールと有効化を行います。
 
-インストール後の手順：
+1. DSH で **DSH to Figma** を有効にし、`figma_setup` で連携プラグインを生成します。
+2. Figma Desktop の **Plugins → Development → Import plugin from manifest…** から、返された `manifest.json` を選びます。
+3. 対象ファイルでプラグインを実行し、ウィンドウを開いたまま、DSH の `figma_status` で接続を確認します。
 
-1. DSH のプラグイン画面で **DSH to Figma → 実行中** を確認し、必要なら現在のホストを再起動します。
-2. DSH に `figma_setup` を実行させ、返された `manifest.json` を Figma Desktop の **Plugins → Development → Import plugin from manifest…** から読み込みます。
-3. 対象ファイルでプラグインを起動してウィンドウを開いたままにし、DSH の `figma_status` で両側のバージョンと接続を確認します。更新も同じインストールコマンドで行い、Figma 側を閉じて再実行してください。
+更新時も同じインストールコマンドを使い、`figma_setup` を実行してから Figma プラグインを閉じ、再実行します。
 
-[GitHub Releases](https://github.com/Duoasa/DSH-to-Figma/releases) にある `.tgz` と `SHA256SUMS` を取得して検証した場合は、上記のパッケージ名を `"file:/absolute/path/downloaded-package.tgz"` に置き換えて導入することもできます。npm と GitHub Release は別々に公開されるため、それぞれのバージョンを確認してください。
+## ドキュメントと貢献
 
-通常は DSH が生成するペアリング済みプラグインを使います。Release の単独 companion ZIP は手動ペアリング用です。生成済みフォルダーや ZIP にはローカル認証情報が含まれるため、共有しないでください。
+[接続とトラブル対応](docs/setup.md) · [機能の詳細](CAPABILITIES.md) · [変更履歴](CHANGELOG.md) · [問題を報告](https://github.com/Duoasa/DSH-to-Figma/issues)
 
-## 接続と設定
-
-標準の `local` モードではローカルサービス経由で接続します。接続中のファイルが一つなら自動選択し、複数ある場合は対象を指定します。
-
-| 設定 | 初期値 | 用途 |
-| --- | --- | --- |
-| `backend` | `local` | `local`、`desktop`、`remote` の選択 |
-| `bridgePort` | `3055` | ローカル接続ポート |
-| `toolCallTimeoutMs` | `120000` | ツール呼び出しのタイムアウト（ミリ秒） |
-| `desktopServerUrl` | `http://127.0.0.1:3845/mcp` | デスクトップ MCP のアドレス |
-| `oauthClientId` | 空 | リモートログインのクライアント設定 |
-
-ホストのプラグイン設定から変更できます。[詳しい接続方法](docs/setup.md)。
-
-更新後にツールが表示されない場合は、ホスト、profile、プラグイン画面を確認し、DSH を再読み込みまたは再起動してください。Figma 側も閉じて再実行します。問題報告には両側のバージョンとエラーを添えてください。
-
-## 開発・コントリビューション
-
-```sh
-npm ci --ignore-scripts
-npm run test:all
-npm run package:companion
-npm pack --ignore-scripts
-```
-
-ソースには DSH エントリー、接続ブリッジ、Figma companion、ワークフロー Skill が含まれます。改善案や再現手順付きの報告を歓迎します。
-
-ホスト互換性へのフィードバックと貢献をいただいた [heeq666](https://github.com/heeq666)、[miztizm](https://github.com/miztizm) に感謝します。
-
-[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)、[Figma Plugin API](https://developers.figma.com/docs/plugins/)、[Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk) を使用しています。
+フィードバックと貢献をいただいた [heeq666](https://github.com/heeq666)、[miztizm](https://github.com/miztizm) に感謝します。
 
 [MIT](LICENSE) · Copyright © 2026 Duoasa.
