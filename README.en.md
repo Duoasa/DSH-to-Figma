@@ -18,6 +18,8 @@
 
 Connect DeepSeek Harness to Figma. The local plugin is the default route, with official MCP connections available. Local mode does not consume official Figma MCP calls.
 
+You can also use DSH to Figma with Codex and other agents. Several users have reported good results installing and using the plugin this way.
+
 ## Install with a prompt
 
 **Prompt installation is recommended.** Let DSH handle installation and guide you through the connection. Send this to DSH:
@@ -31,6 +33,18 @@ Install dsh-to-figma@latest, preserve existing settings, and use local mode.
 Run figma_setup, give me the local manifest.json path, and guide me through importing it into Figma.
 For an existing installation, update the same directory and remind me to rerun the Figma plugin.
 Finally, confirm the connection with figma_status.
+```
+
+### Install with Codex or another agent
+
+Paste this prompt into your agent:
+
+```text
+Help me install DSH to Figma from https://github.com/Duoasa/DSH-to-Figma.
+
+Read the current installation guide and check which agent, operating system and DSH environment I use. Choose the appropriate installation method. If the connection to Figma requires DSH, install the plugin in my active DSH profile and generate the local Figma companion.
+
+When I need to use Figma Desktop, give me the full path to manifest.json and show me how to import and run the plugin. Once connected, try reading the current page or selection and tell me which agent or DSH session to use for design requests.
 ```
 
 ## Install from npm
