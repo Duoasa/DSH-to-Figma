@@ -18,7 +18,7 @@
 
 连接 DeepSeek Harness 与 Figma，以本地插件为默认链路，保留官方 MCP 接入。本地模式不消耗官方 Figma MCP 调用额度。
 
-DSH to Figma 也可以搭配 Codex 等 Agent 使用。近期有多位用户反馈，通过这些 Agent 安装和使用插件的体验良好。
+使用 Codex 或其他 Agent？请前往 [Figmote](https://github.com/Duoasa/Figmote)。
 
 ## 提示词安装
 
@@ -32,18 +32,6 @@ https://github.com/Duoasa/DSH-to-Figma
 安装 dsh-to-figma@latest，保留现有配置，使用 local 模式。
 安装后调用 figma_setup，给我本机 manifest.json 的路径并指导导入 Figma。
 若已安装，更新原目录并提醒我重新运行 Figma 插件，最后用 figma_status 确认连接。
-```
-
-### 使用 Codex 等 Agent 安装
-
-将下面这段提示词复制给你正在使用的 Agent：
-
-```text
-请帮我安装 DSH to Figma，项目地址是 https://github.com/Duoasa/DSH-to-Figma 。
-
-请先阅读仓库最新的安装说明，确认我当前使用的 Agent、操作系统和已安装的 DSH 环境，再选择适合的安装方式。如果需要通过 DSH 连接 Figma，请使用我实际使用的 DSH 配置安装插件，并生成本机的 Figma 配套插件。
-
-需要我在 Figma Desktop 里操作时，请给出 manifest.json 的完整路径，告诉我如何导入并运行插件。连接后，请尝试读取当前页面或选区，并告诉我以后应该从哪个 Agent 或 DSH 会话发起绘图。
 ```
 
 ## npm 安装
